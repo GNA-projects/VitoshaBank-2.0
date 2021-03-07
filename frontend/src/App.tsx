@@ -1,9 +1,7 @@
+import Template from "./components/Template";
+
 function App() {
-	return (
-		<div>
-			<p>HI</p>
-		</div>
-	);
+	return <Template></Template>;
 }
 
 export default App;
