@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using VitoshaBank.Services.UserService;
+using VitoshaBank.Services.UserService.Interfaces;
 
 namespace VitoshaBank
 {
@@ -22,6 +24,7 @@ namespace VitoshaBank
         {
 
             services.AddControllersWithViews();
+            services.AddScoped<IUserService, UsersService>();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
