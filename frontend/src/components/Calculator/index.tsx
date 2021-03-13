@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
 const INPUT = styled.input`
@@ -34,28 +34,24 @@ export default function Calculator() {
 	const handleFromChange = (e: any) => {
 		setFrom(e.target.value);
 		getCurrency();
-		setToInput(fromInput * currency)
+		setToInput(fromInput * currency);
 	};
 	const handleToChange = (e: any) => {
 		setTo(e.target.value);
 		getCurrency();
-		setFromInput(toInput / currency)
+		setFromInput(toInput / currency);
 	};
 
 	const handleFromChangeInput = (e: any) => {
-		setFromInput(parseInt(e.target.value))
+		setFromInput(parseInt(e.target.value));
 		getCurrency();
-		setToInput(fromInput * currency)
+		setToInput(fromInput * currency);
 	};
 	const handleToChangeInput = (e: any) => {
-		setToInput(parseInt(e.target.value))
+		setToInput(parseInt(e.target.value));
 		getCurrency();
-		setFromInput(toInput / currency)
+		setFromInput(toInput / currency);
 	};
-
-	useEffect(() => {
-		getCurrency();
-	}, []);
 
 	return (
 		<div>
