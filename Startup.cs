@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using VitoshaBank.Data.DbModels;
 using VitoshaBank.Services.UserService;
 using VitoshaBank.Services.UserService.Interfaces;
 
@@ -24,9 +26,10 @@ namespace VitoshaBank
         {
 
             services.AddControllersWithViews();
-            services.AddScoped<IUserService, UsersService>();
+            // services.AddScoped<IUserService, UsersService>();
 
             // In production, the React files will be served from this directory
+            services.AddDbContext<BankSystemContext>(options => options.UseNpgsql(Configuration.GetConnectionString("BankConnection")));
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "frontend/build";

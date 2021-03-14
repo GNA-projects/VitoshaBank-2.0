@@ -6,7 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VitoshaBank.Data.DbModels;
 using VitoshaBank.Data.MessageModels;
+using VitoshaBank.Data.RequestModels;
+using VitoshaBank.Services.UserService;
+using VitoshaBank.Services.UserService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
@@ -15,9 +19,9 @@ namespace VitoshaBank.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly IUsersService _userService;
-        
-        public UsersController(IConfiguration config, IUsersService userService)
+        private readonly IUserService _userService;
+
+        public UsersController(IConfiguration config, IUserService userService)
         {
             _config = config;
             _userService = userService;
