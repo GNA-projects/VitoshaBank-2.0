@@ -7,6 +7,12 @@ namespace VitoshaBank.Data.DbModels
 {
     public partial class Users
     {
+        public Users()
+        {
+            UserAccountUserUsernameNavigations = new HashSet<UserAccounts>();
+            UserAccountUsers = new HashSet<UserAccounts>();
+        }
+
         public int Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
@@ -19,5 +25,9 @@ namespace VitoshaBank.Data.DbModels
         public string Email { get; set; }
         public bool IsConfirmed { get; set; }
         public string ActivationCode { get; set; }
+
+        public virtual Transactions LastTransaction { get; set; }
+        public virtual ICollection<UserAccounts> UserAccountUserUsernameNavigations { get; set; }
+        public virtual ICollection<UserAccounts> UserAccountUsers { get; set; }
     }
 }
