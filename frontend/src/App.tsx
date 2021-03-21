@@ -15,9 +15,11 @@ function App() {
 	const [admin, setAdmin] = useState(false);
 
 	return (
+
 		<AdminContext.Provider value={{ admin, setAdmin }}>
 			<Template></Template>
 		</AdminContext.Provider>
+
 	);
 }
 
