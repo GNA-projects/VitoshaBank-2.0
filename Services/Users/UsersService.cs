@@ -16,20 +16,23 @@ using VitoshaBank.Services.UserService.Interfaces;
 using System.Net.Mail;
 using System.Net;
 using Microsoft.IdentityModel.Tokens;
+using VitoshaBank.Data.RequestModels;
 
 namespace VitoshaBank.Services.UserService
 {
     public class UsersService : ControllerBase, IUserService
     {
         BCryptPasswordHasherService _BCrypt = new BCryptPasswordHasherService();
-        BankSystemContext _context = new BankSystemContext();
+
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<MessageModel>> CreateUser(ClaimsPrincipal currentUser, Users user, IConfiguration _config)
+
+        public async Task<ActionResult<MessageModel>> CreateUser(ClaimsPrincipal currentUser, UserRequestModel requestModel, IConfiguration config, BankSystemContext dbContext)
         {
             string role = "";
+            var user = requestModel.User;
             List<Transactions> userTransaction = new List<Transactions>();
-            Users userUsernameExists = await _context.Users.FirstOrDefaultAsync(x => x.Username == user.Username);
-            Users userEmailExists = await _context.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
+            Users userUsernameExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == user.Username);
+            Users userEmailExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
 
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
@@ -75,12 +78,12 @@ namespace VitoshaBank.Services.UserService
                     var vanillaPassword = user.Password;
                     user.Password = _BCrypt.HashPassword(user.Password);
                     user.ActivationCode = Guid.NewGuid().ToString();
-                    _context.Add(user);
-                    int i = await _context.SaveChangesAsync();
+                    dbContext.Add(user);
+                    int i = await dbContext.SaveChangesAsync();
 
                     if (i > 0)
                     {
-                        SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, _config);
+                        SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, config);
                         responseMessage.Message = $"User {user.Username} created succesfully!";
                         return StatusCode(201, responseMessage);
                     }
@@ -103,7 +106,7 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser)
+        public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext)
         {
             string role = "";
 
@@ -115,7 +118,7 @@ namespace VitoshaBank.Services.UserService
 
             if (role == "Admin")
             {
-                return await _context.Users.ToListAsync();
+                return await dbContext.Users.ToListAsync();
             }
             else
             {
@@ -123,7 +126,7 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<Users>> GetUser(ClaimsPrincipal currentUser, string username)
+        public async Task<ActionResult<Users>> GetUser(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
         {
             string role = "";
 
@@ -135,7 +138,7 @@ namespace VitoshaBank.Services.UserService
 
             if (role == "Admin")
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+                var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
                 if (user == null)
                 {
@@ -151,18 +154,18 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<MessageModel>> GetUsername(string username)
+        public async Task<ActionResult<MessageModel>> GetUsername(string username, BankSystemContext dbContext)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             UserResponseModel responseModel = new UserResponseModel();
             responseModel.FirstName = user.FirstName;
             responseModel.LastName = user.LastName;
             responseModel.Username = user.Username;
             return StatusCode(200, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> AdminCheck(string username)
+        public async Task<ActionResult<MessageModel>> AdminCheck(string username, BankSystemContext dbContext)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             if (user.IsAdmin)
             {
                 responseMessage.Message = "User is admin";
@@ -175,68 +178,13 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(400, responseMessage);
             }
         }
-        public async Task<ActionResult<MessageModel>> LoginUser(Users userLogin, IConfiguration _config)
+        public async Task<ActionResult> VerifyAccount(string activationCode, BankSystemContext dbContext)
         {
-
-            responseMessage.Message = "Something went wrong! Check your credetials!";
-            ActionResult response = StatusCode(403, responseMessage);
-
-            var user = await AuthenticateUser(userLogin, _context, _BCrypt);
-
-            if (user != null)
-            {
-                if (user.IsConfirmed == true)
-                {
-                    var tokenString = GenerateJSONWebToken(user, _config);
-                    responseMessage.Message = tokenString;
-                    response = StatusCode(200, responseMessage);
-                }
-                else
-                {
-                    responseMessage.Message = "You need to verify your email";
-                    response = StatusCode(400, responseMessage);
-                }
-            }
-
-            return response;
-        }
-        public async Task<ActionResult<MessageModel>> ChangePassword(string username, string newPassword)
-        {
-            var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
-
-            if (userAuthenticate != null)
-            {
-                if (newPassword == null || newPassword == "")
-                {
-                    responseMessage.Message = "Password cannot be null";
-                    return StatusCode(400, responseMessage);
-                }
-                else if (newPassword.Length < 6)
-                {
-                    responseMessage.Message = "Password cannot be less than 6 symbols";
-                    return StatusCode(400, responseMessage);
-
-                }
-
-                userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
-                await _context.SaveChangesAsync();
-
-                responseMessage.Message = "Password changed successfully!";
-                return StatusCode(200, responseMessage);
-            }
-            else
-            {
-                responseMessage.Message = "User not found!";
-                return StatusCode(404, responseMessage);
-            }
-        }
-        public async Task<ActionResult> VerifyAccount(string activationCode)
-        {
-            var value = _context.Users.Where(a => a.ActivationCode == activationCode).FirstOrDefault();
+            var value = dbContext.Users.Where(a => a.ActivationCode == activationCode).FirstOrDefault();
             if (value != null)
             {
                 value.IsConfirmed = true;
-                await _context.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
                 responseMessage.Message = "Dear user, Your email successfully activated now you can able to login";
                 return StatusCode(200, responseMessage);
             }
@@ -247,10 +195,10 @@ namespace VitoshaBank.Services.UserService
             }
 
         }
-        public async Task<ActionResult<MessageModel>> DeleteUser(ClaimsPrincipal currentUser, string username)
+        public async Task<ActionResult<MessageModel>> DeleteUser(ClaimsPrincipal currentUser, UserRequestModel requestModel, BankSystemContext dbContext)
         {
             string role = "";
-
+            var username = requestModel.Username;
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 string userRole = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Roles").Value;
@@ -259,8 +207,8 @@ namespace VitoshaBank.Services.UserService
 
             if (role == "Admin")
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
-                var userAccList = _context.Useraccounts.Where(x => x.UserId == user.Id).ToList();
+                var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+                var userAccList = dbContext.UserAccounts.Where(x => x.UserId == user.Id).ToList();
 
                 if (userAccList.FirstOrDefault(x => x.CreditId != null) != null)
                 {
@@ -276,9 +224,9 @@ namespace VitoshaBank.Services.UserService
 
                 foreach (var bankacc in userAccList)
                 {
-                    _context.Useraccounts.Remove(bankacc);
+                    dbContext.UserAccounts.Remove(bankacc);
                 }
-                await _context.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = $"Succsesfully deleted user {user.Username}";
                 return StatusCode(200, responseMessage);
@@ -373,5 +321,62 @@ namespace VitoshaBank.Services.UserService
             })
                 smtp.Send(message);
         }
+        public async Task<ActionResult<MessageModel>> LoginUser(UserRequestModel requestModel, IConfiguration config, BankSystemContext dbContext)
+        {
+            responseMessage.Message = "Something went wrong! Check your credetials!";
+            Users userLogin = requestModel.User;
+            ActionResult response = StatusCode(403, responseMessage);
+
+            var user = await AuthenticateUser(userLogin, dbContext, _BCrypt);
+
+            if (user != null)
+            {
+                if (user.IsConfirmed == true)
+                {
+                    var tokenString = GenerateJSONWebToken(user, config);
+                    responseMessage.Message = tokenString;
+                    response = StatusCode(200, responseMessage);
+                }
+                else
+                {
+                    responseMessage.Message = "You need to verify your email";
+                    response = StatusCode(400, responseMessage);
+                }
+            }
+
+            return response;
+        }
+        public async Task<ActionResult<MessageModel>> ChangePassword(string username, UserRequestModel requestModel, BankSystemContext dbContext)
+        {
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var newPassword = requestModel.Password;
+            if (userAuthenticate != null)
+            {
+                if (newPassword == null || newPassword == "")
+                {
+                    responseMessage.Message = "Password cannot be null";
+                    return StatusCode(400, responseMessage);
+                }
+                else if (newPassword.Length < 6)
+                {
+                    responseMessage.Message = "Password cannot be less than 6 symbols";
+                    return StatusCode(400, responseMessage);
+
+                }
+
+                userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
+                await dbContext.SaveChangesAsync();
+
+                responseMessage.Message = "Password changed successfully!";
+                return StatusCode(200, responseMessage);
+            }
+            else
+            {
+                responseMessage.Message = "User not found!";
+                return StatusCode(404, responseMessage);
+            }
+        }
+
+
     }
 }
