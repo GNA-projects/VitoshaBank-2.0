@@ -18,13 +18,13 @@ namespace VitoshaBank.Data.DbModels
         }
 
         public virtual DbSet<Cards> Cards { get; set; }
-        public virtual DbSet<ChargeAccounts> Chargeaccounts { get; set; }
+        public virtual DbSet<ChargeAccounts> ChargeAccounts { get; set; }
         public virtual DbSet<Credits> Credits { get; set; }
         public virtual DbSet<Deposits> Deposits { get; set; }
-        public virtual DbSet<SupportTickets> Supporttickets { get; set; }
+        public virtual DbSet<SupportTickets> SupportTickets { get; set; }
         public virtual DbSet<Transactions> Transactions { get; set; }
         public virtual DbSet<Users> Users { get; set; }
-        public virtual DbSet<UserAccounts> Useraccounts { get; set; }
+        public virtual DbSet<UserAccounts> UserAccounts { get; set; }
         public virtual DbSet<Wallets> Wallets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,7 +38,7 @@ namespace VitoshaBank.Data.DbModels
                 entity.HasIndex(e => e.CardNumber, "cards_card_number_key")
                     .IsUnique();
 
-                entity.HasIndex(e => e.ChargeaccountId, "cards_chargeaccount_id_key")
+                entity.HasIndex(e => e.ChargeAccountId, "cards_chargeaccount_id_key")
                     .IsUnique();
 
                 entity.HasIndex(e => e.Cvv, "cards_cvv_key")
@@ -55,22 +55,29 @@ namespace VitoshaBank.Data.DbModels
                     .HasMaxLength(60)
                     .HasColumnName("card_number");
 
-                entity.Property(e => e.ChargeaccountId).HasColumnName("chargeaccount_id");
+                entity.Property(e => e.ChargeAccountId).HasColumnName("charge_account_id");
 
                 entity.Property(e => e.Cvv)
                     .IsRequired()
                     .HasMaxLength(60)
                     .HasColumnName("cvv");
+
+                entity.HasOne(d => d.ChargeAccount)
+                    .WithOne(p => p.Card)
+                    .HasForeignKey<Cards>(d => d.ChargeAccountId)
+                    .HasConstraintName("cards_charge_accounts");
             });
 
             modelBuilder.Entity<ChargeAccounts>(entity =>
             {
-                entity.ToTable("chargeaccounts", "vitosha");
+                entity.ToTable("charge_accounts", "vitosha");
 
                 entity.HasIndex(e => e.Iban, "chargeaccounts_iban_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('vitosha.chargeaccounts_id_seq'::regclass)");
 
                 entity.Property(e => e.Amount)
                     .HasPrecision(6, 6)
@@ -152,13 +159,15 @@ namespace VitoshaBank.Data.DbModels
 
             modelBuilder.Entity<SupportTickets>(entity =>
             {
-                entity.ToTable("supporttickets", "vitosha");
+                entity.ToTable("support_tickets", "vitosha");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('vitosha.supporttickets_id_seq'::regclass)");
 
                 entity.Property(e => e.Date).HasColumnName("date");
 
-                entity.Property(e => e.Hasresponce).HasColumnName("hasresponce");
+                entity.Property(e => e.HasResponce).HasColumnName("has_responce");
 
                 entity.Property(e => e.Message)
                     .IsRequired()
@@ -214,7 +223,7 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.ActivationCode)
                     .IsRequired()
                     .HasMaxLength(64)
-                    .HasColumnName("activationcode");
+                    .HasColumnName("activation_code");
 
                 entity.Property(e => e.BirthDate)
                     .HasColumnType("date")
@@ -230,9 +239,9 @@ namespace VitoshaBank.Data.DbModels
                     .HasMaxLength(60)
                     .HasColumnName("first_name");
 
-                entity.Property(e => e.IsAdmin).HasColumnName("isadmin");
+                entity.Property(e => e.IsAdmin).HasColumnName("is_admin");
 
-                entity.Property(e => e.IsConfirmed).HasColumnName("isconfirmed");
+                entity.Property(e => e.IsConfirmed).HasColumnName("is_confirmed");
 
                 entity.Property(e => e.LastName)
                     .IsRequired()
@@ -252,15 +261,23 @@ namespace VitoshaBank.Data.DbModels
                     .IsRequired()
                     .HasMaxLength(60)
                     .HasColumnName("username");
+
+                entity.HasOne(d => d.LastTransaction)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.LastTransactionId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("users_transactions");
             });
 
             modelBuilder.Entity<UserAccounts>(entity =>
             {
-                entity.ToTable("useraccounts", "vitosha");
+                entity.ToTable("user_accounts", "vitosha");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('vitosha.useraccounts_id_seq'::regclass)");
 
-                entity.Property(e => e.ChargeaccountId).HasColumnName("chargeaccount_id");
+                entity.Property(e => e.ChargeAccountId).HasColumnName("charge_account_id");
 
                 entity.Property(e => e.CreditId).HasColumnName("credit_id");
 
@@ -275,6 +292,49 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("user_username");
 
                 entity.Property(e => e.WalletId).HasColumnName("wallet_id");
+
+                entity.HasOne(d => d.ChargeAccount)
+                    .WithMany(p => p.UserAccounts)
+                    .HasForeignKey(d => d.ChargeAccountId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("charge_accounts_user_accounts");
+
+                entity.HasOne(d => d.Credit)
+                    .WithMany(p => p.UserAccounts)
+                    .HasForeignKey(d => d.CreditId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("credits_user_accounts");
+
+                entity.HasOne(d => d.Deposit)
+                    .WithMany(p => p.UserAccounts)
+                    .HasForeignKey(d => d.DepositId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("deposits_user_accounts");
+
+                entity.HasOne(d => d.Support)
+                    .WithMany(p => p.UserAccounts)
+                    .HasForeignKey(d => d.SupportId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("tickets_user_accounts");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserAccountUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("users_user_accounts");
+
+                entity.HasOne(d => d.UserUsernameNavigation)
+                    .WithMany(p => p.UserAccountUserUsernameNavigations)
+                    .HasPrincipalKey(p => p.Username)
+                    .HasForeignKey(d => d.UserUsername)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("users_username_user_accounts");
+
+                entity.HasOne(d => d.Wallet)
+                    .WithMany(p => p.UserAccounts)
+                    .HasForeignKey(d => d.WalletId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("wallets_user_accounts");
             });
 
             modelBuilder.Entity<Wallets>(entity =>

@@ -7,6 +7,11 @@ namespace VitoshaBank.Data.DbModels
 {
     public partial class Credits
     {
+        public Credits()
+        {
+            UserAccounts = new HashSet<UserAccounts>();
+        }
+
         public int Id { get; set; }
         public string Iban { get; set; }
         public decimal Amount { get; set; }
@@ -15,5 +20,7 @@ namespace VitoshaBank.Data.DbModels
         public decimal CreditAmount { get; set; }
         public DateTime PaymentDate { get; set; }
         public decimal CreditAmountLeft { get; set; }
+
+        public virtual ICollection<UserAccounts> UserAccounts { get; set; }
     }
 }
