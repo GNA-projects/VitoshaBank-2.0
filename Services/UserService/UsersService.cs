@@ -20,10 +20,9 @@ using VitoshaBank.Data.RequestModels;
 
 namespace VitoshaBank.Services.UserService
 {
-    public class UsersService : ControllerBase, IUserService
+    public class UsersService : ControllerBase, IUsersService
     {
-        BCryptPasswordHasherService _BCrypt = new BCryptPasswordHasherService();
-
+        BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
         MessageModel responseMessage = new MessageModel();
 
         public async Task<ActionResult<MessageModel>> CreateUser(ClaimsPrincipal currentUser, UserRequestModel requestModel, IConfiguration config, BankSystemContext dbContext)
@@ -31,9 +30,9 @@ namespace VitoshaBank.Services.UserService
             string role = "";
             var user = requestModel.User;
             List<Transactions> userTransaction = new List<Transactions>();
+
             Users userUsernameExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == user.Username);
             Users userEmailExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
-
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -75,10 +74,12 @@ namespace VitoshaBank.Services.UserService
                         responseMessage.Message = "Password cannot be less than 6 symbols";
                         return StatusCode(400, responseMessage);
                     }
+
                     var vanillaPassword = user.Password;
                     user.Password = _BCrypt.HashPassword(user.Password);
                     user.ActivationCode = Guid.NewGuid().ToString();
-                    dbContext.Add(user);
+                    await dbContext.AddAsync(user);
+
                     int i = await dbContext.SaveChangesAsync();
 
                     if (i > 0)
@@ -212,7 +213,7 @@ namespace VitoshaBank.Services.UserService
 
                 if (userAccList.FirstOrDefault(x => x.CreditId != null) != null)
                 {
-                    responseMessage.Message = "User has Active Credit Accounts";
+                    responseMessage.Message = "User has active credit account";
                     return StatusCode(404, responseMessage);
                 }
 
@@ -237,17 +238,18 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        private async Task<Users> AuthenticateUser(Users userLogin, BankSystemContext _context, BCryptPasswordHasherService _BCrypt)
+        private async Task<Users> AuthenticateUser(Users userLogin, BankSystemContext _context, BCryptPasswordHasher _BCrypt)
         {
             var userAuthenticateUsername = await _context.Users.FirstOrDefaultAsync(x => x.Username == userLogin.Username);
             var userAuthenticateEmail = await _context.Users.FirstOrDefaultAsync(x => x.Email == userLogin.Email);
+
             if (userAuthenticateUsername == null && userAuthenticateEmail == null)
             {
                 return null;
             }
             else if (userAuthenticateEmail == null)
             {
-                if ((userLogin.Username == userAuthenticateUsername.Username && _BCrypt.AuthenticateUser(userLogin, userAuthenticateUsername) == true))
+                if ((userLogin.Username == userAuthenticateUsername.Username && _BCrypt.AuthenticateUser(userLogin.Password, userAuthenticateUsername) == true))
                 {
                     return userAuthenticateUsername;
                 }
@@ -255,7 +257,7 @@ namespace VitoshaBank.Services.UserService
             }
             else if (userAuthenticateUsername == null)
             {
-                if ((userLogin.Email == userAuthenticateEmail.Email && _BCrypt.AuthenticateUser(userLogin, userAuthenticateEmail) == true))
+                if ((userLogin.Email == userAuthenticateEmail.Email && _BCrypt.AuthenticateUser(userLogin.Password, userAuthenticateEmail) == true))
                 {
                     return userAuthenticateEmail;
                 }
@@ -349,26 +351,37 @@ namespace VitoshaBank.Services.UserService
         public async Task<ActionResult<MessageModel>> ChangePassword(string username, UserRequestModel requestModel, BankSystemContext dbContext)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+
+            var currentPassowrd = requestModel.CurrentPassword;
             var newPassword = requestModel.Password;
+
             if (userAuthenticate != null)
             {
-                if (newPassword == null || newPassword == "")
+                if (_BCrypt.AuthenticateUser(currentPassowrd, userAuthenticate) == false)
                 {
-                    responseMessage.Message = "Password cannot be null";
+                    responseMessage.Message = "Wrong current password";
                     return StatusCode(400, responseMessage);
                 }
-                else if (newPassword.Length < 6)
+                else
                 {
-                    responseMessage.Message = "Password cannot be less than 6 symbols";
-                    return StatusCode(400, responseMessage);
+                    if (newPassword == null || newPassword == "")
+                    {
+                        responseMessage.Message = "Password cannot be null";
+                        return StatusCode(400, responseMessage);
+                    }
+                    else if (newPassword.Length < 6)
+                    {
+                        responseMessage.Message = "Password cannot be less than 6 symbols";
+                        return StatusCode(400, responseMessage);
 
+                    }
+
+                    userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
+                    await dbContext.SaveChangesAsync();
+
+                    responseMessage.Message = "Password changed successfully!";
+                    return StatusCode(200, responseMessage);
                 }
-
-                userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
-                await dbContext.SaveChangesAsync();
-
-                responseMessage.Message = "Password changed successfully!";
-                return StatusCode(200, responseMessage);
             }
             else
             {

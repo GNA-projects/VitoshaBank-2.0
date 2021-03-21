@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using VitoshaBank.Data.DbModels;
 
-namespace VitoshaBank.Services.IbanGenereation
+namespace VitoshaBank.Services.IbanGenereatorService
 {
-
-    public static class IBANGeneratorService
+    public static class IBANGenerator
     {
         public static string GenerateIBANInVitoshaBank(string BankAccountType, BankSystemContext dbContext)
         {

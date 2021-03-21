@@ -18,8 +18,8 @@ namespace VitoshaBank.Controllers
     public class DepositsController : ControllerBase
     {
         private readonly BankSystemContext dbContext;
-        private readonly IDepositService _depositService;
-        public DepositsController(BankSystemContext context, IDepositService depositService)
+        private readonly IDepositsService _depositService;
+        public DepositsController(BankSystemContext context, IDepositsService depositService)
         {
             dbContext = context;  
             _depositService = depositService;
@@ -27,7 +27,7 @@ namespace VitoshaBank.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<DepositResponseModel>> GetDepositInfo()
+        public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositInfo()
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;

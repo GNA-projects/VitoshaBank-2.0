@@ -12,9 +12,9 @@ using VitoshaBank.Data.ResponseModels;
 
 namespace VitoshaBank.Services.DepositService.Interfaces
 {
-    public interface IDepositService
+    public interface IDepositsService
     {
-        public Task<ActionResult<DepositResponseModel>> GetDepositsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
+        public Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         public Task<ActionResult<DepositResponseModel>> CheckDividentsPayments(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         public Task<ActionResult<DepositResponseModel>> GetDividentsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         public Task<ActionResult<MessageModel>> CreateDeposit(ClaimsPrincipal currentUser, DepositRequestModel requestModel, IConfiguration config, BankSystemContext dbContext);

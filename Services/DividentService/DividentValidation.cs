@@ -7,17 +7,17 @@ using VitoshaBank.Data.DbModels;
 using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.ResponseModels;
 
-namespace VitoshaBank.Services.Dividents
+namespace VitoshaBank.Services.DividentService
 {
-    public class DividentService : ControllerBase
+    public class DividentValidation : ControllerBase
     {
         MessageModel messageModel = new MessageModel();
         BankSystemContext dbContext = new BankSystemContext();
-        public async Task<ActionResult<MessageModel>> GetDividentPayment(Data.DbModels.Deposits deposit)
+        public async Task<ActionResult<MessageModel>> GetDividentPayment(Deposits deposit)
         {
             if (DateTime.Now >= deposit.PaymentDate)
             {
-                var dividentAmount = CalculateDividentService.GetDividentAmount(deposit.Amount, deposit.Divident, deposit.TermOfPayment);
+                var dividentAmount = CalculateDivident.GetDividentAmount(deposit.Amount, deposit.Divident, deposit.TermOfPayment);
                 deposit.Amount = deposit.Amount + dividentAmount;
                 deposit.PaymentDate.AddMonths(deposit.TermOfPayment);
                 await dbContext.SaveChangesAsync();

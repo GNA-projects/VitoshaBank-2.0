@@ -13,16 +13,16 @@ using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.RequestModels;
 using VitoshaBank.Data.ResponseModels;
 using VitoshaBank.Services.DepositService.Interfaces;
-using VitoshaBank.Services.Dividents;
-using VitoshaBank.Services.IbanGenereation;
+using VitoshaBank.Services.DividentService;
+using VitoshaBank.Services.IbanGenereatorService;
 
 namespace VitoshaBank.Services.DepositService
 {
-    public class DepositsService : ControllerBase, IDepositService
+    public class DepositsService : ControllerBase, IDepositsService
     {
-        
+
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<DepositResponseModel>> GetDepositsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -66,8 +66,7 @@ namespace VitoshaBank.Services.DepositService
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 DepositResponseModel depositResponseModel = new DepositResponseModel();
-                UserAccResponseModel userDeposits = new UserAccResponseModel();
-                DividentService dividentService = new DividentService();
+                DividentValidation dividentService = new DividentValidation();
 
                 if (userAuthenticate == null)
                 {
@@ -109,7 +108,7 @@ namespace VitoshaBank.Services.DepositService
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 DepositResponseModel depositResponseModel = new DepositResponseModel();
                 UserAccResponseModel userDeposits = new UserAccResponseModel();
-                DividentService dividentService = new DividentService();
+                DividentValidation dividentService = new DividentValidation();
 
                 if (userAuthenticate == null)
                 {
@@ -158,7 +157,6 @@ namespace VitoshaBank.Services.DepositService
             if (role == "Admin")
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                UserAccResponseModel userDeposits = new UserAccResponseModel();
 
                 if (userAuthenticate != null)
                 {
@@ -168,14 +166,21 @@ namespace VitoshaBank.Services.DepositService
                         {
                             UserAccounts userAccounts = new UserAccounts();
                             userAccounts.UserId = userAuthenticate.Id;
-                            userAccounts.DepositId = deposit.Id;
-                            deposit.Iban = IBANGeneratorService.GenerateIBANInVitoshaBank("Deposit", dbContext);
+                            userAccounts.UserUsername = userAuthenticate.Username;
+                           
+                            deposit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Deposit", dbContext);
+
                             if (deposit.TermOfPayment == 3 || deposit.TermOfPayment == 6 || deposit.TermOfPayment == 12 || deposit.TermOfPayment == 1)
                             {
                                 deposit.PaymentDate = DateTime.Now.AddMonths(deposit.TermOfPayment);
-                                deposit.Divident = CalculateDividentService.GetDividentPercent(deposit.Amount, deposit.TermOfPayment);
-                                dbContext.Add(deposit);
+                                deposit.Divident = CalculateDivident.GetDividentPercent(deposit.Amount, deposit.TermOfPayment);
+                                await dbContext.AddAsync(deposit);
                                 await dbContext.SaveChangesAsync();
+
+                                userAccounts.WalletId = dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban).Id;
+                                await dbContext.AddAsync(userAccounts);
+                                await dbContext.SaveChangesAsync();
+
                                 SendEmail(userAuthenticate.Email, config);
                                 responseMessage.Message = "Deposit created succesfully";
                                 return StatusCode(200, responseMessage);
@@ -228,15 +233,15 @@ namespace VitoshaBank.Services.DepositService
             Deposits depositExists = null;
             ChargeAccounts chargeAccount = requestModel.ChargeAccount;
             ChargeAccounts chargeAccountExists = null;
-            UserAccResponseModel userDeposits = new UserAccResponseModel();
+
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 if (userAuthenticate != null)
                 {
-                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Id != deposit.Id);
+                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
                     if (depositExists != null)
                     {
-                        chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Id == chargeAccount.Id);
+                        chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
                         if (amount < 0)
                         {
                             responseMessage.Message = "Invalid payment amount!";
@@ -295,19 +300,19 @@ namespace VitoshaBank.Services.DepositService
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
             Deposits deposit = requestModel.Deposit;
+            Deposits depositExists = null;
             DepositResponseModel depositResponseModel = new DepositResponseModel();
-            UserAccResponseModel userDeposits = new UserAccResponseModel();
+
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 if (userAuthenticate != null)
                 {
-                    var depositsReff = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.DepositId == deposit.Id && x.UserUsername == username);
-                    var depositsExists = depositsReff.Deposit;
-                    if (depositsExists != null)
+                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    if (depositExists != null)
                     {
-                        depositsExists.Amount = depositsExists.Amount - amount;
-                        depositsExists.PaymentDate = DateTime.Now.AddMonths(depositsExists.TermOfPayment);
+                        depositExists.Amount = depositExists.Amount - amount;
+                        depositExists.PaymentDate = DateTime.Now.AddMonths(depositExists.TermOfPayment);
                         await dbContext.SaveChangesAsync();
 
                         //Transactions transaction = new Transactions();
@@ -339,6 +344,8 @@ namespace VitoshaBank.Services.DepositService
             string role = "";
             var username = requestModel.Username;
             Deposits deposit = requestModel.Deposit;
+            Deposits depositExists = null;
+            UserAccounts userDeposit = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -349,11 +356,12 @@ namespace VitoshaBank.Services.DepositService
             if (role == "Admin")
             {
                 var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                Deposits depositsExists = null;
+                
 
                 if (user != null)
                 {
-                    depositsExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Id == deposit.Id);
+                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    userDeposit = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.Id == depositExists.Id);
                 }
 
                 if (user == null)
@@ -361,13 +369,14 @@ namespace VitoshaBank.Services.DepositService
                     responseMessage.Message = "User not found!";
                     return StatusCode(404, responseMessage);
                 }
-                else if (depositsExists == null)
+                else if (depositExists == null)
                 {
                     responseMessage.Message = "User doesn't have a Deposit";
                     return StatusCode(400, responseMessage);
                 }
 
-                dbContext.Deposits.Remove(depositsExists);
+                dbContext.Deposits.Remove(depositExists);
+                dbContext.UserAccounts.Remove(userDeposit);
                 await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = $"Succsesfully deleted {user.Username} Deposit!";

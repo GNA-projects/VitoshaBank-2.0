@@ -11,7 +11,7 @@ using VitoshaBank.Data.RequestModels;
 
 namespace VitoshaBank.Services.UserService.Interfaces
 {
-    public interface IUserService
+    public interface IUsersService
     {
         
         public Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext);

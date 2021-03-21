@@ -19,10 +19,10 @@ namespace VitoshaBank.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly IUserService _userService;
+        private readonly IUsersService _userService;
         private readonly BankSystemContext dbContext;
 
-        public UsersController(BankSystemContext context,IConfiguration config, IUserService userService)
+        public UsersController(BankSystemContext context,IConfiguration config, IUsersService userService)
         {
             dbContext = context;
             _config = config;
@@ -53,7 +53,7 @@ namespace VitoshaBank.Controllers
             //need password
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _userService.ChangePassword(username, requestModel,dbContext);
+            return await _userService.ChangePassword(username, requestModel, dbContext);
         }
 
         [HttpGet("activateaccount/{id}")]

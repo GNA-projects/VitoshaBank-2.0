@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace VitoshaBank.Services.Dividents
+namespace VitoshaBank.Services.DividentService
 {
-    public static class CalculateDividentService
+    public static class CalculateDivident
     {
         public static decimal GetDividentPercent(decimal Amount, int termOfPayment)
         {

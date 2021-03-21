@@ -8,9 +8,9 @@ using VitoshaBank.Data.DbModels;
 
 namespace VitoshaBank.Services.BcryptHasherService
 {
-    public class BCryptPasswordHasherService
+    public class BCryptPasswordHasher
     {
-        public BCryptPasswordHasherService(IOptions<PasswordHasherOptions> optionsAccessor = null)
+        public BCryptPasswordHasher(IOptions<PasswordHasherOptions> optionsAccessor = null)
         {
 
         }
@@ -22,10 +22,10 @@ namespace VitoshaBank.Services.BcryptHasherService
             return BCrypt.Net.BCrypt.HashPassword(advancedHashedPassword, salt);
         }
 
-        public bool AuthenticateUser(Users user, Users userDB)
+        public bool AuthenticateUser(string password, Users userDB)
         {
             // check user found and verify password
-            if (!BCrypt.Net.BCrypt.Verify(user.Password + "NeverGonnaLetYouDown", userDB.Password))
+            if (!BCrypt.Net.BCrypt.Verify(password + "NeverGonnaLetYouDown", userDB.Password))
             {
                 // authentication failed
                 return false;

@@ -10,6 +10,7 @@ namespace VitoshaBank.Data.RequestModels
     {
         public Users User { get; set; }
         public string Username { get; set; }
+        public string CurrentPassword { get; internal set; }
         public string Password { get; internal set; }
     }
 }

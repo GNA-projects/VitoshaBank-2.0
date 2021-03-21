@@ -11,6 +11,7 @@ using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.RequestModels;
 using VitoshaBank.Services.DepositService.Interfaces;
 using VitoshaBank.Services.UserService.Interfaces;
+using VitoshaBank.Services.WalletService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
@@ -20,16 +21,16 @@ namespace VitoshaBank.Controllers
     {
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration _config;
-        private readonly IUserService _userService;
-        private readonly IDepositService _depositService;
+        private readonly IUsersService _userService;
+        private readonly IDepositsService _depositService;
         //private readonly IBankAccountService _bankAccountService;
         //private readonly IDebitCardService _debitCardService;
         //private readonly ICreditService _creditService;
-        //private readonly IWalletsService _walletService;
+        private readonly IWalletsService _walletService;
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(BankSystemContext context,  IConfiguration config, IUserService usersService, IDepositService depositService)
+        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService)
         {
             dbContext = context;
             _userService = usersService;
@@ -96,6 +97,23 @@ namespace VitoshaBank.Controllers
             //need username and deposit
             var currentUser = HttpContext.User;
             return await _depositService.DeleteDeposit(currentUser,  requestModel,dbContext);
+        }
+
+        [HttpPost("create/wallet")]
+        [Authorize]
+        //need wallet(Amount), username
+        public async Task<ActionResult<MessageModel>> CreateWallet(WalletRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _walletService.CreateWallet(currentUser, requestModel, _config, dbContext);
+        }
+        [HttpDelete("delete/wallet")]
+        [Authorize]
+        //need wallet(Iban), username
+        public async Task<ActionResult<MessageModel>> DeleteWallet(WalletRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _walletService.DeleteWallet(currentUser, requestModel, dbContext);
         }
     }
 }
