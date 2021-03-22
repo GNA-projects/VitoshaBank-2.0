@@ -275,7 +275,6 @@ namespace VitoshaBank.Services.WalletService
                 return StatusCode(403, responseMessage);
             }
         }
-
         private bool ValidateWallet(Wallets wallet)
         {
             if (wallet.Amount < 0)
@@ -284,7 +283,6 @@ namespace VitoshaBank.Services.WalletService
             }
             return true;
         }
-
         private bool ValidateUser(Users user)
         {
             if (user != null)
@@ -293,7 +291,6 @@ namespace VitoshaBank.Services.WalletService
             }
             return false;
         }
-
         private async Task<ActionResult> ValidateDepositAmountAndBankAccount(Users userAuthenticate, ClaimsPrincipal currentUser, Wallets walletExists, decimal amount, ChargeAccounts bankAccount, BankSystemContext _context, /*ITransactionService _transation*/ MessageModel _messageModel)
         {
             if (amount < 0)
@@ -366,7 +363,6 @@ namespace VitoshaBank.Services.WalletService
             _messageModel.Message = $"Succesfully purhcased {product}.";
             return StatusCode(200, _messageModel);
         }
-
         private void SendEmail(string email, IConfiguration _config)
         {
             var fromMail = new MailAddress(_config["Email:Email"], $"Wallet created");
@@ -394,5 +390,4 @@ namespace VitoshaBank.Services.WalletService
                 smtp.Send(message);
         }
     }
-
 }

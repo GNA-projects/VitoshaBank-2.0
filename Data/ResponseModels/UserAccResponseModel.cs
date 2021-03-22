@@ -10,7 +10,7 @@ namespace VitoshaBank.Data.ResponseModels
     {
         public ICollection<ChargeAccounts> UserChargeAcc { get; set; }
         public ICollection<DepositResponseModel> UserDeposits { get; set; }
-        public ICollection<Credits> UserCredits { get; set; }
+        public ICollection<CreditResponseModel> UserCredits { get; set; }
         public ICollection<WalletResponseModel> UserWallets { get; set; }
 
     }
