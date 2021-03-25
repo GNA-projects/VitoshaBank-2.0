@@ -82,30 +82,30 @@ namespace VitoshaBank.Services.UserService
 
                     int i = await dbContext.SaveChangesAsync();
 
-                    if (i > 0)
-                    {
-                        SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, config);
-                        responseMessage.Message = $"User {user.Username} created succesfully!";
-                        return StatusCode(201, responseMessage);
-                    }
-                    else
-                    {
-                        responseMessage.Message = "Registration failed";
-                        return StatusCode(406, responseMessage);
-                    }
-
+                if (i > 0)
+                {
+                    SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, config);
+                    responseMessage.Message = $"User {user.Username} created succesfully!";
+                    return StatusCode(201, responseMessage);
                 }
+                else
+                {
+                    responseMessage.Message = "Registration failed";
+                    return StatusCode(406, responseMessage);
+                }
+
+            }
                 else
                 {
                     responseMessage.Message = "Username or Mail taken. Choose another one";
                     return StatusCode(400, responseMessage);
                 }
-            }
+        }
             else
             {
                 responseMessage.Message = "You are not autorized to do such action!";
                 return StatusCode(403, responseMessage);
-            }
+           }
         }
         public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext)
         {

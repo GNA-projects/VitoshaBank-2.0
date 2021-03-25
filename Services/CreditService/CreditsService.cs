@@ -13,16 +13,19 @@ using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.RequestModels;
 using VitoshaBank.Data.ResponseModels;
 using VitoshaBank.Services.BcryptHasherService;
+using VitoshaBank.Services.CreditService.Interfaces;
 using VitoshaBank.Services.IbanGenereatorService;
 using VitoshaBank.Services.InterestService;
 
 namespace VitoshaBank.Services.CreditService
 {
-    public class CreditsService : ControllerBase
+    public class CreditsService : ControllerBase, ICreditService
     {
         MessageModel responseMessage = new MessageModel();
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel, IConfiguration _config, BankSystemContext dbContext)
         {
+           
+            
             string role = "";
             string username = requestModel.Username;
             Credits credit = requestModel.Credit;
@@ -147,8 +150,11 @@ namespace VitoshaBank.Services.CreditService
 
                         if (credit.CreditAmountLeft == 0 && credit.CreditAmount > 0)
                         {
+                            CreditRequestModel requestModel = new CreditRequestModel();
+                            requestModel.Credit = credit;
+                            requestModel.Username = username;
                             responseMessage.Message = "You have payed your Credit!";
-                            await this.DeleteCredit(credit,currentUser, username, dbContext);
+                            await this.DeleteCredit(requestModel,currentUser, dbContext);
                         }
                         else
                         {
@@ -164,8 +170,13 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(Credits credit, string product, string reciever, ClaimsPrincipal currentUser, string username, decimal amount, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext _context)
         {
+            //amount credit product reciever
+            var credit = requestModel.Credit;
+            decimal amount = requestModel.Amount;
+            var product = requestModel.Product;
+            var reciever = requestModel.Reciever;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
             Credits creditExists = null;
 
@@ -216,8 +227,11 @@ namespace VitoshaBank.Services.CreditService
             return StatusCode(403, responseMessage);
 
         }
-        public async Task<ActionResult<MessageModel>> AddMoney(Credits credit, ClaimsPrincipal currentUser, string username, decimal amount, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> AddMoney(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext _context)
         {
+            //credit amount
+            var credit = requestModel.Credit;
+            var amount = requestModel.Amount;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
             Credits creditsExists = null;
             ChargeAccounts bankAccounts = null;
@@ -247,8 +261,11 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> Withdraw(Credits credit, ClaimsPrincipal currentUser, string username, decimal amount, string reciever, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> Withdraw(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, string reciever, BankSystemContext _context)
         {
+            //credit amount
+            var credit = requestModel.Credit;
+            var amount = requestModel.Amount;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
 
             Credits creditExists = null;
@@ -304,10 +321,11 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> DeleteCredit(Credits credit, ClaimsPrincipal currentUser, string username, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> DeleteCredit(CreditRequestModel requestModel, ClaimsPrincipal currentUser, BankSystemContext _context)
         {
             string role = "";
-
+            var username = requestModel.Username;
+            var credit = requestModel.Credit;
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 string userRole = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Roles").Value;
@@ -452,5 +470,6 @@ namespace VitoshaBank.Services.CreditService
             })
                 smtp.Send(message);
         }
+
     }
 }
