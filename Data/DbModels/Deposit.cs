@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace VitoshaBank.Data.DbModels
 {
-    public partial class Deposits
+    public partial class Deposit
     {
-        public Deposits()
+        public Deposit()
         {
-            UserAccounts = new HashSet<UserAccounts>();
+            UserAccounts = new HashSet<UserAccount>();
         }
 
         public int Id { get; set; }
@@ -19,6 +19,6 @@ namespace VitoshaBank.Data.DbModels
         public DateTime PaymentDate { get; set; }
         public int TermOfPayment { get; set; }
 
-        public virtual ICollection<UserAccounts> UserAccounts { get; set; }
+        public virtual ICollection<UserAccount> UserAccounts { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace VitoshaBank.Services.CreditService.Interfaces
 {
     public interface ICreditService
     {
-        Task<ActionResult<CreditResponseModel>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
+        Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         Task<ActionResult<CreditResponseModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         Task<ActionResult<MessageModel>> AddMoney(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);

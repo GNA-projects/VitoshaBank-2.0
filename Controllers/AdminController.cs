@@ -31,11 +31,12 @@ namespace VitoshaBank.Controllers
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService, ICreditService creditService)
+        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService, ICreditService creditService, IWalletsService walletsService)
         {
             dbContext = context;
             _userService = usersService;
             _creditService = creditService;
+            _walletService = walletsService;
             _depositService = depositService;
             _config = config;
         }
@@ -69,7 +70,7 @@ namespace VitoshaBank.Controllers
         }
         [HttpGet("get/user/{username}")]
         [Authorize]
-        public async Task<ActionResult<Users>> GetUser(string username)
+        public async Task<ActionResult<User>> GetUser(string username)
         {
             var currentUser = HttpContext.User;
             return await _userService.GetUser(currentUser, username,dbContext);

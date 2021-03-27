@@ -17,21 +17,23 @@ namespace VitoshaBank.Data.DbModels
         {
         }
 
-        public virtual DbSet<Cards> Cards { get; set; }
-        public virtual DbSet<ChargeAccounts> ChargeAccounts { get; set; }
-        public virtual DbSet<Credits> Credits { get; set; }
-        public virtual DbSet<Deposits> Deposits { get; set; }
-        public virtual DbSet<SupportTickets> SupportTickets { get; set; }
-        public virtual DbSet<Transactions> Transactions { get; set; }
-        public virtual DbSet<Users> Users { get; set; }
-        public virtual DbSet<UserAccounts> UserAccounts { get; set; }
-        public virtual DbSet<Wallets> Wallets { get; set; }
+        public virtual DbSet<Card> Cards { get; set; }
+        public virtual DbSet<ChargeAccount> ChargeAccounts { get; set; }
+        public virtual DbSet<Credit> Credits { get; set; }
+        public virtual DbSet<Deposit> Deposits { get; set; }
+        public virtual DbSet<SupportTicket> SupportTickets { get; set; }
+        public virtual DbSet<Transaction> Transactions { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<UserAccount> UserAccounts { get; set; }
+        public virtual DbSet<Wallet> Wallets { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "en_US.UTF-8");
 
-            modelBuilder.Entity<Cards>(entity =>
+            modelBuilder.Entity<Card>(entity =>
             {
                 entity.ToTable("cards", "vitosha");
 
@@ -64,11 +66,11 @@ namespace VitoshaBank.Data.DbModels
 
                 entity.HasOne(d => d.ChargeAccount)
                     .WithOne(p => p.Card)
-                    .HasForeignKey<Cards>(d => d.ChargeAccountId)
+                    .HasForeignKey<Card>(d => d.ChargeAccountId)
                     .HasConstraintName("cards_charge_accounts");
             });
 
-            modelBuilder.Entity<ChargeAccounts>(entity =>
+            modelBuilder.Entity<ChargeAccount>(entity =>
             {
                 entity.ToTable("charge_accounts", "vitosha");
 
@@ -89,7 +91,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("iban");
             });
 
-            modelBuilder.Entity<Credits>(entity =>
+            modelBuilder.Entity<Credit>(entity =>
             {
                 entity.ToTable("credits", "vitosha");
 
@@ -128,7 +130,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("payment_date");
             });
 
-            modelBuilder.Entity<Deposits>(entity =>
+            modelBuilder.Entity<Deposit>(entity =>
             {
                 entity.ToTable("deposits", "vitosha");
 
@@ -157,7 +159,7 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.TermOfPayment).HasColumnName("term_of_payment");
             });
 
-            modelBuilder.Entity<SupportTickets>(entity =>
+            modelBuilder.Entity<SupportTicket>(entity =>
             {
                 entity.ToTable("support_tickets", "vitosha");
 
@@ -178,9 +180,16 @@ namespace VitoshaBank.Data.DbModels
                     .IsRequired()
                     .HasMaxLength(60)
                     .HasColumnName("title");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.SupportTickets)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("support_user");
             });
 
-            modelBuilder.Entity<Transactions>(entity =>
+            modelBuilder.Entity<Transaction>(entity =>
             {
                 entity.ToTable("transactions", "vitosha");
 
@@ -208,7 +217,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("transaction_amount");
             });
 
-            modelBuilder.Entity<Users>(entity =>
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("users", "vitosha");
 
@@ -269,7 +278,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasConstraintName("users_transactions");
             });
 
-            modelBuilder.Entity<UserAccounts>(entity =>
+            modelBuilder.Entity<UserAccount>(entity =>
             {
                 entity.ToTable("user_accounts", "vitosha");
 
@@ -282,8 +291,6 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.CreditId).HasColumnName("credit_id");
 
                 entity.Property(e => e.DepositId).HasColumnName("deposit_id");
-
-                entity.Property(e => e.SupportId).HasColumnName("support_id");
 
                 entity.Property(e => e.UserId).HasColumnName("user_id");
 
@@ -311,12 +318,6 @@ namespace VitoshaBank.Data.DbModels
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("deposits_user_accounts");
 
-                entity.HasOne(d => d.Support)
-                    .WithMany(p => p.UserAccounts)
-                    .HasForeignKey(d => d.SupportId)
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .HasConstraintName("tickets_user_accounts");
-
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserAccountUsers)
                     .HasForeignKey(d => d.UserId)
@@ -337,7 +338,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasConstraintName("wallets_user_accounts");
             });
 
-            modelBuilder.Entity<Wallets>(entity =>
+            modelBuilder.Entity<Wallet>(entity =>
             {
                 entity.ToTable("wallets", "vitosha");
 

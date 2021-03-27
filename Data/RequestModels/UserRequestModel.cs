@@ -8,7 +8,7 @@ namespace VitoshaBank.Data.RequestModels
 {
     public class UserRequestModel
     {
-        public Users User { get; set; }
+        public User User { get; set; }
         public string Username { get; set; }
         public string CurrentPassword { get; internal set; }
         public string Password { get; internal set; }

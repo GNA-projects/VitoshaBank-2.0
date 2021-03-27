@@ -11,7 +11,7 @@ namespace VitoshaBank.Services.InterestService
     public class CreditPayOff : ControllerBase
     {
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<MessageModel>> GetCreditPayOff(Credits credit, string username, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> GetCreditPayOff(Credit credit, string username, BankSystemContext _context)
         {
             while (DateTime.Now >= credit.PaymentDate)
             {
@@ -30,7 +30,7 @@ namespace VitoshaBank.Services.InterestService
                     var chargeAccountsCollection = _context.UserAccounts.Where(x => x.ChargeAccountId != null && x.UserUsername == username);
                     foreach (var chargeAccountReff in chargeAccountsCollection)
                     {
-                        ChargeAccounts chargeAccount = chargeAccountReff.ChargeAccount;
+                        ChargeAccount chargeAccount = chargeAccountReff.ChargeAccount;
                         if (credit.Instalment <= chargeAccount.Amount)
                         {
                             chargeAccount.Amount = chargeAccount.Amount - credit.Instalment;

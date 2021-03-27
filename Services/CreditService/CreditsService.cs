@@ -28,7 +28,7 @@ namespace VitoshaBank.Services.CreditService
             
             string role = "";
             string username = requestModel.Username;
-            Credits credit = requestModel.Credit;
+            Credit credit = requestModel.Credit;
             int period = requestModel.Period;
             BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
 
@@ -48,7 +48,7 @@ namespace VitoshaBank.Services.CreditService
                     {
                         if (ValidateUser(userAuthenticate) && ValidateCredit(credit))
                         {
-                            UserAccounts userAccounts = new UserAccounts();
+                            UserAccount userAccounts = new UserAccount();
                             userAccounts.UserId = userAuthenticate.Id;
                             userAccounts.UserUsername = userAuthenticate.Username;
                             credit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Credit", dbContext);
@@ -90,7 +90,7 @@ namespace VitoshaBank.Services.CreditService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<CreditResponseModel>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -178,7 +178,7 @@ namespace VitoshaBank.Services.CreditService
             var product = requestModel.Product;
             var reciever = requestModel.Reciever;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
-            Credits creditExists = null;
+            Credit creditExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -197,7 +197,7 @@ namespace VitoshaBank.Services.CreditService
                     if (ValidateCreditAmount(amount, creditExists) && ValidateCredit(creditExists))
                     {
                         creditExists.Amount = creditExists.Amount - amount;
-                        Transactions transaction = new Transactions();
+                        Transaction transaction = new Transaction();
                         transaction.SenderAccountInfo = creditExists.Iban;
                         transaction.RecieverAccountInfo = reciever;
                         //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}", _context, _messageModel);
@@ -233,8 +233,8 @@ namespace VitoshaBank.Services.CreditService
             var credit = requestModel.Credit;
             var amount = requestModel.Amount;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
-            Credits creditsExists = null;
-            ChargeAccounts bankAccounts = null;
+            Credit creditsExists = null;
+            ChargeAccount bankAccounts = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -268,7 +268,7 @@ namespace VitoshaBank.Services.CreditService
             var amount = requestModel.Amount;
             var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
 
-            Credits creditExists = null;
+            Credit creditExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -287,7 +287,7 @@ namespace VitoshaBank.Services.CreditService
                     if (ValidateDepositAmountBankAccount(amount) && ValidateCredit(creditExists) && ValidateMinAmount(creditExists, amount))
                     {
                         creditExists.Amount = creditExists.Amount - amount;
-                        Transactions transactions = new Transactions();
+                        Transaction transactions = new Transaction();
                         transactions.SenderAccountInfo = credit.Iban;
                         transactions.RecieverAccountInfo = reciever;
                         //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva", _context, _messageModel);
@@ -335,7 +335,7 @@ namespace VitoshaBank.Services.CreditService
             if (role == "Admin")
             {
                 var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
-                Credits creditsExists = null;
+                Credit creditsExists = null;
 
                 if (user != null)
                 {
@@ -365,7 +365,7 @@ namespace VitoshaBank.Services.CreditService
                 return StatusCode(403, responseMessage);
             }
         }
-        private bool ValidateMinAmount(Credits credit, decimal amount)
+        private bool ValidateMinAmount(Credit credit, decimal amount)
         {
             if (amount <= credit.Amount)
             {
@@ -381,7 +381,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return false;
         }
-        private bool ValidateCreditAmount(decimal amount, Credits credit)
+        private bool ValidateCreditAmount(decimal amount, Credit credit)
         {
             if (credit.Amount < amount)
             {
@@ -389,7 +389,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return true;
         }
-        private bool ValidateCredit(Credits credits)
+        private bool ValidateCredit(Credit credits)
         {
             if (credits.Amount < 0)
             {
@@ -397,7 +397,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return true;
         }
-        private bool ValidateUser(Users user)
+        private bool ValidateUser(User user)
         {
             if (user != null)
             {
@@ -405,7 +405,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return false;
         }
-        private async Task<ActionResult> ValidateDepositAmountAndCredit(Users userAuthenticate, Credits creditExists, ClaimsPrincipal currentUser, decimal amount, ChargeAccounts bankAccount, BankSystemContext _context)
+        private async Task<ActionResult> ValidateDepositAmountAndCredit(User userAuthenticate, Credit creditExists, ClaimsPrincipal currentUser, decimal amount, ChargeAccount bankAccount, BankSystemContext _context)
         {
             if (amount < 0)
             {
@@ -423,7 +423,7 @@ namespace VitoshaBank.Services.CreditService
                 {
                     creditExists.Amount = creditExists.Amount + amount;
                     bankAccount.Amount = bankAccount.Amount - amount;
-                    Transactions transaction = new Transactions();
+                    Transaction transaction = new Transaction();
                     transaction.SenderAccountInfo = bankAccount.Iban;
                     transaction.RecieverAccountInfo = creditExists.Iban;
                     //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Depositing money in Credit Account", _context, _messageModel);

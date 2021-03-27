@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace VitoshaBank.Data.DbModels
 {
-    public partial class Transactions
+    public partial class Transaction
     {
-        public Transactions()
+        public Transaction()
         {
-            Users = new HashSet<Users>();
+            Users = new HashSet<User>();
         }
 
         public int Id { get; set; }
@@ -19,6 +19,6 @@ namespace VitoshaBank.Data.DbModels
         public DateTime Date { get; set; }
         public string Reason { get; set; }
 
-        public virtual ICollection<Users> Users { get; set; }
+        public virtual ICollection<User> Users { get; set; }
     }
 }
