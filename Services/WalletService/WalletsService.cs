@@ -76,7 +76,7 @@ namespace VitoshaBank.Services.WalletService
         {
             string role = "";
             var username = requestModel.Username;
-            Wallets wallet = requestModel.Wallet;
+            Wallet wallet = requestModel.Wallet;
             BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
@@ -95,7 +95,7 @@ namespace VitoshaBank.Services.WalletService
                     {
                         if (ValidateUser(userAuthenticate) && ValidateWallet(wallet))
                         {
-                            UserAccounts userAccounts = new UserAccounts();
+                            UserAccount userAccounts = new UserAccount();
                             userAccounts.UserId = userAuthenticate.Id;
                             userAccounts.UserUsername = userAuthenticate.Username;
                             
@@ -144,10 +144,10 @@ namespace VitoshaBank.Services.WalletService
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
-            Wallets wallet = requestModel.Wallet;
-            Wallets walletExists = null;
-            ChargeAccounts chargeAccount = requestModel.ChargeAccount;
-            ChargeAccounts chargeAccountExists = null;
+            Wallet wallet = requestModel.Wallet;
+            Wallet walletExists = null;
+            ChargeAccount chargeAccount = requestModel.ChargeAccount;
+            ChargeAccount chargeAccountExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -191,8 +191,8 @@ namespace VitoshaBank.Services.WalletService
             var product = requestModel.Product;
             var reciever = requestModel.Reciever;
             var amount = requestModel.Amount;
-            Wallets wallet = requestModel.Wallet;
-            Wallets walletExists = null;
+            Wallet wallet = requestModel.Wallet;
+            Wallet walletExists = null;
             WalletResponseModel walletResponseModel = new WalletResponseModel();
             BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
 
@@ -231,9 +231,9 @@ namespace VitoshaBank.Services.WalletService
         {
             string role = "";
             var username = requestModel.Username;
-            Wallets wallet = requestModel.Wallet;
-            Wallets walletExists = null;
-            UserAccounts userWallet = null;
+            Wallet wallet = requestModel.Wallet;
+            Wallet walletExists = null;
+            UserAccount userWallet = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -275,8 +275,7 @@ namespace VitoshaBank.Services.WalletService
                 return StatusCode(403, responseMessage);
             }
         }
-
-        private bool ValidateWallet(Wallets wallet)
+        private bool ValidateWallet(Wallet wallet)
         {
             if (wallet.Amount < 0)
             {
@@ -284,8 +283,7 @@ namespace VitoshaBank.Services.WalletService
             }
             return true;
         }
-
-        private bool ValidateUser(Users user)
+        private bool ValidateUser(User user)
         {
             if (user != null)
             {
@@ -293,8 +291,7 @@ namespace VitoshaBank.Services.WalletService
             }
             return false;
         }
-
-        private async Task<ActionResult> ValidateDepositAmountAndBankAccount(Users userAuthenticate, ClaimsPrincipal currentUser, Wallets walletExists, decimal amount, ChargeAccounts bankAccount, BankSystemContext _context, /*ITransactionService _transation*/ MessageModel _messageModel)
+        private async Task<ActionResult> ValidateDepositAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, decimal amount, ChargeAccount bankAccount, BankSystemContext _context, /*ITransactionService _transation*/ MessageModel _messageModel)
         {
             if (amount < 0)
             {
@@ -333,7 +330,7 @@ namespace VitoshaBank.Services.WalletService
             _messageModel.Message = $"Succesfully deposited {amount} leva in Wallet.";
             return StatusCode(200, _messageModel);
         }
-        private async Task<ActionResult> ValidatePurchaseAmountAndBankAccount(Users userAuthenticate, ClaimsPrincipal currentUser, Wallets walletExists, string product, string reciever, decimal amount, BankSystemContext _context, /*ITransactionService _transation*/ MessageModel _messageModel)
+        private async Task<ActionResult> ValidatePurchaseAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, string product, string reciever, decimal amount, BankSystemContext _context, /*ITransactionService _transation*/ MessageModel _messageModel)
         {
             if (amount < 0)
             {
@@ -366,7 +363,6 @@ namespace VitoshaBank.Services.WalletService
             _messageModel.Message = $"Succesfully purhcased {product}.";
             return StatusCode(200, _messageModel);
         }
-
         private void SendEmail(string email, IConfiguration _config)
         {
             var fromMail = new MailAddress(_config["Email:Email"], $"Wallet created");
@@ -394,5 +390,4 @@ namespace VitoshaBank.Services.WalletService
                 smtp.Send(message);
         }
     }
-
 }

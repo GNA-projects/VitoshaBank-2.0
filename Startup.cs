@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using VitoshaBank.Data.DbModels;
+using VitoshaBank.Services.CreditService;
+using VitoshaBank.Services.CreditService.Interfaces;
 using VitoshaBank.Services.DepositService;
 using VitoshaBank.Services.DepositService.Interfaces;
 using VitoshaBank.Services.UserService;
@@ -32,6 +34,7 @@ namespace VitoshaBank
 
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IDepositsService, DepositsService>();
+            services.AddScoped<ICreditService, CreditsService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

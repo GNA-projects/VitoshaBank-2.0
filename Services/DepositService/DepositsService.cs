@@ -146,7 +146,7 @@ namespace VitoshaBank.Services.DepositService
         {
             string role = "";
             var username = requestModel.Username;
-            Deposits deposit = requestModel.Deposit;
+            Deposit deposit = requestModel.Deposit;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -164,7 +164,7 @@ namespace VitoshaBank.Services.DepositService
                     {
                         if (ValidateUser(userAuthenticate) && ValidateDeposits(deposit))
                         {
-                            UserAccounts userAccounts = new UserAccounts();
+                            UserAccount userAccounts = new UserAccount();
                             userAccounts.UserId = userAuthenticate.Id;
                             userAccounts.UserUsername = userAuthenticate.Username;
                            
@@ -229,10 +229,10 @@ namespace VitoshaBank.Services.DepositService
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
-            Deposits deposit = requestModel.Deposit;
-            Deposits depositExists = null;
-            ChargeAccounts chargeAccount = requestModel.ChargeAccount;
-            ChargeAccounts chargeAccountExists = null;
+            Deposit deposit = requestModel.Deposit;
+            Deposit depositExists = null;
+            ChargeAccount chargeAccount = requestModel.ChargeAccount;
+            ChargeAccount chargeAccountExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -299,8 +299,8 @@ namespace VitoshaBank.Services.DepositService
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
-            Deposits deposit = requestModel.Deposit;
-            Deposits depositExists = null;
+            Deposit deposit = requestModel.Deposit;
+            Deposit depositExists = null;
             DepositResponseModel depositResponseModel = new DepositResponseModel();
 
 
@@ -343,9 +343,9 @@ namespace VitoshaBank.Services.DepositService
         {
             string role = "";
             var username = requestModel.Username;
-            Deposits deposit = requestModel.Deposit;
-            Deposits depositExists = null;
-            UserAccounts userDeposit = null;
+            Deposit deposit = requestModel.Deposit;
+            Deposit depositExists = null;
+            UserAccount userDeposit = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -388,7 +388,7 @@ namespace VitoshaBank.Services.DepositService
                 return StatusCode(403, responseMessage);
             }
         }
-        private bool ValidateDeposits(Deposits deposit)
+        private bool ValidateDeposits(Deposit deposit)
         {
             if (deposit.Amount < 0)
             {
@@ -396,7 +396,7 @@ namespace VitoshaBank.Services.DepositService
             }
             return true;
         }
-        private bool ValidateUser(Users user)
+        private bool ValidateUser(User user)
         {
             if (user != null)
             {

@@ -8,8 +8,8 @@ namespace VitoshaBank.Data.RequestModels
 {
     public class WalletRequestModel
     {
-        public Wallets Wallet { get; set; }
-        public ChargeAccounts ChargeAccount { get; set; }
+        public Wallet Wallet { get; set; }
+        public ChargeAccount ChargeAccount { get; set; }
         public string Product { get; set; }
         public decimal Amount { get; set; }
         public string Username { get; set; }

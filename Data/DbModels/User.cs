@@ -5,12 +5,13 @@ using System.Collections.Generic;
 
 namespace VitoshaBank.Data.DbModels
 {
-    public partial class Users
+    public partial class User
     {
-        public Users()
+        public User()
         {
-            UserAccountUserUsernameNavigations = new HashSet<UserAccounts>();
-            UserAccountUsers = new HashSet<UserAccounts>();
+            SupportTickets = new HashSet<SupportTicket>();
+            UserAccountUserUsernameNavigations = new HashSet<UserAccount>();
+            UserAccountUsers = new HashSet<UserAccount>();
         }
 
         public int Id { get; set; }
@@ -26,8 +27,9 @@ namespace VitoshaBank.Data.DbModels
         public bool IsConfirmed { get; set; }
         public string ActivationCode { get; set; }
 
-        public virtual Transactions LastTransaction { get; set; }
-        public virtual ICollection<UserAccounts> UserAccountUserUsernameNavigations { get; set; }
-        public virtual ICollection<UserAccounts> UserAccountUsers { get; set; }
+        public virtual Transaction LastTransaction { get; set; }
+        public virtual ICollection<SupportTicket> SupportTickets { get; set; }
+        public virtual ICollection<UserAccount> UserAccountUserUsernameNavigations { get; set; }
+        public virtual ICollection<UserAccount> UserAccountUsers { get; set; }
     }
 }

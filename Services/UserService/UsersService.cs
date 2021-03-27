@@ -29,10 +29,10 @@ namespace VitoshaBank.Services.UserService
         {
             string role = "";
             var user = requestModel.User;
-            List<Transactions> userTransaction = new List<Transactions>();
+            List<Transaction> userTransaction = new List<Transaction>();
 
-            Users userUsernameExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == user.Username);
-            Users userEmailExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
+            User userUsernameExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == user.Username);
+            User userEmailExists = await dbContext.Users.FirstOrDefaultAsync(x => x.Email == user.Email);
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -82,32 +82,32 @@ namespace VitoshaBank.Services.UserService
 
                     int i = await dbContext.SaveChangesAsync();
 
-                    if (i > 0)
-                    {
-                        SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, config);
-                        responseMessage.Message = $"User {user.Username} created succesfully!";
-                        return StatusCode(201, responseMessage);
-                    }
-                    else
-                    {
-                        responseMessage.Message = "Registration failed";
-                        return StatusCode(406, responseMessage);
-                    }
-
+                if (i > 0)
+                {
+                    SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword, config);
+                    responseMessage.Message = $"User {user.Username} created succesfully!";
+                    return StatusCode(201, responseMessage);
                 }
+                else
+                {
+                    responseMessage.Message = "Registration failed";
+                    return StatusCode(406, responseMessage);
+                }
+
+            }
                 else
                 {
                     responseMessage.Message = "Username or Mail taken. Choose another one";
                     return StatusCode(400, responseMessage);
                 }
-            }
+        }
             else
             {
                 responseMessage.Message = "You are not autorized to do such action!";
                 return StatusCode(403, responseMessage);
-            }
+           }
         }
-        public async Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext)
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext)
         {
             string role = "";
 
@@ -127,7 +127,7 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<Users>> GetUser(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<User>> GetUser(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
         {
             string role = "";
 
@@ -238,7 +238,7 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        private async Task<Users> AuthenticateUser(Users userLogin, BankSystemContext _context, BCryptPasswordHasher _BCrypt)
+        private async Task<User> AuthenticateUser(User userLogin, BankSystemContext _context, BCryptPasswordHasher _BCrypt)
         {
             var userAuthenticateUsername = await _context.Users.FirstOrDefaultAsync(x => x.Username == userLogin.Username);
             var userAuthenticateEmail = await _context.Users.FirstOrDefaultAsync(x => x.Email == userLogin.Email);
@@ -265,7 +265,7 @@ namespace VitoshaBank.Services.UserService
             }
             return null;
         }
-        private string GenerateJSONWebToken(Users userInfo, IConfiguration _config)
+        private string GenerateJSONWebToken(User userInfo, IConfiguration _config)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -326,7 +326,7 @@ namespace VitoshaBank.Services.UserService
         public async Task<ActionResult<MessageModel>> LoginUser(UserRequestModel requestModel, IConfiguration config, BankSystemContext dbContext)
         {
             responseMessage.Message = "Something went wrong! Check your credetials!";
-            Users userLogin = requestModel.User;
+            User userLogin = requestModel.User;
             ActionResult response = StatusCode(403, responseMessage);
 
             var user = await AuthenticateUser(userLogin, dbContext, _BCrypt);

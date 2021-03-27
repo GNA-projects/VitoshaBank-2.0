@@ -14,8 +14,8 @@ namespace VitoshaBank.Services.UserService.Interfaces
     public interface IUsersService
     {
         
-        public Task<ActionResult<IEnumerable<Users>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext);
-        public Task<ActionResult<Users>> GetUser(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
+        public Task<ActionResult<IEnumerable<User>>> GetAllUsers(ClaimsPrincipal currentUser, BankSystemContext dbContext);
+        public Task<ActionResult<User>> GetUser(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         public Task<ActionResult<MessageModel>> GetUsername(string username, BankSystemContext dbContext);
         public Task<ActionResult<MessageModel>> AdminCheck(string username, BankSystemContext dbContext);
         public Task<ActionResult<MessageModel>> LoginUser(UserRequestModel requestModel, IConfiguration config, BankSystemContext dbContext);

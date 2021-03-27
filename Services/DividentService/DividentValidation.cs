@@ -13,7 +13,7 @@ namespace VitoshaBank.Services.DividentService
     {
         MessageModel messageModel = new MessageModel();
         BankSystemContext dbContext = new BankSystemContext();
-        public async Task<ActionResult<MessageModel>> GetDividentPayment(Deposits deposit)
+        public async Task<ActionResult<MessageModel>> GetDividentPayment(Deposit deposit)
         {
             if (DateTime.Now >= deposit.PaymentDate)
             {
