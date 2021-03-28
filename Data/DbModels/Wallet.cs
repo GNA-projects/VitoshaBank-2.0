@@ -18,7 +18,9 @@ namespace VitoshaBank.Data.DbModels
         public string CardNumber { get; set; }
         public string Cvv { get; set; }
         public DateTime CardExpirationDate { get; set; }
+        public int UserId { get; set; }
 
+        public virtual User User { get; set; }
         public virtual ICollection<UserAccount> UserAccounts { get; set; }
     }
 }

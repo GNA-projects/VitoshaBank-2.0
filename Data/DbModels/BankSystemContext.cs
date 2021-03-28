@@ -27,8 +27,6 @@ namespace VitoshaBank.Data.DbModels
         public virtual DbSet<UserAccount> UserAccounts { get; set; }
         public virtual DbSet<Wallet> Wallets { get; set; }
 
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "en_US.UTF-8");
@@ -89,6 +87,13 @@ namespace VitoshaBank.Data.DbModels
                     .IsRequired()
                     .HasMaxLength(45)
                     .HasColumnName("iban");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.ChargeAccounts)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("charge_accounts_userid");
             });
 
             modelBuilder.Entity<Credit>(entity =>
@@ -128,6 +133,13 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.PaymentDate)
                     .HasColumnType("date")
                     .HasColumnName("payment_date");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Credits)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("credits_userid");
             });
 
             modelBuilder.Entity<Deposit>(entity =>
@@ -140,11 +152,11 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Amount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("amount");
 
                 entity.Property(e => e.Divident)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("divident");
 
                 entity.Property(e => e.Iban)
@@ -157,6 +169,13 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("payment_date");
 
                 entity.Property(e => e.TermOfPayment).HasColumnName("term_of_payment");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Deposits)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("deposits_userid");
             });
 
             modelBuilder.Entity<SupportTicket>(entity =>
@@ -378,6 +397,13 @@ namespace VitoshaBank.Data.DbModels
                     .IsRequired()
                     .HasMaxLength(60)
                     .HasColumnName("iban");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Wallets)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("wallets_userid");
             });
 
             OnModelCreatingPartial(modelBuilder);

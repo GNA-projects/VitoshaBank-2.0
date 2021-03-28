@@ -16,6 +16,8 @@ using VitoshaBank.Services.DepositService;
 using VitoshaBank.Services.DepositService.Interfaces;
 using VitoshaBank.Services.UserService;
 using VitoshaBank.Services.UserService.Interfaces;
+using VitoshaBank.Services.WalletService;
+using VitoshaBank.Services.WalletService.Interfaces;
 
 namespace VitoshaBank
 {
@@ -35,6 +37,7 @@ namespace VitoshaBank
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IDepositsService, DepositsService>();
             services.AddScoped<ICreditService, CreditsService>();
+            services.AddScoped<IWalletsService, WalletsService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -76,8 +79,11 @@ namespace VitoshaBank
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
 
             app.UseEndpoints(endpoints =>
             {
