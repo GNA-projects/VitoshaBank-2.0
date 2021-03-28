@@ -18,7 +18,9 @@ namespace VitoshaBank.Data.DbModels
         public decimal Divident { get; set; }
         public DateTime PaymentDate { get; set; }
         public int TermOfPayment { get; set; }
+        public int UserId { get; set; }
 
+        public virtual User User { get; set; }
         public virtual ICollection<UserAccount> UserAccounts { get; set; }
     }
 }

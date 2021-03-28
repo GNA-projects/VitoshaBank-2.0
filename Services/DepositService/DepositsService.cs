@@ -27,8 +27,8 @@ namespace VitoshaBank.Services.DepositService
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                DepositResponseModel depositResponseModel = new DepositResponseModel();
-                UserAccResponseModel userDeposits = new UserAccResponseModel();
+                List<DepositResponseModel> userDeposits = new List<DepositResponseModel>();
+                
 
                 if (userAuthenticate == null)
                 {
@@ -37,16 +37,19 @@ namespace VitoshaBank.Services.DepositService
                 }
                 else
                 {
-                    foreach (var depositRef in dbContext.UserAccounts.Where(x => x.DepositId != null && x.UserUsername == username))
+                    foreach (var depositRef in dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id))
                     {
-                        var deposit = depositRef.Deposit;
+                        var deposit = depositRef;
+                        DepositResponseModel depositResponseModel = new DepositResponseModel();
+                        depositResponseModel.IBAN = deposit.Iban;
+                        depositResponseModel.Amount = deposit.Amount;
                         depositResponseModel.Divident = deposit.Divident;
                         depositResponseModel.PaymentDate = deposit.PaymentDate;
-                        userDeposits.UserDeposits.Add(depositResponseModel);
+                        userDeposits.Add(depositResponseModel);
                     }
-                    if (userDeposits.UserDeposits.Count > 0)
+                    if (userDeposits.Count > 0)
                     {
-                        return StatusCode(200, userDeposits.UserDeposits);
+                        return StatusCode(200, userDeposits);
                     }
                     responseMessage.Message = "You don't have a Deposit!";
                     return StatusCode(400, responseMessage);
@@ -76,9 +79,9 @@ namespace VitoshaBank.Services.DepositService
                 else
                 {
                     bool isChecked = false;
-                    foreach (var depositRef in dbContext.UserAccounts.Where(x => x.DepositId != null && x.UserUsername == username))
+                    foreach (var depositRef in dbContext.Deposits.Where(x => x.UserId ==  userAuthenticate.Id))
                     {
-                        await dividentService.GetDividentPayment(depositRef.Deposit);
+                        await dividentService.GetDividentPayment(depositRef);
                         isChecked = true;
                     }
                     if (isChecked)
@@ -118,9 +121,9 @@ namespace VitoshaBank.Services.DepositService
                 else
                 {
                     bool isChecked = false;
-                    foreach (var depositRef in dbContext.UserAccounts.Where(x => x.DepositId != null && x.UserUsername == username))
+                    foreach (var depositRef in dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id))
                     {
-                        await dividentService.GetDividentPayment(depositRef.Deposit);
+                        await dividentService.GetDividentPayment(depositRef);
                         isChecked = true;
 
                     }
@@ -160,25 +163,20 @@ namespace VitoshaBank.Services.DepositService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.DepositId != null && x.UserUsername == username).Count() < 6)
+                    if (dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id).Count() < 6)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateDeposits(deposit))
                         {
-                            UserAccount userAccounts = new UserAccount();
-                            userAccounts.UserId = userAuthenticate.Id;
-                            userAccounts.UserUsername = userAuthenticate.Username;
-                           
+                        
+   
                             deposit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Deposit", dbContext);
 
                             if (deposit.TermOfPayment == 3 || deposit.TermOfPayment == 6 || deposit.TermOfPayment == 12 || deposit.TermOfPayment == 1)
                             {
                                 deposit.PaymentDate = DateTime.Now.AddMonths(deposit.TermOfPayment);
                                 deposit.Divident = CalculateDivident.GetDividentPercent(deposit.Amount, deposit.TermOfPayment);
+                                deposit.UserId = userAuthenticate.Id;
                                 await dbContext.AddAsync(deposit);
-                                await dbContext.SaveChangesAsync();
-
-                                userAccounts.WalletId = dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban).Id;
-                                await dbContext.AddAsync(userAccounts);
                                 await dbContext.SaveChangesAsync();
 
                                 SendEmail(userAuthenticate.Email, config);
@@ -361,7 +359,7 @@ namespace VitoshaBank.Services.DepositService
                 if (user != null)
                 {
                     depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
-                    userDeposit = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.Id == depositExists.Id);
+                    userDeposit = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.DepositId == depositExists.Id);
                 }
 
                 if (user == null)
@@ -375,8 +373,9 @@ namespace VitoshaBank.Services.DepositService
                     return StatusCode(400, responseMessage);
                 }
 
-                dbContext.Deposits.Remove(depositExists);
                 dbContext.UserAccounts.Remove(userDeposit);
+                await dbContext.SaveChangesAsync();
+                dbContext.Deposits.Remove(depositExists);
                 await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = $"Succsesfully deleted {user.Username} Deposit!";

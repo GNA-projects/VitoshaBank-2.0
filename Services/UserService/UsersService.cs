@@ -227,6 +227,7 @@ namespace VitoshaBank.Services.UserService
                 {
                     dbContext.UserAccounts.Remove(bankacc);
                 }
+                dbContext.Users.Remove(user);
                 await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = $"Succsesfully deleted user {user.Username}";
@@ -352,12 +353,12 @@ namespace VitoshaBank.Services.UserService
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
-            var currentPassowrd = requestModel.CurrentPassword;
+            var currentPassword = requestModel.CurrentPassword;
             var newPassword = requestModel.Password;
 
             if (userAuthenticate != null)
             {
-                if (_BCrypt.AuthenticateUser(currentPassowrd, userAuthenticate) == false)
+                if (_BCrypt.AuthenticateUser(currentPassword, userAuthenticate) == false)
                 {
                     responseMessage.Message = "Wrong current password";
                     return StatusCode(400, responseMessage);

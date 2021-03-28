@@ -9,9 +9,13 @@ namespace VitoshaBank.Data.DbModels
     {
         public User()
         {
+            ChargeAccounts = new HashSet<ChargeAccount>();
+            Credits = new HashSet<Credit>();
+            Deposits = new HashSet<Deposit>();
             SupportTickets = new HashSet<SupportTicket>();
             UserAccountUserUsernameNavigations = new HashSet<UserAccount>();
             UserAccountUsers = new HashSet<UserAccount>();
+            Wallets = new HashSet<Wallet>();
         }
 
         public int Id { get; set; }
@@ -28,8 +32,12 @@ namespace VitoshaBank.Data.DbModels
         public string ActivationCode { get; set; }
 
         public virtual Transaction LastTransaction { get; set; }
+        public virtual ICollection<ChargeAccount> ChargeAccounts { get; set; }
+        public virtual ICollection<Credit> Credits { get; set; }
+        public virtual ICollection<Deposit> Deposits { get; set; }
         public virtual ICollection<SupportTicket> SupportTickets { get; set; }
         public virtual ICollection<UserAccount> UserAccountUserUsernameNavigations { get; set; }
         public virtual ICollection<UserAccount> UserAccountUsers { get; set; }
+        public virtual ICollection<Wallet> Wallets { get; set; }
     }
 }
