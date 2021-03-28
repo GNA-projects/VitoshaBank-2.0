@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import Template from "./components/Template";
-
-type AdminProps = {
-	admin: Boolean;
-	setAdmin: Function;
-};
-const defaultAdminProps = {
-	admin: false,
-	setAdmin: Function,
-};
-export const AdminContext = React.createContext<AdminProps>(defaultAdminProps);
+import AdminContext from './context/AdminContext'
 
 function App() {
 	const [admin, setAdmin] = useState(false);

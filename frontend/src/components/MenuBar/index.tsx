@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { AdminContext } from "../../App";
+import AdminContext from "../../context/AdminContext";
 
 import Menu from "./Menu/";
 
