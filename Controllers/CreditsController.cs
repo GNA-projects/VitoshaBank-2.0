@@ -13,16 +13,16 @@ using VitoshaBank.Services.CreditService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
-    [Route("api/credit")]
+    [Route("api/credits")]
     [ApiController]
     public class CreditController : ControllerBase
     {
         private readonly BankSystemContext dbContext;
-        private readonly ICreditService _creditService;
+        private readonly ICreditsService _creditService;
 
 
 
-        public CreditController(BankSystemContext context, ICreditService creditService)
+        public CreditController(BankSystemContext context, ICreditsService creditService)
         {
             dbContext = context;
             _creditService = creditService;

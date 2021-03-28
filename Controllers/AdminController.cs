@@ -26,12 +26,12 @@ namespace VitoshaBank.Controllers
         private readonly IDepositsService _depositService;
         //private readonly IBankAccountService _bankAccountService;
         //private readonly IDebitCardService _debitCardService;
-        private readonly ICreditService _creditService;
+        private readonly ICreditsService _creditService;
         private readonly IWalletsService _walletService;
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService, ICreditService creditService, IWalletsService walletsService)
+        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService)
         {
             dbContext = context;
             _userService = usersService;

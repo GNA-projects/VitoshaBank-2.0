@@ -263,6 +263,7 @@ namespace VitoshaBank.Services.WalletService
                 }
 
                 dbContext.Wallets.Remove(walletExists);
+                await dbContext.SaveChangesAsync();
                 dbContext.UserAccounts.Remove(userWallet);
                 await dbContext.SaveChangesAsync();
 

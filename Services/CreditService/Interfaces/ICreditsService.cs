@@ -12,7 +12,7 @@ using VitoshaBank.Data.ResponseModels;
 
 namespace VitoshaBank.Services.CreditService.Interfaces
 {
-    public interface ICreditService
+    public interface ICreditsService
     {
         Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
         Task<ActionResult<CreditResponseModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);

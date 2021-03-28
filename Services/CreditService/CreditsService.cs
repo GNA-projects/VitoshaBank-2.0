@@ -19,12 +19,11 @@ using VitoshaBank.Services.InterestService;
 
 namespace VitoshaBank.Services.CreditService
 {
-    public class CreditsService : ControllerBase, ICreditService
+    public class CreditsService : ControllerBase, ICreditsService
     {
         MessageModel responseMessage = new MessageModel();
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel, IConfiguration _config, BankSystemContext dbContext)
         {
-           
             
             string role = "";
             string username = requestModel.Username;
@@ -44,7 +43,7 @@ namespace VitoshaBank.Services.CreditService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username).Count() < 7)
+                    if (dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username).Count() < 3)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateCredit(credit))
                         {
@@ -59,7 +58,7 @@ namespace VitoshaBank.Services.CreditService
                             credit.PaymentDate = DateTime.Now.AddMonths(1);
                             await dbContext.AddAsync(credit);
                             await dbContext.SaveChangesAsync();
-                            userAccounts.WalletId = dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == credit.Iban).Id;
+                            userAccounts.CreditId = dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban).Id;
                             await dbContext.AddAsync(userAccounts);
                             await dbContext.SaveChangesAsync();
 
@@ -250,7 +249,7 @@ namespace VitoshaBank.Services.CreditService
                 if (creditsExists != null)
                 {
                     bankAccounts = _context.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
-                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts, _context);
+                    return await ValidateDepositAmountAndCredit(creditsExists, amount, bankAccounts, _context);
                 }
                 else
                 {
@@ -405,7 +404,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return false;
         }
-        private async Task<ActionResult> ValidateDepositAmountAndCredit(User userAuthenticate, Credit creditExists, ClaimsPrincipal currentUser, decimal amount, ChargeAccount bankAccount, BankSystemContext _context)
+        private async Task<ActionResult> ValidateDepositAmountAndCredit(Credit creditExists, decimal amount, ChargeAccount bankAccount, BankSystemContext _context)
         {
             if (amount < 0)
             {

@@ -301,8 +301,6 @@ namespace VitoshaBank.Services.DepositService
             var amount = requestModel.Amount;
             Deposit deposit = requestModel.Deposit;
             Deposit depositExists = null;
-            DepositResponseModel depositResponseModel = new DepositResponseModel();
-
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
