@@ -17,11 +17,11 @@ namespace VitoshaBank.Controllers
     [ApiController]
     public class DepositsController : ControllerBase
     {
-        private readonly BankSystemContext dbContext;
+
         private readonly IDepositsService _depositService;
         public DepositsController(BankSystemContext context, IDepositsService depositService)
         {
-            dbContext = context;  
+            
             _depositService = depositService;
         }
 
@@ -31,7 +31,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _depositService.GetDepositsInfo(currentUser, username,dbContext);
+            return await _depositService.GetDepositsInfo(currentUser, username);
         }
 
         [HttpPut("deposit")]
@@ -41,7 +41,7 @@ namespace VitoshaBank.Controllers
             //need from deposit(IBAN), BankAcc(IBAN),Username,Amount
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _depositService.AddMoney(requestModel, currentUser, username,dbContext);
+            return await _depositService.AddMoney(requestModel, currentUser, username);
         }
         [HttpPut("withdraw")]
         [Authorize]
@@ -50,7 +50,7 @@ namespace VitoshaBank.Controllers
             //need from deposit(IBAN), BankAcc(IBAN),Username,Amount
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _depositService.WithdrawMoney(requestModel, currentUser, username,dbContext);
+            return await _depositService.WithdrawMoney(requestModel, currentUser, username);
         }
         [HttpGet("info")]
         [Authorize]
@@ -58,7 +58,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _depositService.GetDividentsInfo(currentUser, username,dbContext);
+            return await _depositService.GetDividentsInfo(currentUser, username);
         }
         [HttpGet("check")]
         [Authorize]
@@ -66,7 +66,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _depositService.CheckDividentsPayments(currentUser, username,dbContext);
+            return await _depositService.CheckDividentsPayments(currentUser, username);
         }
     }
 }
