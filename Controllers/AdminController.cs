@@ -20,8 +20,7 @@ namespace VitoshaBank.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly BankSystemContext dbContext;
-        private readonly IConfiguration _config;
+        
         private readonly IUsersService _userService;
         private readonly IDepositsService _depositService;
         //private readonly IBankAccountService _bankAccountService;
@@ -31,19 +30,17 @@ namespace VitoshaBank.Controllers
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(BankSystemContext context,  IConfiguration config, IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService)
+        public AdminController(IUsersService usersService, IDepositsService depositService, ICreditService creditService, IWalletsService walletsService)
         {
-            dbContext = context;
             _userService = usersService;
             _creditService = creditService;
             _walletService = walletsService;
             _depositService = depositService;
-            _config = config;
         }
 
         [HttpGet("authme")]
         [Authorize]
-        public async Task<ActionResult> AuthMe()
+        public ActionResult AuthMe()
         {
             var currentUser = HttpContext.User;
 

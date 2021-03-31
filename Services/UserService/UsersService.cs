@@ -89,7 +89,8 @@ namespace VitoshaBank.Services.UserService
 
                     int i = await dbContext.SaveChangesAsync();
 
-             if (i > 0)
+
+                if (i > 0)
                 {
                         SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword);
                         responseMessage.Message = $"User {user.Username} created succesfully!";
@@ -108,8 +109,7 @@ namespace VitoshaBank.Services.UserService
                     responseMessage.Message = "Registration failed";
                     return StatusCode(406, responseMessage);
                 }
-
-            }
+                
                 else
                 {
                     responseMessage.Message = "Username or Mail taken. Choose another one";
@@ -117,6 +117,7 @@ namespace VitoshaBank.Services.UserService
                 }
         }
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(ClaimsPrincipal currentUser)
+
         {
             string role = "";
 
