@@ -30,7 +30,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _walletService.GetWalletsInfo(currentUser, username, dbContext);
+            return await _walletService.GetWalletsInfo(currentUser, username);
         }
 
         [HttpPut("deposit")]
@@ -40,7 +40,7 @@ namespace VitoshaBank.Controllers
             //Wallet(IBAN), BankAcc(IBAN), Amount
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _walletService.AddMoney(requestModel, currentUser, username, dbContext);
+            return await _walletService.AddMoney(requestModel, currentUser, username);
         }
 
         [HttpPut("purchase")]
@@ -50,7 +50,7 @@ namespace VitoshaBank.Controllers
             //Product, Reciever, Amount, Wallet(Iban, CardNumber, CardExpirationDate, CVV)
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _walletService.SimulatePurchase(requestModel, currentUser, username, dbContext);
+            return await _walletService.SimulatePurchase(requestModel, currentUser, username);
         }
     }
 }

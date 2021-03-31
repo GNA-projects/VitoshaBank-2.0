@@ -19,12 +19,18 @@ using VitoshaBank.Services.InterestService;
 
 namespace VitoshaBank.Services.CreditService
 {
-    public class CreditsService : ControllerBase, ICreditService
+    public class CreditsService : ControllerBase, ICreditsService
     {
-        MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel, IConfiguration _config, BankSystemContext dbContext)
+        private readonly BankSystemContext dbContext;
+        private readonly IConfiguration _config;
+        public CreditsService(BankSystemContext context, IConfiguration config)
         {
-           
+            dbContext = context;
+            _config = config;
+        }
+        MessageModel responseMessage = new MessageModel();
+        public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel)
+        {
             
             string role = "";
             string username = requestModel.Username;
@@ -44,7 +50,7 @@ namespace VitoshaBank.Services.CreditService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username).Count() < 7)
+                    if (dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username).Count() < 3)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateCredit(credit))
                         {
@@ -59,11 +65,11 @@ namespace VitoshaBank.Services.CreditService
                             credit.PaymentDate = DateTime.Now.AddMonths(1);
                             await dbContext.AddAsync(credit);
                             await dbContext.SaveChangesAsync();
-                            userAccounts.WalletId = dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == credit.Iban).Id;
+                            userAccounts.CreditId = dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban).Id;
                             await dbContext.AddAsync(userAccounts);
                             await dbContext.SaveChangesAsync();
 
-                            SendEmail(userAuthenticate.Email, _config);
+                            SendEmail(userAuthenticate.Email);
                             responseMessage.Message = "Credit created succesfully!";
                             return StatusCode(200, responseMessage);
                         }
@@ -90,7 +96,7 @@ namespace VitoshaBank.Services.CreditService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -127,7 +133,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return null;
         }
-        public async Task<ActionResult<CreditResponseModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<CreditResponseModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -154,7 +160,7 @@ namespace VitoshaBank.Services.CreditService
                             requestModel.Credit = credit;
                             requestModel.Username = username;
                             responseMessage.Message = "You have payed your Credit!";
-                            await this.DeleteCredit(requestModel,currentUser, dbContext);
+                            await this.DeleteCredit(requestModel,currentUser);
                         }
                         else
                         {
@@ -170,21 +176,21 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             //amount credit product reciever
             var credit = requestModel.Credit;
             decimal amount = requestModel.Amount;
             var product = requestModel.Product;
             var reciever = requestModel.Reciever;
-            var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             Credit creditExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 if (userAuthenticate != null)
                 {
-                    creditExists = await _context.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
                 }
                 else
                 {
@@ -201,7 +207,7 @@ namespace VitoshaBank.Services.CreditService
                         transaction.SenderAccountInfo = creditExists.Iban;
                         transaction.RecieverAccountInfo = reciever;
                         //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}", _context, _messageModel);
-                        await _context.SaveChangesAsync();
+                        await dbContext.SaveChangesAsync();
                         responseMessage.Message = $"Succesfully purhcased {product}.";
                         return StatusCode(200, responseMessage);
                     }
@@ -227,12 +233,12 @@ namespace VitoshaBank.Services.CreditService
             return StatusCode(403, responseMessage);
 
         }
-        public async Task<ActionResult<MessageModel>> AddMoney(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> AddMoney(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             //credit amount
             var credit = requestModel.Credit;
             var amount = requestModel.Amount;
-            var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             Credit creditsExists = null;
             ChargeAccount bankAccounts = null;
 
@@ -240,7 +246,7 @@ namespace VitoshaBank.Services.CreditService
             {
                 if (userAuthenticate != null)
                 {
-                    creditsExists = await _context.Credits.FirstOrDefaultAsync(x =>x.Iban == credit.Iban);
+                    creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x =>x.Iban == credit.Iban);
                 }
                 else
                 {
@@ -249,8 +255,9 @@ namespace VitoshaBank.Services.CreditService
                 }
                 if (creditsExists != null)
                 {
-                    bankAccounts = _context.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
-                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts, _context);
+                    bankAccounts = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
+                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts);
+
                 }
                 else
                 {
@@ -261,12 +268,12 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> Withdraw(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, string reciever, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> Withdraw(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username, string reciever)
         {
             //credit amount
             var credit = requestModel.Credit;
             var amount = requestModel.Amount;
-            var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
             Credit creditExists = null;
 
@@ -274,7 +281,7 @@ namespace VitoshaBank.Services.CreditService
             {
                 if (userAuthenticate != null)
                 {
-                    creditExists = await _context.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
                 }
                 else
                 {
@@ -291,7 +298,7 @@ namespace VitoshaBank.Services.CreditService
                         transactions.SenderAccountInfo = credit.Iban;
                         transactions.RecieverAccountInfo = reciever;
                         //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva", _context, _messageModel);
-                        await _context.SaveChangesAsync();
+                        await dbContext.SaveChangesAsync();
                         responseMessage.Message = $"Succesfully withdrawed {amount} leva.";
                         return StatusCode(200, responseMessage);
                     }
@@ -321,7 +328,7 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> DeleteCredit(CreditRequestModel requestModel, ClaimsPrincipal currentUser, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> DeleteCredit(CreditRequestModel requestModel, ClaimsPrincipal currentUser)
         {
             string role = "";
             var username = requestModel.Username;
@@ -334,12 +341,12 @@ namespace VitoshaBank.Services.CreditService
 
             if (role == "Admin")
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+                var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 Credit creditsExists = null;
 
                 if (user != null)
                 {
-                    creditsExists = await _context.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
                 }
 
                 if (user == null)
@@ -353,8 +360,8 @@ namespace VitoshaBank.Services.CreditService
                     return StatusCode(400, responseMessage);
                 }
 
-                _context.Credits.Remove(creditsExists);
-                await _context.SaveChangesAsync();
+                dbContext.Credits.Remove(creditsExists);
+                await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = "Credit deleted successfully!";
                 return StatusCode(200, responseMessage);
@@ -405,7 +412,8 @@ namespace VitoshaBank.Services.CreditService
             }
             return false;
         }
-        private async Task<ActionResult> ValidateDepositAmountAndCredit(User userAuthenticate, Credit creditExists, ClaimsPrincipal currentUser, decimal amount, ChargeAccount bankAccount, BankSystemContext _context)
+
+        private async Task<ActionResult> ValidateDepositAmountAndCredit(User userAuthenticate, Credit creditExists, ClaimsPrincipal currentUser, decimal amount, ChargeAccount bankAccount)
         {
             if (amount < 0)
             {
@@ -427,7 +435,7 @@ namespace VitoshaBank.Services.CreditService
                     transaction.SenderAccountInfo = bankAccount.Iban;
                     transaction.RecieverAccountInfo = creditExists.Iban;
                     //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Depositing money in Credit Account", _context, _messageModel);
-                    await _context.SaveChangesAsync();
+                    await dbContext.SaveChangesAsync();
                 }
                 else if (bankAccount.Amount < amount)
                 {
@@ -444,7 +452,7 @@ namespace VitoshaBank.Services.CreditService
             return StatusCode(200, responseMessage);
         }
 
-        private void SendEmail(string email, IConfiguration _config)
+        private void SendEmail(string email)
         {
             var fromMail = new MailAddress(_config["Email:Email"], $"Credit account created");
             var toMail = new MailAddress(email);

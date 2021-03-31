@@ -18,14 +18,13 @@ namespace VitoshaBank.Controllers
     [Route("api/users")]
     public class UsersController : ControllerBase
     {
-        private readonly IConfiguration _config;
+
         private readonly IUsersService _userService;
-        private readonly BankSystemContext dbContext;
+
 
         public UsersController(BankSystemContext context,IConfiguration config, IUsersService userService)
         {
-            dbContext = context;
-            _config = config;
+
             _userService = userService;
         }
 
@@ -35,7 +34,7 @@ namespace VitoshaBank.Controllers
         {
             //return all users
             var currentUser = HttpContext.User;
-            return await _userService.GetAllUsers(currentUser,dbContext);
+            return await _userService.GetAllUsers(currentUser);
         }
 
         [HttpPost("login")]
@@ -43,7 +42,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> LoginUser(UserRequestModel requestModel)
         {
             //need user(passowrd, email/username
-            return await _userService.LoginUser(requestModel, _config,dbContext);
+            return await _userService.LoginUser(requestModel);
         }
 
         [HttpPut("changepass")]
@@ -53,13 +52,13 @@ namespace VitoshaBank.Controllers
             //need password
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _userService.ChangePassword(username, requestModel, dbContext);
+            return await _userService.ChangePassword(username, requestModel);
         }
 
         [HttpGet("activateaccount/{id}")]
         public async Task<ActionResult<MessageModel>> VeryfiyUserAccount(string id)
         {
-            return await _userService.VerifyAccount(id, dbContext);
+            return await _userService.VerifyAccount(id);
         }
         [HttpGet("username")]
         [Authorize]
@@ -67,7 +66,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _userService.GetUsername(username,dbContext);
+            return await _userService.GetUsername(username);
         }
         [HttpGet("authenticate")]
         [Authorize]
@@ -75,7 +74,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _userService.AdminCheck(username,dbContext);
+            return await _userService.AdminCheck(username);
         }
 
     }

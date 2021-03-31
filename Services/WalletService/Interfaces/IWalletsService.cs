@@ -14,11 +14,11 @@ namespace VitoshaBank.Services.WalletService.Interfaces
 {
     public interface IWalletsService
     {
-        public Task<ActionResult<ICollection<WalletResponseModel>>> GetWalletsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
-        public Task<ActionResult<MessageModel>> CreateWallet(ClaimsPrincipal currentUser, WalletRequestModel requestModel, IConfiguration _config, BankSystemContext dbContext);
-        public Task<ActionResult<MessageModel>> AddMoney(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext);
-        public Task<ActionResult<MessageModel>> SimulatePurchase(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext /*ITransactionService _transation*/);
-        public Task<ActionResult<MessageModel>> DeleteWallet(ClaimsPrincipal currentUser, WalletRequestModel requestModel, BankSystemContext dbContext);
+        public Task<ActionResult<ICollection<WalletResponseModel>>> GetWalletsInfo(ClaimsPrincipal currentUser, string username);
+        public Task<ActionResult<MessageModel>> CreateWallet(ClaimsPrincipal currentUser, WalletRequestModel requestModel);
+        public Task<ActionResult<MessageModel>> AddMoney(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username);
+        public Task<ActionResult<MessageModel>> SimulatePurchase(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username /*ITransactionService _transation*/);
+        public Task<ActionResult<MessageModel>> DeleteWallet(ClaimsPrincipal currentUser, WalletRequestModel requestModel);
 
     }
 }

@@ -13,20 +13,16 @@ using VitoshaBank.Services.CreditService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
-    [Route("api/credit")]
+    [Route("api/credits")]
     [ApiController]
     public class CreditController : ControllerBase
     {
-        private readonly BankSystemContext dbContext;
-        private readonly ICreditService _creditService;
 
+        private readonly ICreditsService _creditService;
 
-
-        public CreditController(BankSystemContext context, ICreditService creditService)
+        public CreditController(ICreditsService creditService)
         {
-            dbContext = context;
             _creditService = creditService;
-
         }
 
         [HttpGet]
@@ -35,7 +31,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _creditService.GetCreditInfo(currentUser, username, dbContext);
+            return await _creditService.GetCreditInfo(currentUser, username);
         }
         [HttpGet("check")]
         [Authorize]
@@ -43,7 +39,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _creditService.GetPayOffInfo(currentUser, username, dbContext);
+            return await _creditService.GetPayOffInfo(currentUser, username);
         }
 
         [HttpPut("purchase")]
@@ -53,7 +49,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _creditService.SimulatePurchase(requestModel, currentUser, username,  dbContext);
+            return await _creditService.SimulatePurchase(requestModel, currentUser, username);
         }
 
         [HttpPut("deposit")]
@@ -63,7 +59,7 @@ namespace VitoshaBank.Controllers
             //amount = 0.50M;
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _creditService.AddMoney(requestModel, currentUser, username, dbContext);
+            return await _creditService.AddMoney(requestModel, currentUser, username);
         }
         [HttpPut("withdraw")]
         [Authorize]
@@ -71,7 +67,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _creditService.Withdraw(requestModel, currentUser, username, "User in ATM", dbContext);
+            return await _creditService.Withdraw(requestModel, currentUser, username, "User in ATM");
         }
 
     }

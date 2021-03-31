@@ -16,7 +16,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
             string secondUniqueNumber = "1234567";
             string bankAccountTypeCode = "";
 
-            if (BankAccountType == "BankAccount")
+            if (BankAccountType == "ChargeAccount")
             {
                 bankAccountTypeCode = "01";
             }

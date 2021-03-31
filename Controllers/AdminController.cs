@@ -25,7 +25,7 @@ namespace VitoshaBank.Controllers
         private readonly IDepositsService _depositService;
         //private readonly IBankAccountService _bankAccountService;
         //private readonly IDebitCardService _debitCardService;
-        private readonly ICreditService _creditService;
+        private readonly ICreditsService _creditService;
         private readonly IWalletsService _walletService;
         //private readonly ISupportTicketService _ticketService;
         
@@ -70,7 +70,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<User>> GetUser(string username)
         {
             var currentUser = HttpContext.User;
-            return await _userService.GetUser(currentUser, username,dbContext);
+            return await _userService.GetUser(currentUser, username);
         }
         [HttpDelete("delete/user")]
         [Authorize]
@@ -79,7 +79,7 @@ namespace VitoshaBank.Controllers
         {
             //need username
             var currentUser = HttpContext.User;
-            return await _userService.DeleteUser(currentUser, requestModel,dbContext);
+            return await _userService.DeleteUser(currentUser, requestModel);
         }
         [HttpPost("create/deposit")]
         [Authorize]
@@ -87,7 +87,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> CreateDeposit(DepositRequestModel requestModel)
         {
             var currentUser = HttpContext.User;
-            return await _depositService.CreateDeposit(currentUser, requestModel, _config,dbContext);
+            return await _depositService.CreateDeposit(currentUser, requestModel);
         }
         [HttpDelete("delete/deposit")]
         [Authorize]
@@ -96,7 +96,7 @@ namespace VitoshaBank.Controllers
         {
             //need username and deposit
             var currentUser = HttpContext.User;
-            return await _depositService.DeleteDeposit(currentUser,  requestModel,dbContext);
+            return await _depositService.DeleteDeposit(currentUser,  requestModel);
         }
 
         [HttpPost("create/wallet")]
@@ -105,7 +105,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> CreateWallet(WalletRequestModel requestModel)
         {
             var currentUser = HttpContext.User;
-            return await _walletService.CreateWallet(currentUser, requestModel, _config, dbContext);
+            return await _walletService.CreateWallet(currentUser, requestModel);
         }
         [HttpDelete("delete/wallet")]
         [Authorize]
@@ -113,7 +113,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> DeleteWallet(WalletRequestModel requestModel)
         {
             var currentUser = HttpContext.User;
-            return await _walletService.DeleteWallet(currentUser, requestModel, dbContext);
+            return await _walletService.DeleteWallet(currentUser, requestModel);
         }
         [HttpPost("create/credit")]
         [Authorize]
@@ -121,7 +121,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> CreateCredit(CreditRequestModel requestModel)
         {
             var currentUser = HttpContext.User;
-            return await _creditService.CreateCredit(currentUser, requestModel,_config, dbContext);
+            return await _creditService.CreateCredit(currentUser, requestModel);
         }
         [HttpDelete("delete/credit")]
         [Authorize]
@@ -129,7 +129,7 @@ namespace VitoshaBank.Controllers
         public async Task<ActionResult<MessageModel>> DeleteCredit(CreditRequestModel requestModel)
         {
             var currentUser = HttpContext.User;
-            return await _creditService.DeleteCredit(requestModel,currentUser, dbContext);
+            return await _creditService.DeleteCredit(requestModel,currentUser);
         }
     }
 }

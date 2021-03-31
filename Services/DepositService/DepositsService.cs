@@ -20,9 +20,15 @@ namespace VitoshaBank.Services.DepositService
 {
     public class DepositsService : ControllerBase, IDepositsService
     {
-
+        private readonly BankSystemContext dbContext;
+        private readonly IConfiguration config;
+        public DepositsService(BankSystemContext context, IConfiguration _config)
+        {
+            dbContext = context;
+            config = _config;
+        }
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -63,7 +69,7 @@ namespace VitoshaBank.Services.DepositService
             }
 
         }
-        public async Task<ActionResult<DepositResponseModel>> CheckDividentsPayments(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<DepositResponseModel>> CheckDividentsPayments(ClaimsPrincipal currentUser, string username )
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -104,7 +110,7 @@ namespace VitoshaBank.Services.DepositService
 
 
         }
-        public async Task<ActionResult<DepositResponseModel>> GetDividentsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<DepositResponseModel>> GetDividentsInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -145,7 +151,7 @@ namespace VitoshaBank.Services.DepositService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<MessageModel>> CreateDeposit(ClaimsPrincipal currentUser, DepositRequestModel requestModel, IConfiguration config, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> CreateDeposit(ClaimsPrincipal currentUser, DepositRequestModel requestModel)
         {
             string role = "";
             var username = requestModel.Username;
@@ -223,7 +229,7 @@ namespace VitoshaBank.Services.DepositService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<MessageModel>> AddMoney(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> AddMoney(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
@@ -293,14 +299,12 @@ namespace VitoshaBank.Services.DepositService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> WithdrawMoney(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> WithdrawMoney(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
             Deposit deposit = requestModel.Deposit;
             Deposit depositExists = null;
-            DepositResponseModel depositResponseModel = new DepositResponseModel();
-
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -337,7 +341,7 @@ namespace VitoshaBank.Services.DepositService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> DeleteDeposit(ClaimsPrincipal currentUser, DepositRequestModel requestModel, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> DeleteDeposit(ClaimsPrincipal currentUser, DepositRequestModel requestModel)
         {
             string role = "";
             var username = requestModel.Username;
