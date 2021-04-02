@@ -30,7 +30,7 @@ namespace VitoshaBank.Controllers
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(IUsersService usersService, IDepositsService depositService, ICreditService creditService, IWalletsService walletsService)
+        public AdminController(IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService)
         {
             _userService = usersService;
             _creditService = creditService;

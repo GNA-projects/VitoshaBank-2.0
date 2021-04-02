@@ -20,14 +20,16 @@ namespace VitoshaBank.Services.DepositService
 {
     public class DepositsService : ControllerBase, IDepositsService
     {
+
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration config;
+        MessageModel responseMessage = new MessageModel();
         public DepositsService(BankSystemContext context, IConfiguration _config)
         {
             dbContext = context;
             config = _config;
         }
-        MessageModel responseMessage = new MessageModel();
+
         public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
@@ -69,7 +71,7 @@ namespace VitoshaBank.Services.DepositService
             }
 
         }
-        public async Task<ActionResult<DepositResponseModel>> CheckDividentsPayments(ClaimsPrincipal currentUser, string username )
+        public async Task<ActionResult<DepositResponseModel>> CheckDividentsPayments(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -185,7 +187,7 @@ namespace VitoshaBank.Services.DepositService
                                 await dbContext.AddAsync(deposit);
                                 await dbContext.SaveChangesAsync();
 
-                                SendEmail(userAuthenticate.Email, config);
+                                SendEmail(userAuthenticate.Email);
                                 responseMessage.Message = "Deposit created succesfully";
                                 return StatusCode(200, responseMessage);
                             }
@@ -407,11 +409,11 @@ namespace VitoshaBank.Services.DepositService
             }
             return false;
         }
-        private void SendEmail(string email, IConfiguration _config)
+        private void SendEmail(string email)
         {
-            var fromMail = new MailAddress(_config["Email:Email"], $"Deposit account created");
+            var fromMail = new MailAddress(config["Email:Email"], $"Deposit account created");
             var toMail = new MailAddress(email);
-            var frontEmailPassowrd = _config["Pass:Pass"];
+            var frontEmailPassowrd = config["Pass:Pass"];
             string subject = "Your deposit account is successfully created";
             string body = "<br/><br/>We are excited to tell you that your deposit account is created succesfully. You can use it instantly.";
 

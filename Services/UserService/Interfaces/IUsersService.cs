@@ -25,5 +25,6 @@ namespace VitoshaBank.Services.UserService.Interfaces
         public Task<ActionResult<MessageModel>> DeleteUser(ClaimsPrincipal currentUser, UserRequestModel requestModel);
         public Task<ActionResult<MessageModel>> CreateUser(ClaimsPrincipal currentUser, UserRequestModel requestModel);
 
+
     }
 }

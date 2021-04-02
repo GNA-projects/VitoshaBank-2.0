@@ -42,7 +42,7 @@ namespace VitoshaBank
 
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IDepositsService, DepositsService>();
-            services.AddScoped<ICreditService, CreditsService>();
+            services.AddScoped<ICreditsService, CreditsService>();
             services.AddScoped<IWalletsService, WalletsService>();
 
             services.AddScoped<ISupportTicketsService, SupportTicketsService>();

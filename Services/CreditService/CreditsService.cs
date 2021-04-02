@@ -22,15 +22,17 @@ namespace VitoshaBank.Services.CreditService
     public class CreditsService : ControllerBase, ICreditsService
     {
         private readonly BankSystemContext dbContext;
-        private readonly IConfiguration _config;
-        public CreditsService(BankSystemContext context, IConfiguration config)
+        private readonly IConfiguration config;
+        MessageModel responseMessage = new MessageModel();
+        public CreditsService(BankSystemContext context, IConfiguration _config)
         {
             dbContext = context;
-            _config = config;
+            config = _config;
         }
-        MessageModel responseMessage = new MessageModel();
+
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel)
         {
+           
             
             string role = "";
             string username = requestModel.Username;
@@ -96,7 +98,7 @@ namespace VitoshaBank.Services.CreditService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username)
+        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username )
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -257,7 +259,6 @@ namespace VitoshaBank.Services.CreditService
                 {
                     bankAccounts = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
                     return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts);
-
                 }
                 else
                 {
@@ -454,9 +455,9 @@ namespace VitoshaBank.Services.CreditService
 
         private void SendEmail(string email)
         {
-            var fromMail = new MailAddress(_config["Email:Email"], $"Credit account created");
+            var fromMail = new MailAddress(config["Email:Email"], $"Credit account created");
             var toMail = new MailAddress(email);
-            var frontEmailPassowrd = _config["Pass:Pass"];
+            var frontEmailPassowrd = config["Pass:Pass"];
             string subject = "Your credit account is successfully created";
             string body = "<br/><br/>We are excited to tell you that your credit account is created succesfully. You can use it instantly.";
 

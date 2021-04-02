@@ -22,6 +22,7 @@ namespace VitoshaBank.Services.WalletService
     public class WalletsService : ControllerBase, IWalletsService
     {
         private readonly BankSystemContext dbContext;
+
         private readonly IConfiguration _config;
         public WalletsService(BankSystemContext context, IConfiguration config)
         {
@@ -29,6 +30,7 @@ namespace VitoshaBank.Services.WalletService
             _config = config;
         }
         MessageModel responseMessage = new MessageModel();
+
         public async Task<ActionResult<ICollection<WalletResponseModel>>> GetWalletsInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))

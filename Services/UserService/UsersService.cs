@@ -90,16 +90,16 @@ namespace VitoshaBank.Services.UserService
                     int i = await dbContext.SaveChangesAsync();
 
 
-                if (i > 0)
-                {
+                    if (i > 0)
+                    {
                         SendVerificationLinkEmail(user.Email, user.ActivationCode, user.Username, vanillaPassword);
                         responseMessage.Message = $"User {user.Username} created succesfully!";
                         return StatusCode(201, responseMessage);
-                }
-                else
-                 {
+                    }
+                    else
+                    {
                         responseMessage.Message = "Registration failed";
-                     return StatusCode(406, responseMessage);
+                        return StatusCode(406, responseMessage);
                     }
 
 
@@ -109,15 +109,16 @@ namespace VitoshaBank.Services.UserService
                     responseMessage.Message = "Registration failed";
                     return StatusCode(406, responseMessage);
                 }
-                
-                else
-                {
-                    responseMessage.Message = "Username or Mail taken. Choose another one";
-                    return StatusCode(400, responseMessage);
-                }
-        }
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(ClaimsPrincipal currentUser)
+            }
+            else
+            {
+                responseMessage.Message = "Username or Mail taken. Choose another one";
+                return StatusCode(400, responseMessage);
+            }
 
+        }
+
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(ClaimsPrincipal currentUser)
         {
             string role = "";
 
@@ -207,7 +208,6 @@ namespace VitoshaBank.Services.UserService
 
         }
         public async Task<ActionResult<MessageModel>> DeleteUser(ClaimsPrincipal currentUser, UserRequestModel requestModel)
-    
         {
             string role = "";
             var username = requestModel.Username;
@@ -250,7 +250,7 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
-        
+
         private async Task<User> AuthenticateUser(User userLogin, BCryptPasswordHasher _BCrypt)
         {
             var userAuthenticateUsername = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == userLogin.Username);
@@ -278,7 +278,7 @@ namespace VitoshaBank.Services.UserService
             }
             return null;
         }
-            private string GenerateJSONWebToken(User userInfo)
+        private string GenerateJSONWebToken(User userInfo)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -348,7 +348,9 @@ namespace VitoshaBank.Services.UserService
             {
                 if (user.IsConfirmed == true)
                 {
+
                     var tokenString = GenerateJSONWebToken(user);
+
                     responseMessage.Message = tokenString;
                     response = StatusCode(200, responseMessage);
                 }
