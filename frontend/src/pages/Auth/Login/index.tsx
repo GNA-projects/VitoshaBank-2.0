@@ -1,4 +1,4 @@
-import axios from "axios";
+import { loginReq } from "../../../api/auth/auth";
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
 import Form from "../../../components/Form";
@@ -9,27 +9,17 @@ export default function Login() {
 	const { loggedIn, setLoggedIn } = useContext(LoginContext);
 
 	const history = useHistory();
+	const [loginLoad, setLoginLoad] = useState<string>("Log in");
+
 
 	const [username, setUsername] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
 
 	const login = async () => {
-		let res = await axios
-			.post("https://localhost:44342/api/users/login", {
-				user: {
-					username: username,
-					password: password,
-				},
-			})
-			.then((res) => {
-				localStorage.setItem("jwt", res.data.message);
-				setLoggedIn(true);
-				history.push("/banking");
-				alert("Welcome");
-			})
-			.catch((err) => {
-				alert("Wrong credentials");
-			});
+		setLoginLoad("Loading...");
+		await loginReq(username, password) ? alert("Welcome") : alert("Wrong Credentials");
+		setLoginLoad("Log In");
+
 	};
 
 	const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +40,7 @@ export default function Login() {
 				onChange={handlePassword}
 				value={password}
 			></Form.Input>
-			<Form.Button onClick={() => login()}>Log In</Form.Button>
+			<Form.Button onClick={() => login()}>{loginLoad}</Form.Button>
 		</Form>
 	);
 }

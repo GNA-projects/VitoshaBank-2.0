@@ -8,8 +8,8 @@ const PrivateRoute = ({ component: Component, ...rest }: any) => {
 	let realLoggedIn = loggedIn;
 
 	const jwt = localStorage.getItem("jwt");
-	alert(jwt);
-	realLoggedIn = true;
+	
+	jwt ? (realLoggedIn = true) : (realLoggedIn = false);
 
 	return (
 		<Route

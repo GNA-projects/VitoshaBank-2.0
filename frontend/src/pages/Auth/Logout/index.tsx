@@ -10,12 +10,14 @@ export default function Logout() {
 	const history = useHistory();
 
 	const logout = () => {
-		
+		setLoggedIn(false)
+		localStorage.removeItem('jwt');
+		history.push('login')
 	}
 	return (
 		<Form>
 			
-			<Form.Button onClick={() => logout()}>Log In</Form.Button>
+			<Form.Button onClick={() => logout()}>Log Out</Form.Button>
 		</Form>
 	);
 }
