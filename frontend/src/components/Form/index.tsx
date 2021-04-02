@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEventHandler } from "react";
 import styled from "styled-components";
 
 const DIV = styled.div`
@@ -40,7 +40,7 @@ const BUTTON = styled.button`
 	outline: none;
 	border-radius: 20px;
 	height: 30px;
-	&:hover{
+	&:hover {
 		background-color: cyan;
 	}
 `;
@@ -54,15 +54,20 @@ export default function Form(props: any) {
 }
 
 Form.Button = BUTTON;
-Form.Input = (props: any) => (
+type InputProps = {
+	label: string;
+	onChange: ChangeEventHandler;
+	value: any;
+};
+Form.Input = ({ label, onChange, value }: InputProps) => (
 	<INPUTGROUP>
-		<LABEL>{props.label}</LABEL>
-		<INPUT></INPUT>
+		<LABEL>{label}</LABEL>
+		<INPUT onChange={onChange} value={value}></INPUT>
 	</INPUTGROUP>
 );
-Form.Password = (props: any) => (
+Form.Password = ({ label, onChange, value }: InputProps) => (
 	<INPUTGROUP>
-		<LABEL>{props.label}</LABEL>
-		<INPUT type='password'></INPUT>
+		<LABEL>{label}</LABEL>
+		<INPUT type="password" onChange={(onChange)} value={value}></INPUT>
 	</INPUTGROUP>
 );

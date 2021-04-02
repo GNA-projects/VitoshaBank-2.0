@@ -11,7 +11,7 @@ export default function MenuBar() {
 			<Menu.Option to="/calculator" text="Users"></Menu.Option>
 			<Menu.Option to="/" text="Accounts"></Menu.Option>
 			<Menu.Option to="/banking" text="Cards"></Menu.Option>
-			<Menu.Option to="/me" text="Review"></Menu.Option>
+			<Menu.Option to="/profile" text="Review"></Menu.Option>
 			<Menu.Option to="/logout" text="Log Out"></Menu.Option>
 		</Menu>
 	) : (
@@ -19,7 +19,7 @@ export default function MenuBar() {
 			<Menu.Option to="/calculator" text="Calculator"></Menu.Option>
 			<Menu.Option to="/" text="Home"></Menu.Option>
 			<Menu.Option to="/banking" text="Banking"></Menu.Option>
-			<Menu.Option to="/me" text="My Profile"></Menu.Option>
+			<Menu.Option to="/profile" text="My Profile"></Menu.Option>
 			<Menu.Option to="/logout" text="Log Out"></Menu.Option>
 		</Menu>
 	);
