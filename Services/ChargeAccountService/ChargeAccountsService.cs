@@ -21,8 +21,17 @@ namespace VitoshaBank.Services.ChargeAccountService
 {
     public class ChargeAccountsService : ControllerBase, IChargeAccountsService
     {
-        MessageModel messageModel = new MessageModel();
-        public async Task<ActionResult<MessageModel>> CreateChargeAccount(ClaimsPrincipal currentUser, ChargeAccountRequestModel requestModel, IDebitCardsService _debitCardService, IConfiguration _config, BankSystemContext dbContext)
+        private readonly BankSystemContext dbContext;
+        private readonly IConfiguration _config;
+        public ChargeAccountsService(BankSystemContext context, IConfiguration config)
+        {
+            dbContext = context;
+            _config = config;
+        }
+        BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
+        MessageModel responseModel = new MessageModel();
+        
+        public async Task<ActionResult<MessageModel>> CreateChargeAccount(ClaimsPrincipal currentUser, ChargeAccountRequestModel requestModel, IDebitCardsService _debitCardService)
         {
             string role = "";
             var username = requestModel.Username;
@@ -58,36 +67,38 @@ namespace VitoshaBank.Services.ChargeAccountService
                             await dbContext.SaveChangesAsync();
 
                             Card card = new Card();
-                            //await _debitCardService.CreateDebitCard(currentUser, username, bankAccount, _context, card, _BCrypt, messageModel);
+                            DebitCardRequestModel debitCardRequest = new DebitCardRequestModel();
+                            debitCardRequest.Card = card;
+                            await _debitCardService.CreateDebitCard(currentUser, username, chargeAcc, card);
 
                             SendEmail(userAuthenticate.Email, _config);
-                            messageModel.Message = "Charge Account created succesfully";
-                            return StatusCode(201, messageModel);
+                            responseModel.Message = "Charge Account created succesfully";
+                            return StatusCode(201, responseModel);
                         }
                         else if (ValidateUser(userAuthenticate) == false)
                         {
-                            messageModel.Message = "User not found!";
-                            return StatusCode(404, messageModel);
+                            responseModel.Message = "User not found!";
+                            return StatusCode(404, responseModel);
                         }
                         else if (ValidateChargeAccount(chargeAcc) == false)
                         {
-                            messageModel.Message = "Invalid parameteres!";
-                            return StatusCode(400, messageModel);
+                            responseModel.Message = "Invalid parameteres!";
+                            return StatusCode(400, responseModel);
                         }
                     }
 
                 }
 
-                messageModel.Message = "User already has a Charge Account!";
-                return StatusCode(400, messageModel);
+                responseModel.Message = "User already has a Charge Account!";
+                return StatusCode(400, responseModel);
             }
             else
             {
-                messageModel.Message = "You are not authorized to do such actions";
-                return StatusCode(403, messageModel);
+                responseModel.Message = "You are not authorized to do such actions";
+                return StatusCode(403, responseModel);
             }
         }
-        public async Task<ActionResult<ICollection<ChargeAccountResponseModel>>> GetBankAccountInfo(ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<ICollection<ChargeAccountResponseModel>>> GetBankAccountInfo(ClaimsPrincipal currentUser, string username )
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -97,8 +108,8 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                 if (userAuthenticate == null)
                 {
-                    messageModel.Message = "User not found";
-                    return StatusCode(404, messageModel);
+                    responseModel.Message = "User not found";
+                    return StatusCode(404, responseModel);
                 }
                 else
                 {
@@ -116,63 +127,63 @@ namespace VitoshaBank.Services.ChargeAccountService
                         return StatusCode(200, userChargeAccounts.UserWallets);
                     }
 
-                    messageModel.Message = "You don't have a Charge Account!";
-                    return StatusCode(400, messageModel);
+                    responseModel.Message = "You don't have a Charge Account!";
+                    return StatusCode(400, responseModel);
                 }
             }
             else
             {
-                messageModel.Message = "You are not authorized to do such actions";
-                return StatusCode(403, messageModel);
+                responseModel.Message = "You are not authorized to do such actions";
+                return StatusCode(403, responseModel);
             }
         }
-        //public async Task<ActionResult<MessageModel>> DepositMoney(ChargeAccount bankAccount, ClaimsPrincipal currentUser, string username, decimal amount, BankSystemContext _context, ITransactionService _transactionService, MessageModel messageModel)
-        //{
-        //    var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
+        public async Task<ActionResult<MessageModel>> DepositMoney(ChargeAccount bankAccount,Deposit deposit, ClaimsPrincipal currentUser, string username, decimal amount /*ITransactionService _transactionService*/)
+        {
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
-        //    ChargeAccounts bankAccounts = null;
-        //    Deposits depositsExist = null;
+            ChargeAccount bankAccounts = null;
+            Deposit depositsExist = null;
 
-        //    if (currentUser.HasClaim(c => c.Type == "Roles"))
-        //    {
-        //        if (userAuthenticate != null)
-        //        {
-        //            bankAccounts = await _context.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-        //            depositsExist = await _context.Deposits.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-        //        }
-        //        else
-        //        {
-        //            messageModel.Message = "User not found!";
-        //            return StatusCode(404, messageModel);
-        //        }
+            if (currentUser.HasClaim(c => c.Type == "Roles"))
+            {
+                if (userAuthenticate != null)
+                {
+                    bankAccounts = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == bankAccount.Iban);
+                    depositsExist = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                }
+                else
+                {
+                    responseModel.Message = "User not found!";
+                    return StatusCode(404, responseModel);
+                }
 
-        //        if (bankAccounts != null && depositsExist != null)
-        //        {
-        //            if (ValidateDepositAmountChargeAccount(amount))
-        //            {
-        //                bankAccounts.Amount = bankAccounts.Amount + amount;
-        //                depositsExist.Amount = depositsExist.Amount - amount;
-        //                await _context.SaveChangesAsync();
-        //                Transaction transactions = new Transaction();
-        //                transactions.RecieverAccountInfo = bankAccounts.Iban;
-        //                transactions.SenderAccountInfo = depositsExist.Iban;
-        //                await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account", _context, messageModel);
-        //                messageModel.Message = "Money deposited succesfully!";
-        //                return StatusCode(200, messageModel);
-        //            }
-        //            messageModel.Message = "Invalid deposit amount!";
-        //            return StatusCode(400, messageModel);
-        //        }
-        //        else
-        //        {
-        //            messageModel.Message = "Charge Account not found";
-        //            return StatusCode(404, messageModel);
-        //        }
-        //    }
-        //    messageModel.Message = "You are not autorized to do such actions!";
-        //    return StatusCode(403, messageModel);
-        //}
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext /*ITransactionService _transation*/)
+                if (bankAccounts != null && depositsExist != null)
+                {
+                    if (ValidateDepositAmountChargeAccount(amount))
+                    {
+                        bankAccounts.Amount = bankAccounts.Amount + amount;
+                        depositsExist.Amount = depositsExist.Amount - amount;
+                        await dbContext.SaveChangesAsync();
+                        Transaction transactions = new Transaction();
+                        transactions.RecieverAccountInfo = bankAccounts.Iban;
+                        transactions.SenderAccountInfo = depositsExist.Iban;
+                      //  await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account", _context, messageModel);
+                        responseModel.Message = "Money deposited succesfully!";
+                        return StatusCode(200, responseModel);
+                    }
+                    responseModel.Message = "Invalid deposit amount!";
+                    return StatusCode(400, responseModel);
+                }
+                else
+                {
+                    responseModel.Message = "Charge Account not found";
+                    return StatusCode(404, responseModel);
+                }
+            }
+            responseModel.Message = "You are not autorized to do such actions!";
+            return StatusCode(403, responseModel);
+        }
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username  /*ITransactionService _transation*/)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var product = requestModel.Product;
@@ -197,31 +208,31 @@ namespace VitoshaBank.Services.ChargeAccountService
                         transactions.RecieverAccountInfo = reciever;
                         // await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account", dbContext, _messageModel);
                         await dbContext.SaveChangesAsync();
-                        messageModel.Message = $"Succesfully purhcased {product}.";
-                        return StatusCode(200, messageModel);
+                        responseModel.Message = $"Succesfully purhcased {product}.";
+                        return StatusCode(200, responseModel);
                     }
                     else if (ValidateDepositAmountChargeAccount(amount) == false)
                     {
-                        messageModel.Message = "Invalid payment amount!";
-                        return StatusCode(400, messageModel);
+                        responseModel.Message = "Invalid payment amount!";
+                        return StatusCode(400, responseModel);
                     }
                     else if (ValidateChargeAccount(chargeAcc, amount) == false)
                     {
-                        messageModel.Message = "You don't have enough money in Charge account!";
-                        return StatusCode(406, messageModel);
+                        responseModel.Message = "You don't have enough money in Charge account!";
+                        return StatusCode(406, responseModel);
                     }
                 }
                 else
                 {
-                    messageModel.Message = "Charge Account not found";
-                    return StatusCode(404, messageModel);
+                    responseModel.Message = "Charge Account not found";
+                    return StatusCode(404, responseModel);
                 }
             }
 
-            messageModel.Message = "You are not autorized to do such actions!";
-            return StatusCode(403, messageModel);
+            responseModel.Message = "You are not autorized to do such actions!";
+            return StatusCode(403, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> AddMoney(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> AddMoney(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
@@ -251,33 +262,33 @@ namespace VitoshaBank.Services.ChargeAccountService
                             transactions.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
                             transactions.RecieverAccountInfo = chargeAcc.Iban;
                             //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money in Charge Account", dbContext, messageModel);
-                            messageModel.Message = $"Succesfully deposited {amount} leva in Charge Account.";
-                            return StatusCode(200, messageModel);
+                            responseModel.Message = $"Succesfully deposited {amount} leva in Charge Account.";
+                            return StatusCode(200, responseModel);
                         }
 
-                        messageModel.Message = "Invalid money amount!";
-                        return StatusCode(400, messageModel);
+                        responseModel.Message = "Invalid money amount!";
+                        return StatusCode(400, responseModel);
                     }
                     else
                     {
-                        messageModel.Message = "Charge Account not found";
-                        return StatusCode(404, messageModel);
+                        responseModel.Message = "Charge Account not found";
+                        return StatusCode(404, responseModel);
                     }
 
                 }
                 else
                 {
-                    messageModel.Message = "User not found!";
-                    return StatusCode(404, messageModel);
+                    responseModel.Message = "User not found!";
+                    return StatusCode(404, responseModel);
                 }
 
 
             }
 
-            messageModel.Message = "You are not autorized to do such actions!";
-            return StatusCode(403, messageModel);
+            responseModel.Message = "You are not autorized to do such actions!";
+            return StatusCode(403, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> Withdraw(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> Withdraw(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username )
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
@@ -301,44 +312,44 @@ namespace VitoshaBank.Services.ChargeAccountService
                             transactions.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
                             // await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva", dbContext, messageModel);
                             await dbContext.SaveChangesAsync();
-                            messageModel.Message = $"Succesfully withdrawed {amount} leva.";
-                            return StatusCode(200, messageModel);
+                            responseModel.Message = $"Succesfully withdrawed {amount} leva.";
+                            return StatusCode(200, responseModel);
                         }
                         else if (ValidateDepositAmountChargeAccount(amount) == false)
                         {
-                            messageModel.Message = "Invalid payment amount!";
-                            return StatusCode(400, messageModel);
+                            responseModel.Message = "Invalid payment amount!";
+                            return StatusCode(400, responseModel);
                         }
                         else if (ValidateChargeAccount(chargeAcc, amount) == false)
                         {
-                            messageModel.Message = "You don't have enough money in Charge Account!";
-                            return StatusCode(406, messageModel);
+                            responseModel.Message = "You don't have enough money in Charge Account!";
+                            return StatusCode(406, responseModel);
                         }
                         else if (ValidateMinAmount(chargeAcc, amount) == false)
                         {
-                            messageModel.Message = "Min amount is 10 leva!";
-                            return StatusCode(406, messageModel);
+                            responseModel.Message = "Min amount is 10 leva!";
+                            return StatusCode(406, responseModel);
                         }
 
                     }
                     else
                     {
-                        messageModel.Message = "Charge Account not found";
-                        return StatusCode(404, messageModel);
+                        responseModel.Message = "Charge Account not found";
+                        return StatusCode(404, responseModel);
                     }
 
                 }
                 else
                 {
-                    messageModel.Message = "User not found!";
-                    return StatusCode(404, messageModel);
+                    responseModel.Message = "User not found!";
+                    return StatusCode(404, responseModel);
                 }
 
             }
-            messageModel.Message = "You are not autorized to do such actions!";
-            return StatusCode(403, messageModel);
+            responseModel.Message = "You are not autorized to do such actions!";
+            return StatusCode(403, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> DeleteBankAccount(ClaimsPrincipal currentUser, ChargeAccountRequestModel requestModel, BankSystemContext dbContext)
+        public async Task<ActionResult<MessageModel>> DeleteBankAccount(ClaimsPrincipal currentUser, ChargeAccountRequestModel requestModel)
         {
             string role = "";
             var username = requestModel.Username;
@@ -362,21 +373,21 @@ namespace VitoshaBank.Services.ChargeAccountService
                 {
                     chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
                     cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
-                    creditExists = null/*await dbContext.Credits.FirstOrDefaultAsync(x => x.UserId == user.Id)*/;
+                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.UserId == user.Id);
                     userChargeAcc = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
 
                 }
 
                 if (user == null)
                 {
-                    messageModel.Message = "User not found";
-                    return StatusCode(404, messageModel);
+                    responseModel.Message = "User not found";
+                    return StatusCode(404, responseModel);
                 }
 
                 if (chargeAccExists == null)
                 {
-                    messageModel.Message = "User doesn't have a Charge Account";
-                    return StatusCode(400, messageModel);
+                    responseModel.Message = "User doesn't have a Charge Account";
+                    return StatusCode(400, responseModel);
                 }
 
                 if (cardExists != null)
@@ -387,8 +398,8 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                 if (creditExists != null)
                 {
-                    messageModel.Message = "You can't delete Charge account if you have an existing credit!";
-                    return StatusCode(406, messageModel);
+                    responseModel.Message = "You can't delete Charge account if you have an existing credit!";
+                    return StatusCode(406, responseModel);
                 }
 
                 dbContext.ChargeAccounts.Remove(chargeAccExists);
@@ -396,14 +407,14 @@ namespace VitoshaBank.Services.ChargeAccountService
                 dbContext.UserAccounts.Remove(userChargeAcc);
                 await dbContext.SaveChangesAsync();
 
-                messageModel.Message = $"Succsesfully deleted {user.Username} Charge Account and Debit Card!";
-                return StatusCode(200, messageModel);
+                responseModel.Message = $"Succsesfully deleted {user.Username} Charge Account and Debit Card!";
+                return StatusCode(200, responseModel);
 
             }
             else
             {
-                messageModel.Message = "You are not authorized to do such actions";
-                return StatusCode(403, messageModel);
+                responseModel.Message = "You are not authorized to do such actions";
+                return StatusCode(403, responseModel);
             }
         }
         private bool ValidateChargeAccount(ChargeAccount chargeAccounts)

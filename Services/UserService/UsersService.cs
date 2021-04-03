@@ -17,6 +17,10 @@ using System.Net.Mail;
 using System.Net;
 using Microsoft.IdentityModel.Tokens;
 using VitoshaBank.Data.RequestModels;
+using VitoshaBank.Services.ChargeAccountService.Interfaces;
+using VitoshaBank.Services.DepositService.Interfaces;
+using VitoshaBank.Services.CreditService.Interfaces;
+using VitoshaBank.Services.WalletService.Interfaces;
 
 namespace VitoshaBank.Services.UserService
 {
@@ -250,7 +254,32 @@ namespace VitoshaBank.Services.UserService
                 return StatusCode(403, responseMessage);
             }
         }
+        public async Task<ActionResult<UserAccResponseModel>> GetAllUserBankAccounts(ClaimsPrincipal currentUser, string username, IChargeAccountsService chargeAccount, IDepositsService depositService, ICreditsService creditsService, IWalletsService walletsService)
+        {
+            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+            if (currentUser.HasClaim(c => c.Type == "Roles"))
+            {
+                if (userAuthenticate != null)
+                {
 
+                    var charges =await chargeAccount.GetBankAccountInfo(currentUser, username);
+                    var deposits = await depositService.GetDepositsInfo(currentUser, username);
+                    var wallets = await walletsService.GetWalletsInfo(currentUser, username);
+                    var credits = await creditsService.GetCreditInfo(currentUser, username);
+                    UserAccResponseModel userAcc = new UserAccResponseModel();
+                    userAcc.UserChargeAcc = charges.Value;
+                    userAcc.UserCredits = credits.Value;
+                    userAcc.UserDeposits = deposits.Value;
+                    userAcc.UserWallets = wallets.Value;
+                    return StatusCode(200, userAcc);
+                }
+                responseMessage.Message = "User not found";
+                return StatusCode(404, responseMessage);
+            }
+            responseMessage.Message = "You are not logged in";
+            return StatusCode(403, responseMessage);
+
+        }
         private async Task<User> AuthenticateUser(User userLogin, BCryptPasswordHasher _BCrypt)
         {
             var userAuthenticateUsername = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == userLogin.Username);

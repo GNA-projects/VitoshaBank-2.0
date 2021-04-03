@@ -13,5 +13,6 @@ namespace VitoshaBank.Data.RequestModels
         public string Product { get; set; }
         public decimal Amount { get; set; }
         public string Reciever { get; set; }
+        public Deposit Deposit { get;  set; }
     }
 }

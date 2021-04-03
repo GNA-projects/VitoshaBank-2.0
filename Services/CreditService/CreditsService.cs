@@ -129,7 +129,7 @@ namespace VitoshaBank.Services.CreditService
                         return StatusCode(200, userCredits.UserCredits);
                     }
 
-                    responseMessage.Message = "You don't have a Wallet!";
+                    responseMessage.Message = "You don't have a Credit!";
                     return StatusCode(400, responseMessage);
                 }
             }
