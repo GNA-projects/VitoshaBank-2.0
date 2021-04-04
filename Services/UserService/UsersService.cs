@@ -201,7 +201,7 @@ namespace VitoshaBank.Services.UserService
             {
                 value.IsConfirmed = true;
                 await dbContext.SaveChangesAsync();
-                responseMessage.Message = "Dear user, Your email successfully activated now you can able to login";
+                responseMessage.Message = "Dear user, Your email is successfully activated now and you are able to login";
                 return StatusCode(200, responseMessage);
             }
             else
@@ -338,7 +338,7 @@ namespace VitoshaBank.Services.UserService
         }
         private void SendVerificationLinkEmail(string email, string activationcode, string username, string password)
         {
-            var varifyUrl = "https" + "://" + "localhost" + ":" + "44377" + "/api/users/activateaccount/" + activationcode;
+            var varifyUrl = "https" + "://" + "localhost" + ":" + "44342" + "/api/users/activateaccount/" + activationcode;
             var fromMail = new MailAddress(_config["Email:Email"], $"Welcome to Vitosha Bank");
             var toMail = new MailAddress(email);
             var frontEmailPassowrd = _config["Pass:Pass"];

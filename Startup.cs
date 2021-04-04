@@ -26,6 +26,8 @@ using VitoshaBank.Services.CalculatorService;
 using VitoshaBank.Services.CalculatorService.Interfaces;
 using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.DebitCardService;
+using VitoshaBank.Services.TransactionService.Interfaces;
+using VitoshaBank.Services.TransactionService;
 
 namespace VitoshaBank
 {
@@ -50,6 +52,8 @@ namespace VitoshaBank
             services.AddScoped<ISupportTicketsService, SupportTicketsService>();
             services.AddScoped<IChargeAccountsService, ChargeAccountsService>();
             services.AddScoped<ICalculatorService, CalculatorService>();
+            services.AddScoped<ITransactionsService, TransactionsService>();
+
 
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
