@@ -9,5 +9,8 @@ namespace VitoshaBank.Data.RequestModels
     public class DebitCardRequestModel
     {
         public Card Card { get; set; }
+        public decimal Amount { get; internal set; }
+        public string Reciever { get; internal set; }
+        public string Product { get; internal set; }
     }
 }

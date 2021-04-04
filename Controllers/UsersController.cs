@@ -9,8 +9,13 @@ using System.Threading.Tasks;
 using VitoshaBank.Data.DbModels;
 using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.RequestModels;
+using VitoshaBank.Data.ResponseModels;
+using VitoshaBank.Services.ChargeAccountService.Interfaces;
+using VitoshaBank.Services.CreditService.Interfaces;
+using VitoshaBank.Services.DepositService.Interfaces;
 using VitoshaBank.Services.UserService;
 using VitoshaBank.Services.UserService.Interfaces;
+using VitoshaBank.Services.WalletService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
@@ -20,12 +25,17 @@ namespace VitoshaBank.Controllers
     {
 
         private readonly IUsersService _userService;
-
-
-        public UsersController(BankSystemContext context,IConfiguration config, IUsersService userService)
+        private readonly IDepositsService _depositService;
+        private readonly ICreditsService _creditService;
+        private readonly IWalletsService _walletService;
+        private readonly IChargeAccountsService _chargeAccount;
+        public UsersController(IUsersService userService, IChargeAccountsService chargeAccountsService, IDepositsService depositsService, ICreditsService creditsService, IWalletsService walletsService)
         {
-
             _userService = userService;
+            _chargeAccount = chargeAccountsService;
+            _depositService = depositsService;
+            _creditService = creditsService;
+            _walletService = walletsService;
         }
 
         [HttpGet("all")]
@@ -76,6 +86,14 @@ namespace VitoshaBank.Controllers
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
             return await _userService.AdminCheck(username);
         }
-
+        [HttpGet("accounts")]
+        [Authorize]
+        public async Task<ActionResult<UserAccResponseModel>> GetAccounts()
+        {
+            //return all users
+            var currentUser = HttpContext.User;
+            string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
+            return await _userService.GetAllUserBankAccounts(currentUser, username,_chargeAccount,_depositService,_creditService,_walletService);
+        }
     }
 }
