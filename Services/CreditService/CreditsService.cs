@@ -52,24 +52,21 @@ namespace VitoshaBank.Services.CreditService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username).Count() < 3)
+                    if (dbContext.Credits.Where(x => x.UserId != userAuthenticate.Id).Count() < 3)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateCredit(credit))
                         {
-                            UserAccount userAccounts = new UserAccount();
-                            userAccounts.UserId = userAuthenticate.Id;
-                            userAccounts.UserUsername = userAuthenticate.Username;
+                            
                             credit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Credit", dbContext);
                             credit.Interest = 6.9m;
                             credit.CreditAmount = CalculateInterest.CalculateCreditAmount(credit.Amount, period, credit.Interest);
                             credit.Instalment = CalculateInterest.CalculateInstalment(credit.CreditAmount, credit.Interest, period);
                             credit.CreditAmountLeft = credit.CreditAmount;
                             credit.PaymentDate = DateTime.Now.AddMonths(1);
+                            credit.UserId = userAuthenticate.Id;
                             await dbContext.AddAsync(credit);
                             await dbContext.SaveChangesAsync();
-                            userAccounts.CreditId = dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban).Id;
-                            await dbContext.AddAsync(userAccounts);
-                            await dbContext.SaveChangesAsync();
+                            
 
                             SendEmail(userAuthenticate.Email);
                             responseMessage.Message = "Credit created succesfully!";
@@ -89,7 +86,7 @@ namespace VitoshaBank.Services.CreditService
 
                 }
 
-                responseMessage.Message = "User already has a wallet!";
+                responseMessage.Message = "User already has 3 active credits!";
                 return StatusCode(400, responseMessage);
             }
             else

@@ -319,7 +319,6 @@ namespace VitoshaBank.Services.DebitCardService
                 return StatusCode(403, responseMessage);
             }
         }
-
         private bool ValidateUser(User user)
         {
             if (user != null)

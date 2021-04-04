@@ -27,6 +27,15 @@ namespace VitoshaBank.Data.DbModels
         public virtual DbSet<UserAccount> UserAccounts { get; set; }
         public virtual DbSet<Wallet> Wallets { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseNpgsql("Host=91.230.230.249;Database=vitosha;Username=gosho;Password=gosho");
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "en_US.UTF-8");
@@ -80,7 +89,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasDefaultValueSql("nextval('vitosha.chargeaccounts_id_seq'::regclass)");
 
                 entity.Property(e => e.Amount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("amount");
 
                 entity.Property(e => e.Iban)
@@ -106,15 +115,15 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Amount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("amount");
 
                 entity.Property(e => e.CreditAmount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("credit_amount");
 
                 entity.Property(e => e.CreditAmountLeft)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("credit_amount_left");
 
                 entity.Property(e => e.Iban)
@@ -123,11 +132,11 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("iban");
 
                 entity.Property(e => e.Instalment)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("instalment");
 
                 entity.Property(e => e.Interest)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("interest");
 
                 entity.Property(e => e.PaymentDate)
@@ -232,7 +241,7 @@ namespace VitoshaBank.Data.DbModels
                     .HasColumnName("sender_account_info");
 
                 entity.Property(e => e.TransactionAmount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("transaction_amount");
             });
 
@@ -376,7 +385,7 @@ namespace VitoshaBank.Data.DbModels
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Amount)
-                    .HasPrecision(6, 6)
+                    .HasPrecision(20, 10)
                     .HasColumnName("amount");
 
                 entity.Property(e => e.CardExpirationDate)
