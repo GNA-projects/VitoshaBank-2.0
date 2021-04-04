@@ -8,10 +8,10 @@ export default function MenuBar() {
 
 	return admin ? (
 		<Menu>
-			<Menu.Option to="/calculator" text="Users"></Menu.Option>
-			<Menu.Option to="/" text="Accounts"></Menu.Option>
-			<Menu.Option to="/banking" text="Cards"></Menu.Option>
-			<Menu.Option to="/profile" text="Review"></Menu.Option>
+			<Menu.Option to="/admin/user" text="Users"></Menu.Option>
+			<Menu.Option to="/admin/accounts" text="Accounts"></Menu.Option>
+			<Menu.Option to="/admin/cards" text="Cards"></Menu.Option>
+			<Menu.Option to="/admin/review" text="Review"></Menu.Option>
 			<Menu.Option to="/logout" text="Log Out"></Menu.Option>
 		</Menu>
 	) : (

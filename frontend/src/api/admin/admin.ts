@@ -6,32 +6,36 @@ const refreshToken = () => {
 	] = `Bearer ${localStorage["jwt"]}`;
 };
 
-export const loginReq = async (username: string, password: string) => {
+export const usersReq = async () => {
 	refreshToken();
 	return await axivit
-		.post("/users/login", {
-			user: {
-				username: username,
-				password: password,
-			},
-		})
-		.then((res) => {
-			localStorage.setItem("jwt", res.data.message);
-			return true;
-		})
-		.catch((err) => {
-			return false;
-		});
-};
-
-export const usernameReq = async () => {
-	refreshToken();
-	return await axivit
-		.get("/users/username")
+		.get("/users/all")
 		.then((res) => {
 			return res.data;
 		})
 		.catch((err) => {
 			return err;
+		});
+};
+
+export const createDepositReq = async (
+	username: any,
+	top: any,
+	amount: any
+) => {
+	refreshToken();
+	return await axivit
+		.post("/admin/create/deposit", {
+			Deposit: {
+				TermOfPayment: top,
+				Amount: amount,
+			},
+			Username: username,
+		})
+		.then((res) => {
+			return res.data;
+		})
+		.catch((err) => {
+			console.log(err);
 		});
 };
