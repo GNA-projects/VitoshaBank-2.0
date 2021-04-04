@@ -13,9 +13,10 @@ namespace VitoshaBank.Services.SupportTicketService.Interfaces
 {
     public interface ISupportTicketsService
     {
-        public Task<ActionResult<MessageModel>> CreateSupportTicket(ClaimsPrincipal currentUser, string username, SupportTicket ticket, BankSystemContext _context);
-        public Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetUserTicketsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext _context );
-        public Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetAllTicketsInfo(ClaimsPrincipal currentUser, BankSystemContext _context);
-       
+        public Task<ActionResult<MessageModel>> CreateSupportTicket(ClaimsPrincipal currentUser, string username, SupportTicket ticket);
+        public Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetUserTicketsInfo(ClaimsPrincipal currentUser, string username);
+        public Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetAllTicketsInfo(ClaimsPrincipal currentUser);
+        public Task<ActionResult<MessageModel>> GiveResponse(ClaimsPrincipal currentUser, int id);
+
     }
 }

@@ -33,7 +33,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _ticketService.GetUserTicketsInfo(currentUser, username, _context);
+            return await _ticketService.GetUserTicketsInfo(currentUser, username);
         }
         [HttpPost("create")]
         [Authorize]
@@ -41,7 +41,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _ticketService.CreateSupportTicket(currentUser, username, requestModel.Ticket, _context);
+            return await _ticketService.CreateSupportTicket(currentUser, username, requestModel.Ticket);
         }
     }
 }

@@ -18,7 +18,14 @@ namespace VitoshaBank.Services.SupportTicketService
     public class SupportTicketsService : ControllerBase, ISupportTicketsService
     {
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<MessageModel>> CreateSupportTicket(ClaimsPrincipal currentUser, string username, SupportTicket ticket, BankSystemContext _context)
+        private readonly BankSystemContext _context;
+        private readonly IConfiguration _config;
+        public SupportTicketsService(BankSystemContext context, IConfiguration config)
+        {
+            _context = context;
+            _config = config;
+        }
+        public async Task<ActionResult<MessageModel>> CreateSupportTicket(ClaimsPrincipal currentUser, string username, SupportTicket ticket)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -74,7 +81,7 @@ namespace VitoshaBank.Services.SupportTicketService
             }
 
         }
-        public async Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetUserTicketsInfo(ClaimsPrincipal currentUser, string username, BankSystemContext _context)
+        public async Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetUserTicketsInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -117,7 +124,7 @@ namespace VitoshaBank.Services.SupportTicketService
             responseMessage.Message = "You don't have Support Tickets!";
             return StatusCode(400, responseMessage);
         }
-        public async Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetAllTicketsInfo(ClaimsPrincipal currentUser, BankSystemContext _context)
+        public async Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetAllTicketsInfo(ClaimsPrincipal currentUser)
         {
             string role = "";
             if (currentUser.HasClaim(c => c.Type == "Roles"))
@@ -157,7 +164,7 @@ namespace VitoshaBank.Services.SupportTicketService
             responseMessage.Message = "You don't have Support Tickets!";
             return StatusCode(400, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> GiveResponse(ClaimsPrincipal currentUser, int id, IConfiguration _config, BankSystemContext _context)
+        public async Task<ActionResult<MessageModel>> GiveResponse(ClaimsPrincipal currentUser, int id)
         {
             string role = "";
 
