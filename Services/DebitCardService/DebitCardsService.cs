@@ -12,11 +12,12 @@ using VitoshaBank.Data.RequestModels;
 using VitoshaBank.Data.ResponseModels;
 using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.ChargeAccountService.Interfaces;
+using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.GenerateCardInfoService;
 
 namespace VitoshaBank.Services.DebitCardService
 {
-    public class DebitCardsService :ControllerBase
+    public class DebitCardsService : ControllerBase, IDebitCardsService
     {
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration _config;

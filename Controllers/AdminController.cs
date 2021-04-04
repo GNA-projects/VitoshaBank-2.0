@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 using VitoshaBank.Data.DbModels;
 using VitoshaBank.Data.MessageModels;
 using VitoshaBank.Data.RequestModels;
+using VitoshaBank.Data.ResponseModels;
+using VitoshaBank.Services.ChargeAccountService.Interfaces;
 using VitoshaBank.Services.CreditService.Interfaces;
+using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.DepositService.Interfaces;
+using VitoshaBank.Services.SupportTicketService.Interfaces;
 using VitoshaBank.Services.UserService.Interfaces;
 using VitoshaBank.Services.WalletService.Interfaces;
 
@@ -23,19 +27,24 @@ namespace VitoshaBank.Controllers
         
         private readonly IUsersService _userService;
         private readonly IDepositsService _depositService;
-        //private readonly IBankAccountService _bankAccountService;
-        //private readonly IDebitCardService _debitCardService;
+        private readonly IChargeAccountsService _chargeAccountService;
+        private readonly IDebitCardsService _debitCardService;
         private readonly ICreditsService _creditService;
         private readonly IWalletsService _walletService;
+        private readonly ISupportTicketsService _supportTicketService;
         //private readonly ISupportTicketService _ticketService;
         
 
-        public AdminController(IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService)
+        public AdminController(IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService, IChargeAccountsService chargeAccountService, IDebitCardsService debitCardService, ISupportTicketsService supportTicketService)
         {
             _userService = usersService;
             _creditService = creditService;
             _walletService = walletsService;
             _depositService = depositService;
+            _chargeAccountService = chargeAccountService;
+            _debitCardService = debitCardService;
+            _supportTicketService = supportTicketService;
+
         }
 
         [HttpGet("authme")]
@@ -123,6 +132,7 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _creditService.CreateCredit(currentUser, requestModel);
         }
+
         [HttpDelete("delete/credit")]
         [Authorize]
         //need username 
@@ -131,5 +141,67 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _creditService.DeleteCredit(requestModel,currentUser);
         }
+
+        [HttpPost("create/debitcard")]
+        [Authorize]
+        //need bankaccount(IBAN), username, card()
+        public async Task<ActionResult<MessageModel>> CreateDebitcard(DebitCardRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _debitCardService.CreateDebitCard(currentUser, requestModel.Username, requestModel.ChargeAccount, requestModel.Card);
+        }
+
+        [HttpDelete("delete/debitcard")]
+        [Authorize]
+        //need username
+        public async Task<ActionResult<MessageModel>> DeleteDebitCard(DebitCardRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _debitCardService.DeleteDebitCard(currentUser, requestModel, requestModel.Username);
+        }
+
+        [HttpGet("get/support")]
+        [Authorize]
+        public async Task<ActionResult<ICollection<SupportTicketResponseModel>>> GetAllTickets()
+        {
+            var currentUser = HttpContext.User;
+            return await _supportTicketService.GetAllTicketsInfo(currentUser);
+        }
+
+        [HttpPut("respond/support")]
+        [Authorize]
+        public async Task<ActionResult<MessageModel>> RespondToTicket(SupportTicketRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _supportTicketService.GiveResponse(currentUser, requestModel.Ticket.Id);
+        }
+
+        [HttpPost("create/charge")]
+        [Authorize]
+        public async Task<ActionResult<MessageModel>> CreateBankAccount(ChargeAccountRequestModel requestModel)
+        {
+            //need username, BankAccount(amount)
+            var currentUser = HttpContext.User;
+            return await _chargeAccountService.CreateChargeAccount(currentUser, requestModel, _debitCardService);
+        }
+
+        [HttpPut("addmoney/charge")]
+        [Authorize]
+        //need BankAccount(IBAN), username, amount
+        public async Task<ActionResult<MessageModel>> AddMoneyInBankAccount(ChargeAccountRequestModel requestModel)
+        {
+            var currentUser = HttpContext.User;
+            return await _chargeAccountService.AddMoney(requestModel, currentUser, requestModel.Username);
+        }
+        [HttpDelete("delete/charge")]
+        [Authorize]
+        public async Task<ActionResult<MessageModel>> DeleteBankAccount(ChargeAccountRequestModel requestModel)
+        {
+            //need username
+            var currentUser = HttpContext.User;
+            return await _chargeAccountService.DeleteBankAccount(currentUser, requestModel);
+        }
+
+
     }
 }
