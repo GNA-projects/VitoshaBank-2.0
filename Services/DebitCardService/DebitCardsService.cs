@@ -14,6 +14,7 @@ using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.ChargeAccountService.Interfaces;
 using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.GenerateCardInfoService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.DebitCardService
 {
@@ -21,10 +22,12 @@ namespace VitoshaBank.Services.DebitCardService
     {
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration _config;
-        public DebitCardsService(BankSystemContext context, IConfiguration config)
+        private readonly ITransactionsService _transactionsService;
+        public DebitCardsService(BankSystemContext context, IConfiguration config, ITransactionsService transactionsService)
         {
             dbContext = context;
             _config = config;
+            _transactionsService = transactionsService;
         }
         BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
         MessageModel responseMessage = new MessageModel();
@@ -131,7 +134,7 @@ namespace VitoshaBank.Services.DebitCardService
             responseMessage.Message = "You don't have a Debit Card!!";
             return StatusCode(400, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> AddMoney(string cardNumber, string CVV, DateTime expireDate, ClaimsPrincipal currentUser, string username, decimal amount/*, ITransactionService _transactionService*/, IChargeAccountsService _chargeAccService)
+        public async Task<ActionResult<MessageModel>> AddMoney(string cardNumber, string CVV, DateTime expireDate, ClaimsPrincipal currentUser, string username, decimal amount, IChargeAccountsService _chargeAccService)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
@@ -161,7 +164,7 @@ namespace VitoshaBank.Services.DebitCardService
                     ChargeAccountRequestModel requestModel = new ChargeAccountRequestModel();
                     requestModel.ChargeAccount = bankAccountsExists;
                     requestModel.Amount = amount;
-                    await _chargeAccService.AddMoney(requestModel, currentUser, username /*_transactionService*/);
+                    await _chargeAccService.AddMoney(requestModel, currentUser, username);
                 }
                 else if (bankAccountsExists == null)
                 {
@@ -178,7 +181,7 @@ namespace VitoshaBank.Services.DebitCardService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(string cardNumber, string CVV, DateTime expireDate, string product, ClaimsPrincipal currentUser, string username, decimal amount, string reciever/*, ITransactionService _transactionService*/, IChargeAccountsService _chargeAccService)
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(string cardNumber, string CVV, DateTime expireDate, string product, ClaimsPrincipal currentUser, string username, decimal amount, string reciever, IChargeAccountsService _chargeAccService)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
@@ -210,7 +213,7 @@ namespace VitoshaBank.Services.DebitCardService
                     requestModel.Product = product;
                     requestModel.Amount = amount;
                     requestModel.Reciever = reciever;
-                    await _chargeAccService.SimulatePurchase(requestModel, currentUser, username/*, _transactionService*/);
+                    await _chargeAccService.SimulatePurchase(requestModel, currentUser, username);
                 }
                 else if (bankAccountsExists == null)
                 {
@@ -259,7 +262,7 @@ namespace VitoshaBank.Services.DebitCardService
                     
                     requestModel.Amount = amount;
                     requestModel.Reciever = reciever;
-                    await _chargeAccService.Withdraw(requestModel, currentUser, username/*_transactionService*/);
+                    await _chargeAccService.Withdraw(requestModel, currentUser, username);
                 }
                 else if (bankAccountsExists == null)
                 {

@@ -16,6 +16,7 @@ using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.CreditService.Interfaces;
 using VitoshaBank.Services.IbanGenereatorService;
 using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.CreditService
 {
@@ -23,17 +24,18 @@ namespace VitoshaBank.Services.CreditService
     {
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration config;
+        private readonly ITransactionsService _transactionsService;
         MessageModel responseMessage = new MessageModel();
-        public CreditsService(BankSystemContext context, IConfiguration _config)
+        public CreditsService(BankSystemContext context, IConfiguration _config, ITransactionsService transactionsService)
         {
             dbContext = context;
             config = _config;
+            _transactionsService = transactionsService;
         }
 
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel)
         {
            
-            
             string role = "";
             string username = requestModel.Username;
             Credit credit = requestModel.Credit;
@@ -205,7 +207,7 @@ namespace VitoshaBank.Services.CreditService
                         Transaction transaction = new Transaction();
                         transaction.SenderAccountInfo = creditExists.Iban;
                         transaction.RecieverAccountInfo = reciever;
-                        //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}", _context, _messageModel);
+                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}");
                         await dbContext.SaveChangesAsync();
                         responseMessage.Message = $"Succesfully purhcased {product}.";
                         return StatusCode(200, responseMessage);
@@ -295,7 +297,7 @@ namespace VitoshaBank.Services.CreditService
                         Transaction transactions = new Transaction();
                         transactions.SenderAccountInfo = credit.Iban;
                         transactions.RecieverAccountInfo = reciever;
-                        //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva", _context, _messageModel);
+                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
                         await dbContext.SaveChangesAsync();
                         responseMessage.Message = $"Succesfully withdrawed {amount} leva.";
                         return StatusCode(200, responseMessage);
@@ -432,7 +434,7 @@ namespace VitoshaBank.Services.CreditService
                     Transaction transaction = new Transaction();
                     transaction.SenderAccountInfo = bankAccount.Iban;
                     transaction.RecieverAccountInfo = creditExists.Iban;
-                    //await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Depositing money in Credit Account", _context, _messageModel);
+                    await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Depositing money in Credit Account");
                     await dbContext.SaveChangesAsync();
                 }
                 else if (bankAccount.Amount < amount)

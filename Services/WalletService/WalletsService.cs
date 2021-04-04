@@ -15,6 +15,7 @@ using VitoshaBank.Data.ResponseModels;
 using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.GenerateCardInfoService;
 using VitoshaBank.Services.IbanGenereatorService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 using VitoshaBank.Services.WalletService.Interfaces;
 
 namespace VitoshaBank.Services.WalletService
@@ -22,13 +23,15 @@ namespace VitoshaBank.Services.WalletService
     public class WalletsService : ControllerBase, IWalletsService
     {
         private readonly BankSystemContext dbContext;
-
+        private readonly ITransactionsService _transactionsService;
         private readonly IConfiguration _config;
-        public WalletsService(BankSystemContext context, IConfiguration config)
+        public WalletsService(BankSystemContext context, IConfiguration config, ITransactionsService transactionsService)
         {
             dbContext = context;
             _config = config;
+            _transactionsService = transactionsService;
         }
+
         MessageModel responseMessage = new MessageModel();
 
         public async Task<ActionResult<ICollection<WalletResponseModel>>> GetWalletsInfo(ClaimsPrincipal currentUser, string username)
@@ -107,7 +110,7 @@ namespace VitoshaBank.Services.WalletService
                             UserAccount userAccounts = new UserAccount();
                             userAccounts.UserId = userAuthenticate.Id;
                             userAccounts.UserUsername = userAuthenticate.Username;
-                            
+
 
                             wallet.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Wallet", dbContext);
                             wallet.CardNumber = GenerateCardInfo.GenerateNumber(11);
@@ -174,7 +177,7 @@ namespace VitoshaBank.Services.WalletService
                             return StatusCode(406, responseMessage);
                         }
 
-                        return await ValidateDepositAmountAndBankAccount(userAuthenticate, currentUser, walletExists, amount, chargeAccountExists);
+                        return await ValidateDepositAmountAndBankAccount(userAuthenticate, currentUser, walletExists, amount, chargeAccountExists, _transactionsService);
                     }
                     else
                     {
@@ -188,13 +191,13 @@ namespace VitoshaBank.Services.WalletService
                     responseMessage.Message = "User not found!";
                     return StatusCode(404, responseMessage);
                 }
-               
+
             }
 
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username /*ITransactionService _transation*/)
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(WalletRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var product = requestModel.Product;
@@ -218,7 +221,7 @@ namespace VitoshaBank.Services.WalletService
                             return StatusCode(406, responseMessage);
                         }
 
-                        return await ValidatePurchaseAmountAndBankAccount(userAuthenticate, currentUser, walletExists, product, reciever, amount /*_transation*/ );
+                        return await ValidatePurchaseAmountAndBankAccount(userAuthenticate, currentUser, walletExists, product, reciever, amount, _transactionsService);
                     }
                     else
                     {
@@ -301,7 +304,7 @@ namespace VitoshaBank.Services.WalletService
             }
             return false;
         }
-        private async Task<ActionResult> ValidateDepositAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, decimal amount, ChargeAccount bankAccount /*ITransactionService _transation*/)
+        private async Task<ActionResult> ValidateDepositAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, decimal amount, ChargeAccount bankAccount, ITransactionsService _transation)
         {
             if (amount < 0)
             {
@@ -319,12 +322,12 @@ namespace VitoshaBank.Services.WalletService
                 {
                     walletExists.Amount = walletExists.Amount + amount;
                     bankAccount.Amount = bankAccount.Amount - amount;
-                    //Transactions transaction = new Transactions();
-                    //transaction.SenderAccountInfo = bankAccount.Iban;
-                   // transaction.RecieverAccountInfo = walletExists.Iban;
+                    Transaction transaction = new Transaction();
+                    transaction.SenderAccountInfo = bankAccount.Iban;
+                    transaction.RecieverAccountInfo = walletExists.Iban;
 
-                   // await _transation.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Depositing money in Wallet", dbContext, responseMessage);
                     await dbContext.SaveChangesAsync();
+                    await _transation.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Depositing money in Wallet");
                 }
                 else if (bankAccount.Amount < amount)
                 {
@@ -340,7 +343,7 @@ namespace VitoshaBank.Services.WalletService
             responseMessage.Message = $"Succesfully deposited {amount} leva in Wallet.";
             return StatusCode(200, responseMessage);
         }
-        private async Task<ActionResult> ValidatePurchaseAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, string product, string reciever, decimal amount /*ITransactionService _transation*/)
+        private async Task<ActionResult> ValidatePurchaseAmountAndBankAccount(User userAuthenticate, ClaimsPrincipal currentUser, Wallet walletExists, string product, string reciever, decimal amount, ITransactionsService _transation)
         {
             if (amount < 0)
             {
@@ -361,12 +364,13 @@ namespace VitoshaBank.Services.WalletService
                 }
                 else
                 {
-                    //Transactions transaction = new Transactions();
+                    Transaction transaction = new Transaction();
                     walletExists.Amount = walletExists.Amount - amount;
-                   // transaction.SenderAccountInfo = walletExists.Iban;
-                   // transaction.RecieverAccountInfo = reciever;
-                   // await _transation.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product} with Wallet", dbContext, responseMessage);
+                    transaction.SenderAccountInfo = walletExists.Iban;
+                    transaction.RecieverAccountInfo = reciever;
+                   
                     await dbContext.SaveChangesAsync();
+                    await _transation.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product} with Wallet");
                 }
             }
 

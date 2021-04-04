@@ -15,6 +15,7 @@ using VitoshaBank.Data.ResponseModels;
 using VitoshaBank.Services.DepositService.Interfaces;
 using VitoshaBank.Services.DividentService;
 using VitoshaBank.Services.IbanGenereatorService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.DepositService
 {
@@ -23,11 +24,14 @@ namespace VitoshaBank.Services.DepositService
 
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration config;
+        private readonly ITransactionsService _transactionsService;
         MessageModel responseMessage = new MessageModel();
-        public DepositsService(BankSystemContext context, IConfiguration _config)
+
+        public DepositsService(BankSystemContext context, IConfiguration _config, ITransactionsService transactionsService)
         {
             dbContext = context;
             config = _config;
+            _transactionsService = transactionsService;
         }
 
         public async Task<ActionResult<ICollection<DepositResponseModel>>> GetDepositsInfo(ClaimsPrincipal currentUser, string username)
@@ -175,7 +179,6 @@ namespace VitoshaBank.Services.DepositService
                     {
                         if (ValidateUser(userAuthenticate) && ValidateDeposits(deposit))
                         {
-                        
    
                             deposit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Deposit", dbContext);
 
@@ -265,11 +268,12 @@ namespace VitoshaBank.Services.DepositService
                                 deposit.Amount = deposit.Amount + amount;
                                 deposit.PaymentDate = DateTime.Now.AddMonths(6);
                                 chargeAccount.Amount = chargeAccount.Amount - amount;
-                                //Transactions transaction = new Transactions();
-                                //transaction.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                                //transaction.RecieverAccountInfo = depositsExists.Iban;
+                                Transaction transaction = new Transaction();
+                                transaction.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                                transaction.RecieverAccountInfo = depositExists.Iban;
+                                
                                 await dbContext.SaveChangesAsync();
-                                //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Added money - Bank Account - Deposit account", _context, _messageModel);
+                                await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Added money - Bank Account - Deposit account");
                             }
                             else if (chargeAccount.Amount < amount)
                             {
@@ -319,10 +323,10 @@ namespace VitoshaBank.Services.DepositService
                         depositExists.PaymentDate = DateTime.Now.AddMonths(depositExists.TermOfPayment);
                         await dbContext.SaveChangesAsync();
 
-                        //Transactions transaction = new Transactions();
-                        //transaction.SenderAccountInfo = depositsExists.Iban;
-                        //transaction.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                        //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Withdrawing {amount}", _context, _messageModel);
+                        Transaction transaction = new Transaction();
+                        transaction.SenderAccountInfo = depositExists.Iban;
+                        transaction.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Withdrawing {amount}");
                         responseMessage.Message = "Money withdrawed successfully!";
                         return StatusCode(200, responseMessage);
                     }

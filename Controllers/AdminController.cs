@@ -32,7 +32,7 @@ namespace VitoshaBank.Controllers
         private readonly ICreditsService _creditService;
         private readonly IWalletsService _walletService;
         private readonly ISupportTicketsService _supportTicketService;
-        //private readonly ISupportTicketService _ticketService;
+        
         
 
         public AdminController(IUsersService usersService, IDepositsService depositService, ICreditsService creditService, IWalletsService walletsService, IChargeAccountsService chargeAccountService, IDebitCardsService debitCardService, ISupportTicketsService supportTicketService)
@@ -90,6 +90,7 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _userService.DeleteUser(currentUser, requestModel);
         }
+
         [HttpPost("create/deposit")]
         [Authorize]
         //need Deposit(amount, term of payment), username
@@ -124,6 +125,7 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _walletService.DeleteWallet(currentUser, requestModel);
         }
+
         [HttpPost("create/credit")]
         [Authorize]
         //need Credit(amount), period, username
@@ -132,7 +134,6 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _creditService.CreateCredit(currentUser, requestModel);
         }
-
         [HttpDelete("delete/credit")]
         [Authorize]
         //need username 
@@ -150,7 +151,6 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _debitCardService.CreateDebitCard(currentUser, requestModel.Username, requestModel.ChargeAccount, requestModel.Card);
         }
-
         [HttpDelete("delete/debitcard")]
         [Authorize]
         //need username
@@ -167,7 +167,6 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _supportTicketService.GetAllTicketsInfo(currentUser);
         }
-
         [HttpPut("respond/support")]
         [Authorize]
         public async Task<ActionResult<MessageModel>> RespondToTicket(SupportTicketRequestModel requestModel)
@@ -184,7 +183,6 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _chargeAccountService.CreateChargeAccount(currentUser, requestModel, _debitCardService);
         }
-
         [HttpPut("addmoney/charge")]
         [Authorize]
         //need BankAccount(IBAN), username, amount
@@ -201,7 +199,6 @@ namespace VitoshaBank.Controllers
             var currentUser = HttpContext.User;
             return await _chargeAccountService.DeleteBankAccount(currentUser, requestModel);
         }
-
 
     }
 }

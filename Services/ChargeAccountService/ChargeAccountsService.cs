@@ -16,6 +16,7 @@ using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.ChargeAccountService.Interfaces;
 using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.IbanGenereatorService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.ChargeAccountService
 {
@@ -23,14 +24,16 @@ namespace VitoshaBank.Services.ChargeAccountService
     {
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration _config;
-        public ChargeAccountsService(BankSystemContext context, IConfiguration config)
+        private readonly ITransactionsService _transactionsService;
+        public ChargeAccountsService(BankSystemContext context, IConfiguration config, ITransactionsService transactionsService)
         {
             dbContext = context;
             _config = config;
+            _transactionsService = transactionsService;
         }
         BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
         MessageModel responseModel = new MessageModel();
-        
+
         public async Task<ActionResult<MessageModel>> CreateChargeAccount(ClaimsPrincipal currentUser, ChargeAccountRequestModel requestModel, IDebitCardsService _debitCardService)
         {
             string role = "";
@@ -98,7 +101,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 return StatusCode(403, responseModel);
             }
         }
-        public async Task<ActionResult<ICollection<ChargeAccountResponseModel>>> GetBankAccountInfo(ClaimsPrincipal currentUser, string username )
+        public async Task<ActionResult<ICollection<ChargeAccountResponseModel>>> GetBankAccountInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -137,7 +140,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 return StatusCode(403, responseModel);
             }
         }
-        public async Task<ActionResult<MessageModel>> DepositMoney(ChargeAccount bankAccount,Deposit deposit, ClaimsPrincipal currentUser, string username, decimal amount /*ITransactionService _transactionService*/)
+        public async Task<ActionResult<MessageModel>> DepositMoney(ChargeAccount bankAccount, Deposit deposit, ClaimsPrincipal currentUser, string username, decimal amount)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
 
@@ -167,7 +170,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                         Transaction transactions = new Transaction();
                         transactions.RecieverAccountInfo = bankAccounts.Iban;
                         transactions.SenderAccountInfo = depositsExist.Iban;
-                      //  await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account", _context, messageModel);
+                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account");
                         responseModel.Message = "Money deposited succesfully!";
                         return StatusCode(200, responseModel);
                     }
@@ -206,7 +209,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                         Transaction transactions = new Transaction();
                         transactions.SenderAccountInfo = chargeAccExists.Iban;
                         transactions.RecieverAccountInfo = reciever;
-                        // await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account", dbContext, _messageModel);
+                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account");
                         await dbContext.SaveChangesAsync();
                         responseModel.Message = $"Succesfully purhcased {product}.";
                         return StatusCode(200, responseModel);
@@ -261,7 +264,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                             Transaction transactions = new Transaction();
                             transactions.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
                             transactions.RecieverAccountInfo = chargeAcc.Iban;
-                            //await _transactionService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money in Charge Account", dbContext, messageModel);
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money in Charge Account");
                             responseModel.Message = $"Succesfully deposited {amount} leva in Charge Account.";
                             return StatusCode(200, responseModel);
                         }
@@ -288,7 +291,7 @@ namespace VitoshaBank.Services.ChargeAccountService
             responseModel.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> Withdraw(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username )
+        public async Task<ActionResult<MessageModel>> Withdraw(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var amount = requestModel.Amount;
@@ -310,7 +313,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                             Transaction transactions = new Transaction();
                             transactions.SenderAccountInfo = chargeAcc.Iban;
                             transactions.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                            // await _transaction.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva", dbContext, messageModel);
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
                             await dbContext.SaveChangesAsync();
                             responseModel.Message = $"Succesfully withdrawed {amount} leva.";
                             return StatusCode(200, responseModel);
