@@ -257,7 +257,17 @@ namespace VitoshaBank.Services.CreditService
                 }
                 if (creditsExists != null)
                 {
-                    bankAccounts = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
+                    try
+                    {
+                        bankAccounts = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
+
+                    }
+                    catch (Exception)
+                    {
+                        responseMessage.Message = "ChargeAccount not found!";
+                        return StatusCode(404, responseMessage);
+                    }
+                    
                     return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts);
                 }
                 else
