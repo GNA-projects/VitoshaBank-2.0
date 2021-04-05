@@ -35,3 +35,21 @@ export const usernameReq = async () => {
 			return err;
 		});
 };
+
+export const changePasswordReq = async (
+	oldPass: string | undefined,
+	newPass: string | undefined
+) => {
+	refreshToken();
+	return await axivit
+		.put("/users/changepass", {
+			CurrentPassword: oldPass,
+			Password: newPass,
+		})
+		.then((res) => {
+			return res.data.message;
+		})
+		.catch((err) => {
+			return err.response.data.message;
+		});
+};

@@ -6,16 +6,16 @@ const refreshToken = () => {
 	] = `Bearer ${localStorage["jwt"]}`;
 };
 
-
-export const getDepositsReq = async () => {
+export const getCreditsReq = async () => {
 	refreshToken();
 	return await axivit
-		.get("/deposits")
+		.get("/credits")
 		.then((res) => {
 			return res.data;
 		})
 		.catch((err) => {
-			return err;
+			alert(err.response.data.message);
+			
+			return [];
 		});
 };
-

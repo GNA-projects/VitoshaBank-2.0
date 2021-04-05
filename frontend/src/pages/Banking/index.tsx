@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { usernameReq } from "../../api/auth/auth";
 import { getDepositsReq } from "../../api/bankAccount/deposit";
 
@@ -15,11 +16,11 @@ export default function Banking() {
 	return (
 		<div>
 			<h1>Hello, {username}</h1>
-			<a href="banking/charge">Charge</a>
+			<Link to="/banking/charge">Charge</Link>
 			<br></br>
-			<a href="banking/deposit">Deposit</a>
+			<Link to="/banking/deposit">Deposit</Link>
 			<br></br>
-			<a href="banking/credit">Credit</a>
+			<Link to="/banking/credit">Credit</Link>
 		</div>
 	);
 }

@@ -1,9 +1,10 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Review() {
 	return (
 		<div>
-			<a href="/admin/review/users">Review Users</a>
+			<Link to="/admin/review/users">Review Users</Link>
 		</div>
 	);
 }
