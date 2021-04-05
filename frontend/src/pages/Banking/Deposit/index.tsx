@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getDepositsReq } from "../../../api/bankAccount/deposit";
 
-export default function Banking() {
+export default function Deposit() {
 	const [deposits, setDeposits] = useState([]);
 
 	const getDeposits = async () => {

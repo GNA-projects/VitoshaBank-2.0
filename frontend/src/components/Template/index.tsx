@@ -17,6 +17,7 @@ import Login from "../../pages/Auth/Login";
 
 import Banking from "../../pages/Banking";
 import Deposit from "../../pages/Banking/Deposit";
+import Credit from "../../pages/Banking/Credit";
 import CalculatorPage from "../../pages/CalculatorPage";
 
 
@@ -43,6 +44,7 @@ function Template() {
 
 					<PrivateRoute exact path="/banking" component={Banking} />
 					<PrivateRoute exact path="/banking/deposit" component={Deposit} />
+					<PrivateRoute exact path="/banking/credit" component={Credit} />
 					<Route exact path="/calculator" component={CalculatorPage} />
 
 					<Route exact path="/admin" component={Admin} />
