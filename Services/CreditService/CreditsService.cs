@@ -103,7 +103,7 @@ namespace VitoshaBank.Services.CreditService
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 CreditResponseModel creditResponseModel = new CreditResponseModel();
-                UserAccResponseModel userCredits = new UserAccResponseModel();
+                var userCredits = dbContext.Credits.Where(x => x.UserId != userAuthenticate.Id);
 
                 if (userAuthenticate == null)
                 {
@@ -112,20 +112,21 @@ namespace VitoshaBank.Services.CreditService
                 }
                 else
                 {
-                    foreach (var creditRef in dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username))
+                    List<CreditResponseModel> responseModels = new List<CreditResponseModel>();
+                    foreach (var creditRef in userCredits)
                     {
-                        var credit = creditRef.Credit;
-                        creditResponseModel.IBAN = credit.Iban;
-                        creditResponseModel.Amount = Math.Round(credit.Amount, 2);
-                        creditResponseModel.Instalment = credit.Instalment;
-                        creditResponseModel.CreditAmount = credit.CreditAmount;
+                       
+                        creditResponseModel.IBAN = creditRef.Iban;
+                        creditResponseModel.Amount = Math.Round(creditRef.Amount, 2);
+                        creditResponseModel.Instalment = creditRef.Instalment;
+                        creditResponseModel.CreditAmount = creditRef.CreditAmount;
 
-                        userCredits.UserCredits.Add(creditResponseModel);
+                        responseModels.Add(creditResponseModel);
                     }
 
-                    if (userCredits.UserWallets.Count > 0)
+                    if (responseModels.Count > 0)
                     {
-                        return StatusCode(200, userCredits.UserCredits);
+                        return StatusCode(200, userCredits);
                     }
 
                     responseMessage.Message = "You don't have a Credit!";
