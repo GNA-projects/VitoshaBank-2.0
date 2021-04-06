@@ -12,8 +12,8 @@ export default function Login() {
 	const [loginLoad, setLoginLoad] = useState<string>("Log in");
 
 
-	const [username, setUsername] = useState<string>("");
-	const [password, setPassword] = useState<string>("");
+	const [username, setUsername] = useState<string>();
+	const [password, setPassword] = useState<string>();
 
 	const login = async () => {
 		setLoginLoad("Loading...");
@@ -35,11 +35,11 @@ export default function Login() {
 				onChange={handleUsername}
 				value={username}
 			></Form.Input>
-			<Form.Input
+			<Form.Password
 				label="pasword"
 				onChange={handlePassword}
 				value={password}
-			></Form.Input>
+			></Form.Password>
 			<Form.Button onClick={() => login()}>{loginLoad}</Form.Button>
 		</Form>
 	);
