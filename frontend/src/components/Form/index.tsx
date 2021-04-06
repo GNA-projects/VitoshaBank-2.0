@@ -15,7 +15,7 @@ const DIV = styled.div`
 `;
 
 const FORM = styled.div`
-	background-image: url(${props => props.theme});
+	background-image: url(${(props) => props.theme});
 	background-size: cover;
 	display: flex;
 	flex-direction: column;
@@ -66,7 +66,7 @@ const BUTTON = styled.button`
 	font-size: 18px;
 `;
 
-export default function Form(props: any) {
+export function FormBig(props: any) {
 	return (
 		<DIV>
 			<FORM theme={props.bg}>{props.children}</FORM>
@@ -74,7 +74,12 @@ export default function Form(props: any) {
 	);
 }
 
+export function Form(props: any) {
+	return <FORM theme={props.bg}>{props.children}</FORM>;
+}
+
 Form.Button = BUTTON;
+Form.Heading = HEADING;
 type InputProps = {
 	label: string;
 	onChange: ChangeEventHandler;

@@ -1,7 +1,7 @@
 import { loginReq } from "../../../api/auth/auth";
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
-import Form from "../../../components/Form";
+import { Form, FormBig } from "../../../components/Form";
 import bg from "./bg.jpg";
 
 
@@ -31,7 +31,7 @@ export default function Login() {
 		setPassword(e.currentTarget.value);
 	};
 	return (
-		<Form bg={bg}>
+		<FormBig bg={bg}>
 			<Form.Input
 				label="username"
 				onChange={handleUsername}
@@ -43,6 +43,6 @@ export default function Login() {
 				value={password}
 			></Form.Password>
 			<Form.Button onClick={() => login()}>{loginLoad}</Form.Button>
-		</Form>
+		</FormBig>
 	);
 }

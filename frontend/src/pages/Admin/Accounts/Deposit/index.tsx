@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createDepositReq } from "../../../../api/admin/admin";
-import Form from "../../../../components/Form";
+import {Form, FormBig} from "../../../../components/Form";
 import bg from "./bg.jpg"
 
 export default function CreateDeposit() {
@@ -14,7 +14,7 @@ export default function CreateDeposit() {
 	};
 
 	return (
-		<Form bg={bg}>
+		<FormBig bg={bg}>
 			<Form.Input
 				label="username"
 				value={username}
@@ -40,6 +40,6 @@ export default function CreateDeposit() {
 			></Form.Input>
 
 			<Form.Button onClick={() => createDeposit()}>Create Deposit</Form.Button>
-		</Form>
+		</FormBig>
 	);
 }
