@@ -15,8 +15,8 @@ export default function Deposit() {
 	return (
 		<BalanceWrap>
 			<BalanceWrap.Heading>Deposit Accounts</BalanceWrap.Heading>
-			{deposits.map(({ iban, amount }) => (
-				<BalanceWrap.Balance iban={iban} balance={amount}></BalanceWrap.Balance>
+			{deposits.map(({ iban, amount, paymentDate }) => (
+				<BalanceWrap.Balance iban={iban} balance={amount} paymentDate={paymentDate}></BalanceWrap.Balance>
 			))}
 		</BalanceWrap>
 	);
