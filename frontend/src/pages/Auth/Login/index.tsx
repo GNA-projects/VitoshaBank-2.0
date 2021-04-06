@@ -2,6 +2,8 @@ import { loginReq } from "../../../api/auth/auth";
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
 import Form from "../../../components/Form";
+import bg from "./bg.jpg";
+
 
 import LoginContext from "../../../context/LoginContext";
 
@@ -29,7 +31,7 @@ export default function Login() {
 		setPassword(e.currentTarget.value);
 	};
 	return (
-		<Form>
+		<Form bg={bg}>
 			<Form.Input
 				label="username"
 				onChange={handleUsername}

@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import bg from "./bg.jpg";
 
 import {
 	menu_margin_max,
@@ -16,7 +15,7 @@ const DIV = styled.div`
 `;
 
 const FORM = styled.div`
-	background-image: url(${bg});
+	background-image: url(${props => props.theme});
 	background-size: cover;
 	display: flex;
 	flex-direction: column;
@@ -70,7 +69,7 @@ const BUTTON = styled.button`
 export default function Form(props: any) {
 	return (
 		<DIV>
-			<FORM>{props.children}</FORM>
+			<FORM theme={props.bg}>{props.children}</FORM>
 		</DIV>
 	);
 }

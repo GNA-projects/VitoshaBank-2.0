@@ -47,13 +47,13 @@ function Template() {
 					<PrivateRoute exact path="/banking/credit" component={Credit} />
 					<Route exact path="/calculator" component={CalculatorPage} />
 
-					<Route exact path="/admin" component={Admin} />
-					<Route exact path="/admin/user" component={User} />
-					<Route exact path="/admin/accounts" component={Accounts} />
-					<Route exact path="/admin/accounts/deposit" component={CreateDeposit} />
-					<Route exact path="/admin/cards" component={Cards} />
-					<Route exact path="/admin/review" component={Review} />
-					<Route exact path="/admin/review/users" component={Users} />
+					<PrivateRoute exact path="/admin" component={Admin} />
+					<PrivateRoute exact path="/admin/user" component={User} />
+					<PrivateRoute exact path="/admin/accounts" component={Accounts} />
+					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDeposit} />
+					<PrivateRoute exact path="/admin/cards" component={Cards} />
+					<PrivateRoute exact path="/admin/review" component={Review} />
+					<PrivateRoute exact path="/admin/review/users" component={Users} />
 				</Switch>
 			</Body>
 		</BrowserRouter>
