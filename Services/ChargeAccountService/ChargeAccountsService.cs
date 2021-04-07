@@ -53,21 +53,15 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.ChargeAccountId != null && x.UserUsername == username).Count() < 10)
+                    if (dbContext.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id).Count() < 10)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateChargeAccount(chargeAcc))
                         {
-                            UserAccount userAccounts = new UserAccount();
-                            userAccounts.UserId = userAuthenticate.Id;
-                            userAccounts.UserUsername = userAuthenticate.Username;
-
+                            chargeAcc.UserId = userAuthenticate.Id;
                             chargeAcc.Iban = IBANGenerator.GenerateIBANInVitoshaBank("ChargeAccount", dbContext);
                             await dbContext.AddAsync(chargeAcc);
                             await dbContext.SaveChangesAsync();
 
-                            userAccounts.ChargeAccountId = chargeAcc.Id;
-                            await dbContext.AddAsync(userAccounts);
-                            await dbContext.SaveChangesAsync();
 
                             Card card = new Card();
                             DebitCardRequestModel debitCardRequest = new DebitCardRequestModel();
@@ -106,7 +100,6 @@ namespace VitoshaBank.Services.ChargeAccountService
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                ChargeAccountResponseModel chargeAccResponseModel = new ChargeAccountResponseModel();
                 UserAccResponseModel userChargeAccounts = new UserAccResponseModel();
 
                 if (userAuthenticate == null)
@@ -116,18 +109,20 @@ namespace VitoshaBank.Services.ChargeAccountService
                 }
                 else
                 {
-                    foreach (var chargeAccRef in dbContext.UserAccounts.Where(x => x.ChargeAccountId != null && x.UserUsername == username))
+                    List<ChargeAccountResponseModel> charges = new List<ChargeAccountResponseModel>();
+                    foreach (var chargeAccRef in dbContext.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id ))
                     {
-                        var chargeAcc = chargeAccRef.ChargeAccount;
+                        ChargeAccountResponseModel chargeAccResponseModel = new ChargeAccountResponseModel();
+                        var chargeAcc = chargeAccRef;
                         chargeAccResponseModel.IBAN = chargeAcc.Iban;
                         chargeAccResponseModel.Amount = Math.Round(chargeAcc.Amount, 2);
 
-                        userChargeAccounts.UserChargeAcc.Add(chargeAccResponseModel);
+                        charges.Add(chargeAccResponseModel);
                     }
 
-                    if (userChargeAccounts.UserWallets.Count > 0)
+                    if (charges.Count > 0)
                     {
-                        return StatusCode(200, userChargeAccounts.UserWallets);
+                        return StatusCode(200, charges);
                     }
 
                     responseModel.Message = "You don't have a Charge Account!";
@@ -194,7 +189,7 @@ namespace VitoshaBank.Services.ChargeAccountService
             var amount = requestModel.Amount;
             ChargeAccount chargeAcc = requestModel.ChargeAccount;
             ChargeAccount chargeAccExists = null;
-            ChargeAccountResponseModel walletResponseModel = new ChargeAccountResponseModel();
+            ChargeAccountResponseModel chargeResponseModel = new ChargeAccountResponseModel();
             BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
@@ -203,7 +198,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 {
                     chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
 
-                    if (chargeAccExists != null && ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAcc, amount))
+                    if (chargeAccExists != null && ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAccExists, amount))
                     {
                         chargeAcc.Amount = chargeAcc.Amount - amount;
                         Transaction transactions = new Transaction();
@@ -374,10 +369,18 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                 if (user != null)
                 {
-                    chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
-                    cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
-                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.UserId == user.Id);
-                    userChargeAcc = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
+                    try
+                    {
+                        chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
+                        cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
+                        creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.UserId == user.Id);
+                        userChargeAcc = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
+                    }
+                    catch (Exception)
+                    {
+
+
+                    }
 
                 }
 

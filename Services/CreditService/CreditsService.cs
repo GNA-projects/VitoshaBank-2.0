@@ -102,8 +102,7 @@ namespace VitoshaBank.Services.CreditService
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                CreditResponseModel creditResponseModel = new CreditResponseModel();
-                var userCredits = dbContext.Credits.Where(x => x.UserId != userAuthenticate.Id);
+                var userCredits = dbContext.Credits.Where(x => x.UserId == userAuthenticate.Id).ToList();
 
                 if (userAuthenticate == null)
                 {
@@ -114,19 +113,18 @@ namespace VitoshaBank.Services.CreditService
                 {
                     List<CreditResponseModel> responseModels = new List<CreditResponseModel>();
                     foreach (var creditRef in userCredits)
-                    {
-                       
+                    { 
+                        CreditResponseModel creditResponseModel = new CreditResponseModel();
                         creditResponseModel.IBAN = creditRef.Iban;
                         creditResponseModel.Amount = Math.Round(creditRef.Amount, 2);
                         creditResponseModel.Instalment = creditRef.Instalment;
-                        creditResponseModel.CreditAmount = creditRef.CreditAmount;
 
                         responseModels.Add(creditResponseModel);
                     }
 
                     if (responseModels.Count > 0)
                     {
-                        return StatusCode(200, userCredits);
+                        return StatusCode(200, responseModels);
                     }
 
                     responseMessage.Message = "You don't have a Credit!";
@@ -150,9 +148,9 @@ namespace VitoshaBank.Services.CreditService
                 }
                 else
                 {
-                    foreach (var creditRef in dbContext.UserAccounts.Where(x => x.CreditId != null && x.UserUsername == username))
+                    foreach (var creditRef in dbContext.Credits.Where(x => x.UserId == userAuthenticate.Id))
                     {
-                        var credit = creditRef.Credit;
+                        var credit = creditRef;
                         CreditPayOff payOff = new CreditPayOff();
                         await payOff.GetCreditPayOff(credit, username, dbContext);
 

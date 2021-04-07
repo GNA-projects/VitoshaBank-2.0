@@ -43,7 +43,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
         private static string GetCurrentAvailabeAccountNumber(string BankAccountType, BankSystemContext dbContext)
         {
 
-            if (BankAccountType == "BankAccount")
+            if (BankAccountType == "ChargeAccount")
             {
                 var lastBankAccount = dbContext.ChargeAccounts.ToList();
                 int serialNumber = 0;
