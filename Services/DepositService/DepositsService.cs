@@ -369,7 +369,6 @@ namespace VitoshaBank.Services.DepositService
                 if (user != null)
                 {
                     depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
-                    userDeposit = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.DepositId == depositExists.Id);
                 }
 
                 if (user == null)
@@ -383,8 +382,7 @@ namespace VitoshaBank.Services.DepositService
                     return StatusCode(400, responseMessage);
                 }
 
-                dbContext.UserAccounts.Remove(userDeposit);
-                await dbContext.SaveChangesAsync();
+                
                 dbContext.Deposits.Remove(depositExists);
                 await dbContext.SaveChangesAsync();
 
