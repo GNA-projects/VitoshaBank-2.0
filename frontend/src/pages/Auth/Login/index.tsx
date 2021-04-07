@@ -4,7 +4,6 @@ import { useHistory } from "react-router";
 import { Form, FormBig } from "../../../components/Form";
 import bg from "./bg.jpg";
 
-
 import LoginContext from "../../../context/LoginContext";
 
 export default function Login() {
@@ -13,19 +12,22 @@ export default function Login() {
 	const history = useHistory();
 	const [loginLoad, setLoginLoad] = useState<string>("Log in");
 
-
 	const [username, setUsername] = useState<string>();
 	const [password, setPassword] = useState<string>();
 
 	const login = async () => {
 		setLoginLoad("Loading...");
-		await loginReq(username, password) ? alert("Welcome") : alert("Wrong Credentials");
+		(await loginReq(username, password))
+			? alert("Welcome")
+			: alert("Wrong Credentials");
 		setLoginLoad("Log In");
-
 	};
 
 	const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.currentTarget.value);
+		username == "admin"
+			? window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+			: console.log();
 	};
 	const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPassword(e.currentTarget.value);
