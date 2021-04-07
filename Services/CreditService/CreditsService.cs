@@ -240,7 +240,8 @@ namespace VitoshaBank.Services.CreditService
             var amount = requestModel.Amount;
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             Credit creditsExists = null;
-            ChargeAccount bankAccounts = null;
+            ChargeAccount bankAccounts = requestModel.ChargeAccount;
+            ChargeAccount bankAccExists = null;
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -257,7 +258,7 @@ namespace VitoshaBank.Services.CreditService
                 {
                     try
                     {
-                        bankAccounts = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
+                        bankAccExists = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
 
                     }
                     catch (Exception)
@@ -266,7 +267,7 @@ namespace VitoshaBank.Services.CreditService
                         return StatusCode(404, responseMessage);
                     }
                     
-                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccounts);
+                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccExists);
                 }
                 else
                 {
