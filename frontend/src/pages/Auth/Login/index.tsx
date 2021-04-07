@@ -1,7 +1,9 @@
 import { loginReq } from "../../../api/auth/auth";
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router";
-import Form from "../../../components/Form";
+import { Form, FormBig } from "../../../components/Form";
+import bg from "./bg.jpg";
+
 
 import LoginContext from "../../../context/LoginContext";
 
@@ -12,8 +14,8 @@ export default function Login() {
 	const [loginLoad, setLoginLoad] = useState<string>("Log in");
 
 
-	const [username, setUsername] = useState<string>("");
-	const [password, setPassword] = useState<string>("");
+	const [username, setUsername] = useState<string>();
+	const [password, setPassword] = useState<string>();
 
 	const login = async () => {
 		setLoginLoad("Loading...");
@@ -29,18 +31,18 @@ export default function Login() {
 		setPassword(e.currentTarget.value);
 	};
 	return (
-		<Form>
+		<FormBig bg={bg}>
 			<Form.Input
 				label="username"
 				onChange={handleUsername}
 				value={username}
 			></Form.Input>
-			<Form.Input
+			<Form.Password
 				label="pasword"
 				onChange={handlePassword}
 				value={password}
-			></Form.Input>
+			></Form.Password>
 			<Form.Button onClick={() => login()}>{loginLoad}</Form.Button>
-		</Form>
+		</FormBig>
 	);
 }

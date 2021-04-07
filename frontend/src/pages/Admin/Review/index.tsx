@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Options from "../../../components/Options";
 
 export default function Review() {
 	return (
-		<div>
-			<Link to="/admin/review/users">Review Users</Link>
-		</div>
+		<Options>
+			<Options.Link to="/admin/review/users">Review Users</Options.Link>
+		</Options>
 	);
 }

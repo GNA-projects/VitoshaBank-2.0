@@ -1,73 +1,99 @@
-import React, { ChangeEventHandler } from "react";
+import React from "react";
 import styled from "styled-components";
 
+import {
+	menu_margin_max,
+	menu_margin_min,
+} from "../../components/Template/constants";
+import { ChangeEventHandler } from "react";
+
 const DIV = styled.div`
-	margin: 100px;
+	height: calc(${menu_margin_max} - ${menu_margin_min});
+	display: flex;
+	align-items: center;
+	justify-content: center;
 `;
 
-const CONTAINER = styled.div`
+const FORM = styled.div`
+	background-image: url(${(props) => props.theme});
+	background-size: cover;
 	display: flex;
 	flex-direction: column;
-	margin: auto;
-	background-color: teal;
+	outline: none;
 	border: 1px;
-	border-radius: 20px;
-	width: 500px;
-`;
-
-const INPUTGROUP = styled.div`
-	display: flex;
-	flex-direction: column;
-	height: 50px;
-	margin: 20px;
+	border-radius: 10px;
+	padding: 140px 60px;
 `;
 
 const INPUT = styled.input`
-	border: 1px;
+	background-color: white;
+	color: teal;
 	outline: none;
-	border-radius: 20px;
-	padding: 10px 10px;
-	height: 30px;
-	margin: 10px;
-`;
-const LABEL = styled.p`
-	width: 100%;
-`;
-const BUTTON = styled.button`
-	width: 100px;
-	margin: 10px auto;
 	border: 1px;
-	outline: none;
-	border-radius: 20px;
-	height: 30px;
-	&:hover {
-		background-color: cyan;
-	}
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 18px;
 `;
 
-export default function Form(props: any) {
+const INPUT_GROUP = styled.div`
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 20px;
+`;
+
+const LABEL = styled.label`
+	color: white;
+	font-size: 18px;
+`;
+
+const HEADING = styled.h2`
+	color: white;
+	text-align: center;
+	margin: 20px 0;
+`;
+
+const BUTTON = styled.button`
+	background-color: white;
+	outline: none;
+	border: 1px;
+	border-radius: 6px;
+	padding: 5px 10px;
+	color: teal;
+	margin: 15px 0;
+	&:hover {
+		background-color: #b9b9b9;
+	}
+	font-size: 18px;
+`;
+
+export function FormBig(props: any) {
 	return (
 		<DIV>
-			<CONTAINER>{props.children}</CONTAINER>
+			<FORM theme={props.bg}>{props.children}</FORM>
 		</DIV>
 	);
 }
 
+export function Form(props: any) {
+	return <FORM theme={props.bg}>{props.children}</FORM>;
+}
+
 Form.Button = BUTTON;
+Form.Heading = HEADING;
 type InputProps = {
 	label: string;
 	onChange: ChangeEventHandler;
-	value: any;
+	value: string | undefined;
 };
 Form.Input = ({ label, onChange, value }: InputProps) => (
-	<INPUTGROUP>
+	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
 		<INPUT onChange={onChange} value={value}></INPUT>
-	</INPUTGROUP>
+	</INPUT_GROUP>
 );
 Form.Password = ({ label, onChange, value }: InputProps) => (
-	<INPUTGROUP>
+	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
-		<INPUT type="password" onChange={(onChange)} value={value}></INPUT>
-	</INPUTGROUP>
+		<INPUT type="password" onChange={onChange} value={value}></INPUT>
+	</INPUT_GROUP>
 );

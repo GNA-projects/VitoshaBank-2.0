@@ -1,42 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { createDepositReq } from "../../../../api/admin/admin";
+import {Form, FormBig} from "../../../../components/Form";
+import bg from "./bg.jpg"
 
 export default function CreateDeposit() {
-	const [username, setUsername] = useState<string>();
-	const [top, setTop] = useState<string>();
-	const [amount, setAmount] = useState<string>();
+	const [username, setUsername] = useState<string>("");
+	const [top, setTop] = useState<string>("");
+	const [amount, setAmount] = useState<string>("");
 
-	const createDeposit = () => {
-        createDepositReq(username,top,amount)
-    };
+	const createDeposit = async() => {
+		let res = await createDepositReq(username, top, amount);
+		alert(res)
+	};
 
 	return (
-		<div>
-			<p>username</p>
-			<input
+		<FormBig bg={bg}>
+			<Form.Input
+				label="username"
 				value={username}
-				onChange={(e) => {
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 					setUsername(e.currentTarget.value);
 				}}
-			></input>
+			></Form.Input>
 
-			<p>top</p>
-			<input
+			<Form.Input
+				label="top"
 				value={top}
-				onChange={(e) => {
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 					setTop(e.currentTarget.value);
 				}}
-			></input>
+			></Form.Input>
 
-			<p>amount</p>
-			<input
+			<Form.Input
+				label="amount"
 				value={amount}
-				onChange={(e) => {
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 					setAmount(e.currentTarget.value);
 				}}
-			></input>
+			></Form.Input>
 
-			<button onClick={() => createDeposit()}>Create Deposit</button>
-		</div>
+			<Form.Button onClick={() => createDeposit()}>Create Deposit</Form.Button>
+		</FormBig>
 	);
 }

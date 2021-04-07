@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getDepositsReq } from "../../../api/bankAccount/deposit";
+import BalanceWrap from "../../../components/Banking/BalanceWrap";
 
 export default function Deposit() {
 	const [deposits, setDeposits] = useState([]);
@@ -12,17 +13,11 @@ export default function Deposit() {
 		getDeposits();
 	}, []);
 	return (
-		<div>
-			<div>
-				{deposits.map(({ iban, amount }) => {
-					return (
-						<div>
-							<h1>{iban}</h1>
-							<h1>{amount}</h1>
-						</div>
-					);
-				})}
-			</div>
-		</div>
+		<BalanceWrap>
+			<BalanceWrap.Heading>Deposit Accounts</BalanceWrap.Heading>
+			{deposits.map(({ iban, amount, paymentDate }) => (
+				<BalanceWrap.Balance iban={iban} balance={amount} paymentDate={paymentDate}></BalanceWrap.Balance>
+			))}
+		</BalanceWrap>
 	);
 }

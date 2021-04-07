@@ -33,9 +33,9 @@ export const createDepositReq = async (
 			Username: username,
 		})
 		.then((res) => {
-			return res.data;
+			return res.data.message;
 		})
 		.catch((err) => {
-			console.log(err);
+			return err.response.data.message;
 		});
 };
