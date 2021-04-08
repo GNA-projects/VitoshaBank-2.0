@@ -25,9 +25,9 @@ export default function Login() {
 
 	const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.currentTarget.value);
-		username == "admin"
+		/* username == "admin"
 			? window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-			: console.log();
+			: console.log(); */
 	};
 	const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPassword(e.currentTarget.value);
