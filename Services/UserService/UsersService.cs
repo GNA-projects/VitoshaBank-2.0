@@ -398,6 +398,7 @@ namespace VitoshaBank.Services.UserService
 
             var currentPassword = requestModel.CurrentPassword;
             var newPassword = requestModel.Password;
+            var confirmNewPassword = requestModel.ConfirmNewPassword;
 
             if (userAuthenticate != null)
             {
@@ -418,6 +419,11 @@ namespace VitoshaBank.Services.UserService
                         responseMessage.Message = "Password cannot be less than 6 symbols";
                         return StatusCode(400, responseMessage);
 
+                    }
+                    else if (confirmNewPassword != newPassword)
+                    {
+                        responseMessage.Message = "New password and confirm password are not the same!";
+                        return StatusCode(400, responseMessage);
                     }
 
                     userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
