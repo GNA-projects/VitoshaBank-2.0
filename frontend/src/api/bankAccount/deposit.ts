@@ -15,7 +15,8 @@ export const getDepositsReq = async () => {
 			return res.data;
 		})
 		.catch((err) => {
-			return err;
+			alert(err.response.data.message);
+			
+			return [];
 		});
 };
-
