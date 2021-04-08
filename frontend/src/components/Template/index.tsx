@@ -27,6 +27,7 @@ import Review from "../../pages/Admin/Review";
 import Cards from "../../pages/Admin/Cards";
 import Accounts from "../../pages/Admin/Accounts";
 import User from "../../pages/Admin/User";
+import CreateUser from "../../pages/Admin/User/Create";
 import Users from "../../pages/Admin/Review/Users";
 import CreateDeposit from "../../pages/Admin/Accounts/Deposit";
 import CreateCredit from "../../pages/Admin/Accounts/Credit";
@@ -54,6 +55,7 @@ function Template() {
 
 					<PrivateRoute exact path="/admin" component={Admin} />
 					<PrivateRoute exact path="/admin/user" component={User} />
+					<PrivateRoute exact path="/admin/user/create" component={CreateUser} />
 					<PrivateRoute exact path="/admin/accounts" component={Accounts} />
 					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDeposit} />
 					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCredit} />

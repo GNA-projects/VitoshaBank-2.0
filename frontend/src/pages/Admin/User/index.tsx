@@ -6,7 +6,6 @@ export default function User() {
 	return (
 		<Options>
 			<Options.Link to="/admin/user/create">Create User</Options.Link>
-			<Options.Link to="/admin/user/delete">Delete User</Options.Link>
 		</Options>
 	);
 }

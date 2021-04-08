@@ -66,6 +66,18 @@ const BUTTON = styled.button`
 	font-size: 18px;
 `;
 
+const BOOL = styled.button`
+	background-color: ${props => props.theme};
+	outline: none;
+	border: 1px;
+	border-radius: 6px;
+	padding: 5px 10px;
+	color: teal;
+	margin: 15px 0;
+	
+	font-size: 18px;
+`;
+
 export function FormBig(props: any) {
 	return (
 		<DIV>
@@ -79,6 +91,7 @@ export function Form(props: any) {
 }
 
 Form.Button = BUTTON;
+Form.Bool = BOOL;
 Form.Heading = HEADING;
 type InputProps = {
 	label: string;
