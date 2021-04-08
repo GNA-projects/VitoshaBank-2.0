@@ -1,4 +1,4 @@
-import { menu_margin_min, menu_margin_max } from "../../constants";
+import { menu_margin_min, menu_margin_max } from "../../Template/constants";
 import React, { MouseEventHandler, useState } from "react";
 import bg from "./bg.svg";
 import styled from "styled-components";
