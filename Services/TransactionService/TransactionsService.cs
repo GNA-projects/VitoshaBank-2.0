@@ -12,7 +12,7 @@ using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.TransactionService
 {
-    public class TransactionsService: ControllerBase, ITransactionsService
+    public class TransactionsService : ControllerBase, ITransactionsService
     {
         MessageModel _messageModel = new MessageModel();
         private readonly BankSystemContext _context;
@@ -108,7 +108,7 @@ namespace VitoshaBank.Services.TransactionService
                 var userAuthenticate = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
                 List<GetTransactionsResponseModel> allTransactions = new List<GetTransactionsResponseModel>();
                 List<Transaction> userTransactions = new List<Transaction>();
-                Dictionary<string, string> userDicTransactions = new Dictionary<string, string>();
+                Dictionary<string, List<string>> userDicTransactions = new Dictionary<string, List<string>>();
 
                 List<ChargeAccount> userChargeAccounts = _context.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id).ToList();
                 List<Deposit> userDeposits = _context.Deposits.Where(x => x.UserId == userAuthenticate.Id).ToList();
@@ -124,123 +124,147 @@ namespace VitoshaBank.Services.TransactionService
                 {
                     if (userChargeAccounts.Count > 0)
                     {
+                        List<string> IBANs = new List<string>();
                         foreach (var chargeAccount in userChargeAccounts)
                         {
-                            userDicTransactions.Add("ChargeAccount", chargeAccount.Iban);
+                            IBANs.Add(chargeAccount.Iban);
                         }
+
+                        userDicTransactions.Add("ChargeAccount", IBANs);
                     }
 
                     if (userDeposits.Count > 0)
                     {
+                        List<string> IBANs = new List<string>();
                         foreach (var deposit in userDeposits)
                         {
-                            userDicTransactions.Add("Deposit", deposit.Iban);
+                            IBANs.Add(deposit.Iban);
                         }
+
+                        userDicTransactions.Add("Deposit", IBANs);
                     }
 
                     if (userCredits.Count > 0)
                     {
+                        List<string> IBANs = new List<string>();
+
                         foreach (var credit in userCredits)
                         {
-                            userDicTransactions.Add("Credit", credit.Iban);
+                            IBANs.Add(credit.Iban);
                         }
+
+                        userDicTransactions.Add("Credit", IBANs);
                     }
 
                     if (userWallets.Count > 0)
                     {
+                        List<string> IBANs = new List<string>();
+
                         foreach (var wallet in userWallets)
                         {
-                            userDicTransactions.Add("Wallet", wallet.Iban);
+                            IBANs.Add(wallet.Iban);
                         }
+                        userDicTransactions.Add("Wallet", IBANs);
                     }
 
                     foreach (var IBAN in userDicTransactions)
                     {
-                        if (IBAN.Key == "ChargeAccount" && IBAN.Value != "")
+                        if (IBAN.Key == "ChargeAccount" && IBAN.Value != null)
                         {
-                            var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IBAN.Value).ToListAsync();
-                            var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IBAN.Value).ToListAsync();
-
-                            if (userSender != null)
+                            foreach (var IbanValue in IBAN.Value)
                             {
-                                foreach (var transaction in userSender)
+                                var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IbanValue).ToListAsync();
+                                var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IbanValue).ToListAsync();
+
+                                if (userSender != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userSender)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
-                            }
 
-                            if (userReciver != null)
-                            {
-                                foreach (var transaction in userReciver)
+                                if (userReciver != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userReciver)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
                             }
                         }
-                        else if (IBAN.Key == "Deposit" && IBAN.Value != "")
+                        else if (IBAN.Key == "Deposit" && IBAN.Value != null)
                         {
-                            var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IBAN.Value).ToListAsync();
-                            var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IBAN.Value).ToListAsync();
-
-                            if (userSender != null)
+                            foreach (var IbanValue in IBAN.Value)
                             {
-                                foreach (var transaction in userSender)
+                                var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IbanValue).ToListAsync();
+                                var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IbanValue).ToListAsync();
+
+                                if (userSender != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userSender)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
-                            }
 
-                            if (userReciver != null)
-                            {
-                                foreach (var transaction in userReciver)
+                                if (userReciver != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userReciver)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
                             }
                         }
-                        else if (IBAN.Key == "Credit" && IBAN.Value != "")
+                        else if (IBAN.Key == "Credit" && IBAN.Value != null)
                         {
-                            var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IBAN.Value).ToListAsync();
-                            var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IBAN.Value).ToListAsync();
-
-                            if (userSender != null)
+                            foreach (var IbanValue in IBAN.Value)
                             {
-                                foreach (var transaction in userSender)
+                                var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IbanValue).ToListAsync();
+                                var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IbanValue).ToListAsync();
+
+                                if (userSender != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userSender)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
-                            }
 
-                            if (userReciver != null)
-                            {
-                                foreach (var transaction in userReciver)
+                                if (userReciver != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userReciver)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
                             }
                         }
-                        else if (IBAN.Key == "Wallet" && IBAN.Value != "")
+                        else if (IBAN.Key == "Wallet" && IBAN.Value != null)
                         {
-                            var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IBAN.Value).ToListAsync();
-                            var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IBAN.Value).ToListAsync();
-
-                            if (userSender != null)
+                            foreach (var IbanValue in IBAN.Value)
                             {
-                                foreach (var transaction in userSender)
+                                var userSender = await _context.Transactions.Where(x => x.SenderAccountInfo == IbanValue).ToListAsync();
+                                var userReciver = await _context.Transactions.Where(x => x.RecieverAccountInfo == IbanValue).ToListAsync();
+
+                                if (userSender != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userSender)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
-                            }
 
-                            if (userReciver != null)
-                            {
-                                foreach (var transaction in userReciver)
+                                if (userReciver != null)
                                 {
-                                    userTransactions.Add(transaction);
+                                    foreach (var transaction in userReciver)
+                                    {
+                                        userTransactions.Add(transaction);
+                                    }
                                 }
                             }
                         }
-
                     }
 
                     foreach (var transaction in userTransactions)

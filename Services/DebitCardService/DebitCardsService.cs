@@ -21,13 +21,9 @@ namespace VitoshaBank.Services.DebitCardService
     public class DebitCardsService : ControllerBase, IDebitCardsService
     {
         private readonly BankSystemContext dbContext;
-        private readonly IConfiguration _config;
-        private readonly ITransactionsService _transactionsService;
-        public DebitCardsService(BankSystemContext context, IConfiguration config, ITransactionsService transactionsService)
+        public DebitCardsService(BankSystemContext context)
         {
             dbContext = context;
-            _config = config;
-            _transactionsService = transactionsService;
         }
         BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
         MessageModel responseMessage = new MessageModel();
@@ -51,14 +47,25 @@ namespace VitoshaBank.Services.DebitCardService
                 if (userAuthenticate != null)
                 {
                     bankAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == bankAccount.Iban);
+
+                    if (bankAccountExists == null)
+                    {
+                        responseMessage.Message = "No Bank Account found";
+                        return StatusCode(404, responseMessage);
+                    }
+
                     cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == bankAccountExists.Id);
                 }
 
 
-                if (cardExists == null && bankAccountExists != null)
+                if (cardExists == null)
                 {
                     if (ValidateUser(userAuthenticate))
                     {
+                        if (card == null)
+                        {
+                            card = new Card();
+                        }
 
                         card.ChargeAccountId = bankAccountExists.Id;
                         card.CardNumber = GenerateCardInfo.GenerateNumber(11);
@@ -76,11 +83,6 @@ namespace VitoshaBank.Services.DebitCardService
                         return StatusCode(404, responseMessage);
                     }
                 }
-                else
-                {
-                    responseMessage.Message = "No Bank Account found";
-                    return StatusCode(404, responseMessage);
-                }
 
                 responseMessage.Message = "User already has a Debit Card!";
                 return StatusCode(400, responseMessage);
@@ -96,8 +98,6 @@ namespace VitoshaBank.Services.DebitCardService
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                ChargeAccount bankAccountExits = null;
-                Card debitCardExists = null;
                 List<DebitCardResponseModel> debitCards = new List<DebitCardResponseModel>();
 
                 if (userAuthenticate == null)
@@ -126,10 +126,9 @@ namespace VitoshaBank.Services.DebitCardService
 
                     if (debitCards.Count > 0)
                     {
-
                         return StatusCode(200, debitCards);
                     }
-                    
+
                     responseMessage.Message = "You don't have a Debit Card!!";
                     return StatusCode(400, responseMessage);
                 }
@@ -154,6 +153,11 @@ namespace VitoshaBank.Services.DebitCardService
                 {
 
                     cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+                    if (cardsExists == null)
+                    {
+                        responseMessage.Message = "Debit Card not found";
+                        return StatusCode(404, responseMessage);
+                    }
                     bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
@@ -162,9 +166,9 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null )
+                if (bankAccountsExists != null)
                 {
-                    if (cardsExists.CardExpirationDate < DateTime.Now)
+                    if (cardsExists.CardExpirationDate > DateTime.Now)
                     {
                         responseMessage.Message = "Debit Card is expired";
                         return StatusCode(406, responseMessage);
@@ -181,11 +185,7 @@ namespace VitoshaBank.Services.DebitCardService
                     responseMessage.Message = "Bank Account not found";
                     return StatusCode(404, responseMessage);
                 }
-                else if (cardsExists == null)
-                {
-                    responseMessage.Message = "Debit Card not found";
-                    return StatusCode(404, responseMessage);
-                }
+                
 
             }
             responseMessage.Message = "You are not autorized to do such actions!";
@@ -204,6 +204,13 @@ namespace VitoshaBank.Services.DebitCardService
                 {
 
                     cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+
+                    if (cardsExists == null)
+                    {
+                        responseMessage.Message = "Debit Card not found";
+                        return StatusCode(404, responseMessage);
+                    }
+
                     bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
@@ -212,9 +219,9 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null)
+                if (bankAccountsExists != null)
                 {
-                    if (cardsExists.CardExpirationDate < DateTime.Now)
+                    if (cardsExists.CardExpirationDate > DateTime.Now)
                     {
                         responseMessage.Message = "Debit Card is expired";
                         return StatusCode(406, responseMessage);
@@ -231,11 +238,6 @@ namespace VitoshaBank.Services.DebitCardService
                 else if (bankAccountsExists == null)
                 {
                     responseMessage.Message = "Bank Account not found";
-                    return StatusCode(404, responseMessage);
-                }
-                else if (cardsExists == null)
-                {
-                    responseMessage.Message = "Debit Card not found";
                     return StatusCode(404, responseMessage);
                 }
             }
@@ -256,6 +258,13 @@ namespace VitoshaBank.Services.DebitCardService
                 {
 
                     cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+
+                    if (cardsExists == null)
+                    {
+                        responseMessage.Message = "Debit Card not found";
+                        return StatusCode(404, responseMessage);
+                    }
+
                     bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
@@ -264,9 +273,9 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null )
+                if (bankAccountsExists != null)
                 {
-                    if (cardsExists.CardExpirationDate < DateTime.Now)
+                    if (cardsExists.CardExpirationDate > DateTime.Now)
                     {
                         responseMessage.Message = "Debit Card is expired";
                         return StatusCode(406, responseMessage);
@@ -283,11 +292,6 @@ namespace VitoshaBank.Services.DebitCardService
                 else if (bankAccountsExists == null)
                 {
                     responseMessage.Message = "Bank Account not found";
-                    return StatusCode(404, responseMessage);
-                }
-                else if (cardsExists == null)
-                {
-                    responseMessage.Message = "Debit Card not found";
                     return StatusCode(404, responseMessage);
                 }
             }
@@ -313,7 +317,7 @@ namespace VitoshaBank.Services.DebitCardService
 
                 if (user != null)
                 {
-                    cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.Id == requestModel.Card.Id);
+                    cardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == requestModel.Card.CardNumber);
                 }
 
                 if (user == null)

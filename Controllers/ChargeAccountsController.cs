@@ -25,7 +25,7 @@ namespace VitoshaBank.Controllers
         
        // private readonly ITransactionService _transactionService;
 
-        public ChargeAccountsController(IChargeAccountsService bankAccountService, IDebitCardsService debitCardService /*ITransactionService transactionService*/)
+        public ChargeAccountsController(IChargeAccountsService bankAccountService, IDebitCardsService debitCardService)
         {
             _chargeAccService= bankAccountService;
             _debitCardService = debitCardService;
@@ -49,7 +49,7 @@ namespace VitoshaBank.Controllers
             //amount = 0.50M;
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _chargeAccService.DepositMoney(requestModel.ChargeAccount,requestModel.Deposit, currentUser, username, requestModel.Amount /*_transactionService*/);
+            return await _chargeAccService.DepositMoney(requestModel.ChargeAccount,requestModel.Deposit, currentUser, username, requestModel.Amount);
         }
 
         [HttpPut("purchase")]
@@ -59,7 +59,7 @@ namespace VitoshaBank.Controllers
 
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _chargeAccService.SimulatePurchase(requestModel, currentUser, username/*_transactionService*/);
+            return await _chargeAccService.SimulatePurchase(requestModel, currentUser, username);
         }
 
         [HttpPut("withdraw")]
@@ -68,7 +68,7 @@ namespace VitoshaBank.Controllers
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
-            return await _chargeAccService.Withdraw(requestModel, currentUser, username /*_transactionService*/);
+            return await _chargeAccService.Withdraw(requestModel, currentUser, username);
         }
 
 

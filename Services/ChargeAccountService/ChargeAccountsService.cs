@@ -64,8 +64,6 @@ namespace VitoshaBank.Services.ChargeAccountService
 
 
                             Card card = new Card();
-                            DebitCardRequestModel debitCardRequest = new DebitCardRequestModel();
-                            debitCardRequest.Card = card;
                             await _debitCardService.CreateDebitCard(currentUser, username, chargeAcc, card);
 
                             SendEmail(userAuthenticate.Email, _config);
@@ -110,7 +108,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 else
                 {
                     List<ChargeAccountResponseModel> charges = new List<ChargeAccountResponseModel>();
-                    foreach (var chargeAccRef in dbContext.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id ))
+                    foreach (var chargeAccRef in dbContext.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id))
                     {
                         ChargeAccountResponseModel chargeAccResponseModel = new ChargeAccountResponseModel();
                         var chargeAcc = chargeAccRef;
@@ -181,7 +179,7 @@ namespace VitoshaBank.Services.ChargeAccountService
             responseModel.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseModel);
         }
-        public async Task<ActionResult<MessageModel>> SimulatePurchase(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username  /*ITransactionService _transation*/)
+        public async Task<ActionResult<MessageModel>> SimulatePurchase(ChargeAccountRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
             var product = requestModel.Product;
@@ -209,12 +207,17 @@ namespace VitoshaBank.Services.ChargeAccountService
                         responseModel.Message = $"Succesfully purhcased {product}.";
                         return StatusCode(200, responseModel);
                     }
+                    else if(chargeAccExists == null)
+                    {
+                        responseModel.Message = "Charge Account not found";
+                        return StatusCode(404, responseModel);
+                    }
                     else if (ValidateDepositAmountChargeAccount(amount) == false)
                     {
                         responseModel.Message = "Invalid payment amount!";
                         return StatusCode(400, responseModel);
                     }
-                    else if (ValidateChargeAccount(chargeAcc, amount) == false)
+                    else if (ValidateChargeAccount(chargeAccExists, amount) == false)
                     {
                         responseModel.Message = "You don't have enough money in Charge account!";
                         return StatusCode(406, responseModel);
@@ -222,9 +225,10 @@ namespace VitoshaBank.Services.ChargeAccountService
                 }
                 else
                 {
-                    responseModel.Message = "Charge Account not found";
+                    responseModel.Message = "User not found";
                     return StatusCode(404, responseModel);
                 }
+
             }
 
             responseModel.Message = "You are not autorized to do such actions!";

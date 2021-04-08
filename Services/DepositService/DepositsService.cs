@@ -275,15 +275,15 @@ namespace VitoshaBank.Services.DepositService
                                 await dbContext.SaveChangesAsync();
                                 await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Added money - Bank Account - Deposit account");
                             }
-                            else if (chargeAccountExists.Amount < amount)
-                            {
-                                responseMessage.Message = "You don't have enough money in Bank Account!";
-                                return StatusCode(406, responseMessage);
-                            }
                             else if (chargeAccountExists == null)
                             {
                                 responseMessage.Message = "You don't have a Bank Account";
                                 return StatusCode(400, responseMessage);
+                            }
+                            else if (chargeAccountExists.Amount < amount)
+                            {
+                                responseMessage.Message = "You don't have enough money in Bank Account!";
+                                return StatusCode(406, responseMessage);
                             }
                         }
                         responseMessage.Message = $"Succesfully deposited {amount} leva.";

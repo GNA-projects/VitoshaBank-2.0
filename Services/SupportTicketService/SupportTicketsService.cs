@@ -45,7 +45,7 @@ namespace VitoshaBank.Services.SupportTicketService
                         if (ticket.Title.Length > 2 && ticket.Message.Length > 2 && ticket.Title.Length < 60 && ticket.Message.Length < 200)
                         {
 
-                            ticket.Id = userAuthenticate.Id;
+                            ticket.UserId = userAuthenticate.Id;
                             ticket.Date = DateTime.Now;
                             ticket.HasResponce = false;
                             _context.Add(ticket);
@@ -99,7 +99,7 @@ namespace VitoshaBank.Services.SupportTicketService
                         if (ticket.UserId == userAuthenticate.Id)
                         {
                             SupportTicketResponseModel responseModel = new SupportTicketResponseModel();
-
+                            responseModel.Id = ticket.Id;
                             responseModel.Title = ticket.Title;
                             responseModel.Message = ticket.Message;
                             responseModel.TicketDate = ticket.Date;
@@ -111,7 +111,6 @@ namespace VitoshaBank.Services.SupportTicketService
 
                 if (userTickets.Count != 0)
                 {
-
                     return StatusCode(200, userTickets);
                 }
             }
@@ -177,18 +176,18 @@ namespace VitoshaBank.Services.SupportTicketService
             {
 
                 SupportTicket ticketExists = await _context.SupportTickets.FirstOrDefaultAsync(p => p.Id == id);
+                if (ticketExists == null)
+                {
+                    responseMessage.Message = "Ticket not found!";
+                    return StatusCode(404, responseMessage);
+                }
                 User userExists = await _context.Users.FirstOrDefaultAsync(x => x.Id == ticketExists.UserId);
 
-                if (ticketExists != null)
-                {
-                    ticketExists.HasResponce = true;
-                    await _context.SaveChangesAsync();
-                    SendEmail(userExists.Email, userExists.Username, _config);
-                    responseMessage.Message = "Responded to ticket succesfully!";
-                    return StatusCode(200, responseMessage);
-                }
-                responseMessage.Message = "Ticket not found!";
-                return StatusCode(404, responseMessage);
+                ticketExists.HasResponce = true;
+                await _context.SaveChangesAsync();
+                SendEmail(userExists.Email, userExists.Username, _config);
+                responseMessage.Message = "Responded to ticket succesfully!";
+                return StatusCode(200, responseMessage);
 
             }
             else

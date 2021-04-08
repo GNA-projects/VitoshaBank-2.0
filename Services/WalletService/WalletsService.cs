@@ -171,7 +171,7 @@ namespace VitoshaBank.Services.WalletService
                     {
                         chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
 
-                        if (walletExists.CardExpirationDate < DateTime.Now)
+                        if (walletExists.CardExpirationDate > DateTime.Now)
                         {
                             responseMessage.Message = "Wallet Card is expired";
                             return StatusCode(406, responseMessage);
@@ -215,7 +215,7 @@ namespace VitoshaBank.Services.WalletService
                     walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
                     if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && _BCrypt.AuthenticateWalletCVV(wallet, walletExists)))
                     {
-                        if (walletExists.CardExpirationDate < DateTime.Now)
+                        if (walletExists.CardExpirationDate > DateTime.Now)
                         {
                             responseMessage.Message = "Wallet Card is expired";
                             return StatusCode(406, responseMessage);
