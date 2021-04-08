@@ -59,11 +59,11 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     if (ValidateUser(userAuthenticate))
                     {
-                       
+
                         card.ChargeAccountId = bankAccountExists.Id;
                         card.CardNumber = GenerateCardInfo.GenerateNumber(11);
                         var CVV = GenerateCardInfo.GenerateCVV(3);
-                        card.Cvv = _BCrypt.HashPassword(CVV);
+                        card.Cvv = CVV;
                         card.CardExpirationDate = DateTime.Now.AddMonths(60);
                         dbContext.Add(card);
                         await dbContext.SaveChangesAsync();
@@ -91,14 +91,14 @@ namespace VitoshaBank.Services.DebitCardService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<DebitCardResponseModel>> GetDebitCardInfo(ClaimsPrincipal currentUser, string username)
+        public async Task<ActionResult<ICollection<DebitCardResponseModel>>> GetDebitCardInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 ChargeAccount bankAccountExits = null;
                 Card debitCardExists = null;
-                DebitCardResponseModel debitCardResponseModel = new DebitCardResponseModel();
+                List<DebitCardResponseModel> debitCards = new List<DebitCardResponseModel>();
 
                 if (userAuthenticate == null)
                 {
@@ -107,32 +107,39 @@ namespace VitoshaBank.Services.DebitCardService
                 }
                 else
                 {
-                    bankAccountExits = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-                    debitCardExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == bankAccountExits.Id);
+                    var userCards = dbContext.Cards.Where(x => x.ChargeAccount.UserId == userAuthenticate.Id).ToList();
+                    foreach (var card in userCards)
+                    {
+                        DebitCardResponseModel debitCardResponseModel = new DebitCardResponseModel();
+                        debitCardResponseModel.CardNumber = card.CardNumber;
+                        if (debitCardResponseModel.CardNumber.StartsWith('5'))
+                        {
+                            debitCardResponseModel.CardBrand = "Master Card";
+                        }
+                        else
+                        {
+                            debitCardResponseModel.CardBrand = "Visa";
+                        }
+                        debitCards.Add(debitCardResponseModel);
+                    }
+
+
+                    if (debitCards.Count > 0)
+                    {
+
+                        return StatusCode(200, debitCards);
+                    }
+                    
+                    responseMessage.Message = "You don't have a Debit Card!!";
+                    return StatusCode(400, responseMessage);
                 }
 
-                if (debitCardExists != null)
-                {
-                    debitCardResponseModel.CardNumber = debitCardExists.CardNumber;
-                    if (debitCardResponseModel.CardNumber.StartsWith('5'))
-                    {
-                        debitCardResponseModel.CardBrand = "Master Card";
-                    }
-                    else
-                    {
-                        debitCardResponseModel.CardBrand = "Visa";
-                    }
-
-                    return StatusCode(200, debitCardResponseModel);
-                }
             }
             else
             {
                 responseMessage.Message = "You are not authorized to do such actions";
                 return StatusCode(403, responseMessage);
             }
-            responseMessage.Message = "You don't have a Debit Card!!";
-            return StatusCode(400, responseMessage);
         }
         public async Task<ActionResult<MessageModel>> AddMoney(string cardNumber, string CVV, DateTime expireDate, ClaimsPrincipal currentUser, string username, decimal amount, IChargeAccountsService _chargeAccService)
         {
@@ -145,8 +152,9 @@ namespace VitoshaBank.Services.DebitCardService
             {
                 if (userAuthenticate != null)
                 {
-                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == bankAccountsExists.Id);
+
+                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
                 {
@@ -154,7 +162,7 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null && (cardNumber == cardsExists.CardNumber && expireDate == cardsExists.CardExpirationDate && _BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists)))
+                if (bankAccountsExists != null && cardsExists != null )
                 {
                     if (cardsExists.CardExpirationDate < DateTime.Now)
                     {
@@ -165,6 +173,8 @@ namespace VitoshaBank.Services.DebitCardService
                     requestModel.ChargeAccount = bankAccountsExists;
                     requestModel.Amount = amount;
                     await _chargeAccService.AddMoney(requestModel, currentUser, username);
+                    responseMessage.Message = "Money deposited successfully";
+                    return StatusCode(200, responseMessage);
                 }
                 else if (bankAccountsExists == null)
                 {
@@ -192,8 +202,9 @@ namespace VitoshaBank.Services.DebitCardService
             {
                 if (userAuthenticate != null)
                 {
-                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == bankAccountsExists.Id);
+
+                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
                 {
@@ -201,7 +212,7 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null && (cardNumber == cardsExists.CardNumber && expireDate == cardsExists.CardExpirationDate && _BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists)))
+                if (bankAccountsExists != null && cardsExists != null)
                 {
                     if (cardsExists.CardExpirationDate < DateTime.Now)
                     {
@@ -214,6 +225,8 @@ namespace VitoshaBank.Services.DebitCardService
                     requestModel.Amount = amount;
                     requestModel.Reciever = reciever;
                     await _chargeAccService.SimulatePurchase(requestModel, currentUser, username);
+                    responseMessage.Message = "Purchase successfull";
+                    return StatusCode(200, responseMessage);
                 }
                 else if (bankAccountsExists == null)
                 {
@@ -241,8 +254,9 @@ namespace VitoshaBank.Services.DebitCardService
             {
                 if (userAuthenticate != null)
                 {
-                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
-                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.ChargeAccountId == bankAccountsExists.Id && x.CardNumber == cardNumber && x.Cvv == CVV && x.CardExpirationDate == expireDate);
+
+                    cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
+                    bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                 }
                 else
                 {
@@ -250,7 +264,7 @@ namespace VitoshaBank.Services.DebitCardService
                     return StatusCode(404, responseMessage);
                 }
 
-                if (bankAccountsExists != null && cardsExists != null && (cardNumber == cardsExists.CardNumber && expireDate == cardsExists.CardExpirationDate && _BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists)))
+                if (bankAccountsExists != null && cardsExists != null )
                 {
                     if (cardsExists.CardExpirationDate < DateTime.Now)
                     {
@@ -259,10 +273,12 @@ namespace VitoshaBank.Services.DebitCardService
                     }
                     ChargeAccountRequestModel requestModel = new ChargeAccountRequestModel();
                     requestModel.ChargeAccount = bankAccountsExists;
-                    
+
                     requestModel.Amount = amount;
                     requestModel.Reciever = reciever;
                     await _chargeAccService.Withdraw(requestModel, currentUser, username);
+                    responseMessage.Message = "Withdraw successfull";
+                    return StatusCode(200, responseMessage);
                 }
                 else if (bankAccountsExists == null)
                 {
@@ -279,10 +295,10 @@ namespace VitoshaBank.Services.DebitCardService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-        public async Task<ActionResult<MessageModel>> DeleteDebitCard(ClaimsPrincipal currentUser,DebitCardRequestModel requestModel ,string username)
+        public async Task<ActionResult<MessageModel>> DeleteDebitCard(ClaimsPrincipal currentUser, DebitCardRequestModel requestModel, string username)
         {
             string role = "";
-            
+
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 string userRole = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Roles").Value;
@@ -293,7 +309,7 @@ namespace VitoshaBank.Services.DebitCardService
             {
                 var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 Card cardExists = null;
-                
+
 
                 if (user != null)
                 {

@@ -353,7 +353,7 @@ namespace VitoshaBank.Services.DepositService
             var username = requestModel.Username;
             Deposit deposit = requestModel.Deposit;
             Deposit depositExists = null;
-            UserAccount userDeposit = null;
+
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {

@@ -13,7 +13,7 @@ using VitoshaBank.Services.DebitCardService.Interfaces;
 
 namespace VitoshaBank.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/debits")]
     [ApiController]
     public class DebitCardsController : ControllerBase
     {
@@ -31,7 +31,7 @@ namespace VitoshaBank.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<DebitCardResponseModel>> GetDebitCardInfo()
+        public async Task<ActionResult<ICollection<DebitCardResponseModel>>> GetDebitCardInfo()
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
