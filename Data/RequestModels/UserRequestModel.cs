@@ -11,7 +11,6 @@ namespace VitoshaBank.Data.RequestModels
         public User User { get; set; }
         public string Username { get; set; }
         public string CurrentPassword { get;  set; }
-        public string ConfirmNewPassword { get; set;  }
         public string Password { get;  set; }
     }
 }

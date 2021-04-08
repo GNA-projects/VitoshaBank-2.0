@@ -420,11 +420,6 @@ namespace VitoshaBank.Services.UserService
                         return StatusCode(400, responseMessage);
 
                     }
-                    else if (confirmNewPassword != newPassword)
-                    {
-                        responseMessage.Message = "New password and confirm password are not the same!";
-                        return StatusCode(400, responseMessage);
-                    }
 
                     userAuthenticate.Password = _BCrypt.HashPassword(newPassword);
                     await dbContext.SaveChangesAsync();
