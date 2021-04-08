@@ -261,9 +261,9 @@ namespace VitoshaBank.Services.CreditService
                         bankAccExists = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
 
                     }
-                    catch (Exception)
+                    catch (System.NullReferenceException)
                     {
-                        responseMessage.Message = "ChargeAccount not found!";
+                        responseMessage.Message = "Invalid Charge Account! Iban not found!";
                         return StatusCode(404, responseMessage);
                     }
                     
@@ -331,7 +331,7 @@ namespace VitoshaBank.Services.CreditService
                 }
                 else
                 {
-                    responseMessage.Message = "Credit not found";
+                    responseMessage.Message = "Iban Invalid! Credit not found";
                     return StatusCode(404, responseMessage);
                 }
             }
@@ -449,12 +449,12 @@ namespace VitoshaBank.Services.CreditService
                 }
                 else if (bankAccount.Amount < amount)
                 {
-                    responseMessage.Message = "You don't have enough money in bank account!";
+                    responseMessage.Message = "You don't have enough money in Charge account!";
                     return StatusCode(406, responseMessage);
                 }
                 else if (bankAccount == null)
                 {
-                    responseMessage.Message = "You don't have a bank account";
+                    responseMessage.Message = "You don't have a Charge account";
                     return StatusCode(400, responseMessage);
                 }
             }

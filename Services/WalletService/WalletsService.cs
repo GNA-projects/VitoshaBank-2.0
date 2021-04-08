@@ -49,9 +49,9 @@ namespace VitoshaBank.Services.WalletService
                 }
                 else
                 {
-                    foreach (var walletRef in dbContext.UserAccounts.Where(x => x.WalletId != null && x.UserUsername == username))
+                    foreach (var walletRef in dbContext.Wallets.Where(x => x.UserId == userAuthenticate.Id))
                     {
-                        var wallet = walletRef.Wallet;
+                        var wallet = walletRef;
                         walletResponseModel.IBAN = wallet.Iban;
                         walletResponseModel.Amount = Math.Round(wallet.Amount, 2);
                         walletResponseModel.CardNumber = wallet.CardNumber;
@@ -103,26 +103,18 @@ namespace VitoshaBank.Services.WalletService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.UserAccounts.Where(x => x.WalletId != null && x.UserUsername == username).Count() < 7)
+                    if (dbContext.Wallets.Where(x => x.UserId == userAuthenticate.Id).Count() < 7)
                     {
                         if (ValidateUser(userAuthenticate) && ValidateWallet(wallet))
                         {
-                            UserAccount userAccounts = new UserAccount();
-                            userAccounts.UserId = userAuthenticate.Id;
-                            userAccounts.UserUsername = userAuthenticate.Username;
-
-
+                            wallet.UserId = userAuthenticate.Id;
                             wallet.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Wallet", dbContext);
                             wallet.CardNumber = GenerateCardInfo.GenerateNumber(11);
                             var CVV = GenerateCardInfo.GenerateCVV(3);
-                            wallet.Cvv = _BCrypt.HashPassword(CVV);
+                            wallet.Cvv = (CVV);
                             wallet.CardExpirationDate = DateTime.Now.AddMonths(60);
 
                             await dbContext.AddAsync(wallet);
-                            await dbContext.SaveChangesAsync();
-
-                            userAccounts.WalletId = dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban).Id;
-                            await dbContext.AddAsync(userAccounts);
                             await dbContext.SaveChangesAsync();
 
                             SendEmail(userAuthenticate.Email, _config);
@@ -181,7 +173,7 @@ namespace VitoshaBank.Services.WalletService
                     }
                     else
                     {
-                        responseMessage.Message = "Wallet not found";
+                        responseMessage.Message = "Wallet not found! Invalid Iban!";
                         return StatusCode(404, responseMessage);
                     }
 
@@ -213,7 +205,7 @@ namespace VitoshaBank.Services.WalletService
                 if (userAuthenticate != null)
                 {
                     walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-                    if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && _BCrypt.AuthenticateWalletCVV(wallet, walletExists)))
+                    if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && wallet.Cvv == walletExists.Cvv))
                     {
                         if (walletExists.CardExpirationDate > DateTime.Now)
                         {
@@ -225,7 +217,7 @@ namespace VitoshaBank.Services.WalletService
                     }
                     else
                     {
-                        responseMessage.Message = "Wallet not found";
+                        responseMessage.Message = "Wallet not found! Invalid Credentials!";
                         return StatusCode(404, responseMessage);
                     }
                 }
@@ -245,7 +237,7 @@ namespace VitoshaBank.Services.WalletService
             var username = requestModel.Username;
             Wallet wallet = requestModel.Wallet;
             Wallet walletExists = null;
-            UserAccount userWallet = null;
+
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -260,7 +252,6 @@ namespace VitoshaBank.Services.WalletService
                 if (user != null)
                 {
                     walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-                    userWallet = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.Id == walletExists.Id);
                 }
 
                 if (user == null)
@@ -275,8 +266,6 @@ namespace VitoshaBank.Services.WalletService
                 }
 
                 dbContext.Wallets.Remove(walletExists);
-                await dbContext.SaveChangesAsync();
-                dbContext.UserAccounts.Remove(userWallet);
                 await dbContext.SaveChangesAsync();
 
                 responseMessage.Message = $"Succsesfully deleted {user.Username} Wallet!";

@@ -172,7 +172,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 }
                 else
                 {
-                    responseModel.Message = "Charge Account not found";
+                    responseModel.Message = "Charge Account not found! Iban Invalid!";
                     return StatusCode(404, responseModel);
                 }
             }
@@ -226,6 +226,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                 else
                 {
                     responseModel.Message = "User not found";
+
                     return StatusCode(404, responseModel);
                 }
 
@@ -273,7 +274,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                     }
                     else
                     {
-                        responseModel.Message = "Charge Account not found";
+                        responseModel.Message = "Charge Account not found! Iban Invalid!";
                         return StatusCode(404, responseModel);
                     }
 
@@ -336,7 +337,7 @@ namespace VitoshaBank.Services.ChargeAccountService
                     }
                     else
                     {
-                        responseModel.Message = "Charge Account not found";
+                        responseModel.Message = "Charge Account not found! Iban Invalid!";
                         return StatusCode(404, responseModel);
                     }
 

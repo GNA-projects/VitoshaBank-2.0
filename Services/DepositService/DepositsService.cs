@@ -291,7 +291,7 @@ namespace VitoshaBank.Services.DepositService
                     }
                     else
                     {
-                        responseMessage.Message = "Deposit not found";
+                        responseMessage.Message = "Invalid Iban! Deposit not found";
                         return StatusCode(404, responseMessage);
                     }
                 }
@@ -332,7 +332,7 @@ namespace VitoshaBank.Services.DepositService
                     }
                     else
                     {
-                        responseMessage.Message = "Deposit not found";
+                        responseMessage.Message = "Deposit not found! Iban invalid!";
                         return StatusCode(404, responseMessage);
                     }
 
