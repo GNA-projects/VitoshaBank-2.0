@@ -18,6 +18,7 @@ import Login from "../../pages/Auth/Login";
 import Banking from "../../pages/Banking";
 import Deposit from "../../pages/Banking/Deposit";
 import Credit from "../../pages/Banking/Credit";
+import Charge from "../../pages/Banking/Charge";
 import CalculatorPage from "../../pages/CalculatorPage";
 
 
@@ -28,6 +29,9 @@ import Accounts from "../../pages/Admin/Accounts";
 import User from "../../pages/Admin/User";
 import Users from "../../pages/Admin/Review/Users";
 import CreateDeposit from "../../pages/Admin/Accounts/Deposit";
+import CreateCredit from "../../pages/Admin/Accounts/Credit";
+import CreateCharge from "../../pages/Admin/Accounts/Charge";
+import DeleteAccount from "../../pages/Admin/Accounts/Delete";
 
 function Template() {
 	return (
@@ -45,12 +49,16 @@ function Template() {
 					<PrivateRoute exact path="/banking" component={Banking} />
 					<PrivateRoute exact path="/banking/deposit" component={Deposit} />
 					<PrivateRoute exact path="/banking/credit" component={Credit} />
+					<PrivateRoute exact path="/banking/charge" component={Charge} />
 					<Route exact path="/calculator" component={CalculatorPage} />
 
 					<PrivateRoute exact path="/admin" component={Admin} />
 					<PrivateRoute exact path="/admin/user" component={User} />
 					<PrivateRoute exact path="/admin/accounts" component={Accounts} />
 					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDeposit} />
+					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCredit} />
+					<PrivateRoute exact path="/admin/accounts/charge" component={CreateCharge} />
+					<PrivateRoute exact path="/admin/accounts/delete" component={DeleteAccount} />
 					<PrivateRoute exact path="/admin/cards" component={Cards} />
 					<PrivateRoute exact path="/admin/review" component={Review} />
 					<PrivateRoute exact path="/admin/review/users" component={Users} />

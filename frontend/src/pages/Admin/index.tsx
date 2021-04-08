@@ -1,5 +1,8 @@
 import React, { useContext, useEffect } from "react";
+import BackgroundBlock from "../../components/BackgroundBlock";
 import AdminContext from "../../context/AdminContext";
+import block1 from "./block1.jpg";
+
 
 export default function Admin() {
 	const { admin, setAdmin } = useContext(AdminContext);
@@ -9,7 +12,12 @@ export default function Admin() {
 	});
 	return (
 		<div>
-			Admin
+			<BackgroundBlock bg={block1}>
+				<BackgroundBlock.HeadingLeft>Admin Panel</BackgroundBlock.HeadingLeft>
+				<BackgroundBlock.TextLeft>
+					Click The Navigation Bar to see your admin options.
+				</BackgroundBlock.TextLeft>
+			</BackgroundBlock>
 		</div>
 	);
 }

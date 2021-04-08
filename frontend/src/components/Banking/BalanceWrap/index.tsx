@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import BalanceForm from "./BalanceForm";
+import { ChargeForm, CreditForm, DepositForm } from "./BalanceForm";
 
 const WRAP = styled.div`
 	display: flex;
@@ -18,5 +18,7 @@ export default function BalanceWrap(props: any) {
 	return <WRAP>{props.children}</WRAP>;
 }
 
-BalanceWrap.Heading = HEADING
-BalanceWrap.Balance = BalanceForm
+BalanceWrap.Heading = HEADING;
+BalanceWrap.Deposit = DepositForm;
+BalanceWrap.Credit = CreditForm;
+BalanceWrap.Charge = ChargeForm;

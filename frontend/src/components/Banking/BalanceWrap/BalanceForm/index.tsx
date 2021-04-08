@@ -20,6 +20,9 @@ const IBAN = styled.h4`
 const PDATE = styled.h3`
 	color: white;
 `;
+const INSTALMENT = styled.h3`
+	color: white;
+`;
 
 const BALANCE = styled.h1`
 	color: white;
@@ -29,12 +32,32 @@ const toDate = (date: string) => {
 	let a = new Date(date);
 	return a.toDateString();
 };
-export default function BalanceForm({ iban, balance, paymentDate }: any) {
+export function DepositForm({ iban, balance, paymentDate }: any) {
 	return (
 		<div>
 			<FORM>
 				<IBAN>Iban: {iban}</IBAN>
 				<PDATE>Payment Date: {toDate(paymentDate)}</PDATE>
+				<BALANCE>{balance} BGN</BALANCE>
+			</FORM>
+		</div>
+	);
+}
+export function CreditForm({ iban, balance, instalment }: any) {
+	return (
+		<div>
+			<FORM>
+				<IBAN>Iban: {iban}</IBAN>
+				<INSTALMENT>Instalment: {instalment}</INSTALMENT>
+				<BALANCE>{balance} BGN</BALANCE>
+			</FORM>
+		</div>
+	);
+}export function ChargeForm({ iban, balance }: any) {
+	return (
+		<div>
+			<FORM>
+				<IBAN>Iban: {iban}</IBAN>
 				<BALANCE>{balance} BGN</BALANCE>
 			</FORM>
 		</div>
