@@ -398,7 +398,6 @@ namespace VitoshaBank.Services.UserService
 
             var currentPassword = requestModel.CurrentPassword;
             var newPassword = requestModel.Password;
-            var confirmNewPassword = requestModel.ConfirmNewPassword;
 
             if (userAuthenticate != null)
             {

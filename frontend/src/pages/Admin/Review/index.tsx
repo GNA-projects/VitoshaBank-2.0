@@ -6,6 +6,7 @@ export default function Review() {
 	return (
 		<Options>
 			<Options.Link to="/admin/review/users">Review Users</Options.Link>
+			<Options.Link to="/admin/review/tickets">Review Tickets</Options.Link>
 		</Options>
 	);
 }

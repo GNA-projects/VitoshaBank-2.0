@@ -53,12 +53,23 @@ export function CreditForm({ iban, balance, instalment }: any) {
 			</FORM>
 		</div>
 	);
-}export function ChargeForm({ iban, balance }: any) {
+}
+export function ChargeForm({ iban, balance }: any) {
 	return (
 		<div>
 			<FORM>
 				<IBAN>Iban: {iban}</IBAN>
 				<BALANCE>{balance} BGN</BALANCE>
+			</FORM>
+		</div>
+	);
+}
+export function CardForm({ cardNumber, cardBrand }: any) {
+	return (
+		<div>
+			<FORM>
+				<IBAN>Card Number: {cardNumber}</IBAN>
+				<BALANCE>{cardBrand}</BALANCE>
 			</FORM>
 		</div>
 	);

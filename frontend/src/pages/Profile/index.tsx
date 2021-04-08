@@ -25,6 +25,8 @@ export default function Profile() {
 					convert prospective clients.
 				</BackgroundBlock.TextLeft>
 			</BackgroundBlock>
+			<br></br>
+			<br></br>
 			<Form bg={bg}>
 				<Form.Heading>Change Password</Form.Heading>
 				<Form.Input
