@@ -1,0 +1,53 @@
+{
+	"folders": [
+		{
+			"name": "All",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.vscode": true,
+			"**/bin": true,
+			"**/obj": true,
+			".gitignore": true,
+			"**/*.code-workspace": true
+		}
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": ".NET Core Workspace Launch",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "Dotnet Build",
+				"program": "${workspaceFolder:All}/bin/Debug/net5.0/VitoshaBank.dll",
+				"args": [],
+				"cwd": "${workspaceFolder:All}",
+				"console": "internalConsole",
+				"stopAtEntry": false,
+			}
+		],
+		"compounds": [],
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Dotnet Build",
+				"command": "dotnet",
+				"type": "shell",
+				"args": [
+					"build",
+					"/property:GenerateFullPaths=true",
+					"/consoleloggerparameters:NoSummary"
+				],
+				"presentation": {
+					"reveal": "silent"
+				},
+				"problemMatcher": "$msCompile"
+			}
+		]
+	}
+}

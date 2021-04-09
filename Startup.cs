@@ -1,6 +1,8 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
@@ -8,29 +10,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using VitoshaBank.Data.DbModels;
+using VitoshaBank.Services.CalculatorService;
+using VitoshaBank.Services.CalculatorService.Interfaces;
 using VitoshaBank.Services.ChargeAccountService;
 using VitoshaBank.Services.ChargeAccountService.Interfaces;
 using VitoshaBank.Services.CreditService;
 using VitoshaBank.Services.CreditService.Interfaces;
+using VitoshaBank.Services.DebitCardService;
+using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.DepositService;
 using VitoshaBank.Services.DepositService.Interfaces;
+using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.InterestService.Interfaces;
 using VitoshaBank.Services.SupportTicketService;
 using VitoshaBank.Services.SupportTicketService.Interfaces;
+using VitoshaBank.Services.TransactionService;
+using VitoshaBank.Services.TransactionService.Interfaces;
 using VitoshaBank.Services.UserService;
 using VitoshaBank.Services.UserService.Interfaces;
 using VitoshaBank.Services.WalletService;
 using VitoshaBank.Services.WalletService.Interfaces;
-using VitoshaBank.Services.CalculatorService;
-using VitoshaBank.Services.CalculatorService.Interfaces;
-using VitoshaBank.Services.DebitCardService.Interfaces;
-using VitoshaBank.Services.DebitCardService;
-using VitoshaBank.Services.TransactionService.Interfaces;
-using VitoshaBank.Services.TransactionService;
-using Microsoft.AspNetCore.HttpOverrides;
-using VitoshaBank.Services.InterestService;
-using VitoshaBank.Services.InterestService.Interfaces;
 
 
 namespace VitoshaBank
@@ -75,6 +75,7 @@ namespace VitoshaBank
                 });
 
             services.AddControllersWithViews();
+            services.AddSwaggerGen();
 
             services.AddDbContext<BankSystemContext>(options => options.UseNpgsql(Configuration.GetConnectionString("BankConnection")));
             // In production, the React files will be served from this directory
@@ -110,6 +111,11 @@ namespace VitoshaBank
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             app.UseEndpoints(endpoints =>
             {
