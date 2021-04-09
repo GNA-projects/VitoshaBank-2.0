@@ -113,7 +113,7 @@ namespace VitoshaBank.Services.WalletService
                                 wallet.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Wallet", dbContext);
                                 wallet.CardNumber = GenerateCardInfo.GenerateNumber(11);
                                 var CVV = GenerateCardInfo.GenerateCVV(3);
-                                wallet.Cvv = (CVV);
+                                wallet.Cvv = (_BCrypt.HashPassword(CVV));
                                 wallet.CardExpirationDate = DateTime.Now.AddMonths(60);
 
                                 await dbContext.AddAsync(wallet);
@@ -173,7 +173,7 @@ namespace VitoshaBank.Services.WalletService
                         {
                             chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
 
-                            if (walletExists.CardExpirationDate > DateTime.Now)
+                            if (walletExists.CardExpirationDate < DateTime.Now)
                             {
                                 responseMessage.Message = "Wallet Card is expired";
                                 return StatusCode(406, responseMessage);
@@ -222,9 +222,9 @@ namespace VitoshaBank.Services.WalletService
                     try
                     {
                         walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-                        if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && wallet.Cvv == walletExists.Cvv))
+                        if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && _BCrypt.AuthenticateWalletCVV(wallet,walletExists)))
                         {
-                            if (walletExists.CardExpirationDate > DateTime.Now)
+                            if (walletExists.CardExpirationDate < DateTime.Now)
                             {
                                 responseMessage.Message = "Wallet Card is expired";
                                 return StatusCode(406, responseMessage);

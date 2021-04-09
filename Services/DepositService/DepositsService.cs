@@ -306,7 +306,7 @@ namespace VitoshaBank.Services.DepositService
                                 }
                                 else if (chargeAccountExists == null)
                                 {
-                                    responseMessage.Message = "You don't have a Bank Account";
+                                    responseMessage.Message = "Charge Account Iban is invalid!";
                                     return StatusCode(400, responseMessage);
                                 }
                                 else if (chargeAccountExists.Amount < amount)

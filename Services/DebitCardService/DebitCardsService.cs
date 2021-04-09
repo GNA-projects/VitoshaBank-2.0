@@ -175,13 +175,22 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     try
                     {
-                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
-                        if (cardsExists == null)
+                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber);
+                        if (_BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists))
                         {
-                            responseMessage.Message = "Debit Card not found";
-                            return StatusCode(404, responseMessage);
+
+                            if (cardsExists == null)
+                            {
+                                responseMessage.Message = "Debit Card not found";
+                                return StatusCode(404, responseMessage);
+                            }
+                            bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
                         }
-                        bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
+                        else
+                        {
+                            responseMessage.Message = "Invalid Credentials";
+                            return StatusCode(400, responseMessage);
+                        }
                     }
                     catch (NullReferenceException)
                     {
@@ -199,7 +208,7 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     try
                     {
-                        if (cardsExists.CardExpirationDate > DateTime.Now)
+                        if (cardsExists.CardExpirationDate < DateTime.Now)
                         {
                             responseMessage.Message = "Debit Card is expired";
                             return StatusCode(406, responseMessage);
@@ -242,15 +251,23 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     try
                     {
-                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
-
-                        if (cardsExists == null)
+                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber);
+                        if (_BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists))
                         {
-                            responseMessage.Message = "Debit Card not found";
-                            return StatusCode(404, responseMessage);
-                        }
 
-                        bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
+                            if (cardsExists == null)
+                            {
+                                responseMessage.Message = "Debit Card not found";
+                                return StatusCode(404, responseMessage);
+                            }
+
+                            bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
+                        }
+                        else
+                        {
+                            responseMessage.Message = "Invalid Credentials";
+                            return StatusCode(400, responseMessage);
+                        }
                     }
                     catch (NullReferenceException)
                     {
@@ -268,7 +285,7 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     try
                     {
-                        if (cardsExists.CardExpirationDate > DateTime.Now)
+                        if (cardsExists.CardExpirationDate < DateTime.Now)
                         {
                             responseMessage.Message = "Debit Card is expired";
                             return StatusCode(406, responseMessage);
@@ -311,15 +328,23 @@ namespace VitoshaBank.Services.DebitCardService
                 {
                     try
                     {
-                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber && x.Cvv == CVV);
-
-                        if (cardsExists == null)
+                        cardsExists = await dbContext.Cards.FirstOrDefaultAsync(x => x.CardNumber == cardNumber );
+                        if (_BCrypt.AuthenticateDebitCardCVV(CVV, cardsExists))
                         {
-                            responseMessage.Message = "Debit Card not found";
-                            return StatusCode(404, responseMessage);
-                        }
 
-                        bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
+                            if (cardsExists == null)
+                            {
+                                responseMessage.Message = "Debit Card not found";
+                                return StatusCode(404, responseMessage);
+                            }
+
+                            bankAccountsExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Card == cardsExists);
+                        }
+                        else
+                        {
+                            responseMessage.Message = "Invalid Credentials";
+                            return StatusCode(400, responseMessage);
+                        }
                     }
                     catch (NullReferenceException)
                     {
@@ -335,20 +360,21 @@ namespace VitoshaBank.Services.DebitCardService
 
                 if (bankAccountsExists != null)
                 {
-                    try { 
-                    if (cardsExists.CardExpirationDate > DateTime.Now)
+                    try
                     {
-                        responseMessage.Message = "Debit Card is expired";
-                        return StatusCode(406, responseMessage);
-                    }
-                    ChargeAccountRequestModel requestModel = new ChargeAccountRequestModel();
-                    requestModel.ChargeAccount = bankAccountsExists;
+                        if (cardsExists.CardExpirationDate < DateTime.Now)
+                        {
+                            responseMessage.Message = "Debit Card is expired";
+                            return StatusCode(406, responseMessage);
+                        }
+                        ChargeAccountRequestModel requestModel = new ChargeAccountRequestModel();
+                        requestModel.ChargeAccount = bankAccountsExists;
 
-                    requestModel.Amount = amount;
-                    requestModel.Reciever = reciever;
-                    await _chargeAccService.Withdraw(requestModel, currentUser, username);
-                    responseMessage.Message = "Withdraw successfull";
-                    return StatusCode(200, responseMessage);
+                        requestModel.Amount = amount;
+                        requestModel.Reciever = reciever;
+                        await _chargeAccService.Withdraw(requestModel, currentUser, username);
+                        responseMessage.Message = "Withdraw successfull";
+                        return StatusCode(200, responseMessage);
                     }
                     catch (NullReferenceException)
                     {
