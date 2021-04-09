@@ -137,7 +137,7 @@ namespace VitoshaBank.Services.CreditService
             }
             return null;
         }
-        public async Task<ActionResult<CreditResponseModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username)
+        public async Task<ActionResult<MessageModel>> GetPayOffInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -171,7 +171,7 @@ namespace VitoshaBank.Services.CreditService
                             requestModel.Credit = credit;
                             requestModel.Username = username;
                             responseMessage.Message = "You have payed your Credit!";
-                            DeleteCreditFromPayOff(credit, currentUser,chargeAcc);
+                            await DeleteCreditFromPayOff(credit, chargeAcc);
                             hasDeleted = true;
                         }
 
@@ -191,15 +191,15 @@ namespace VitoshaBank.Services.CreditService
             return StatusCode(403, responseMessage);
         }
 
-        private Task<ActionResult<MessageModel>> DeleteCreditFromPayOff(Credit credit, ClaimsPrincipal currentUser, ChargeAccount chargeAccount)
+        private async Task<ActionResult<MessageModel>> DeleteCreditFromPayOff(Credit credit, ChargeAccount chargeAccount)
         {
-            
+
             chargeAccount.Amount += credit.Amount;
             responseMessage.Message = ($"Credit payed successfully! The left amount from the  credit is transfered to Bank Account with Iban: {chargeAccount.Iban}");
             dbContext.Remove(credit);
-            return StatusCode(200);
+            return StatusCode(200, responseMessage);
         }
-      
+
 
         public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
@@ -335,31 +335,40 @@ namespace VitoshaBank.Services.CreditService
 
                 if (creditExists != null)
                 {
-                    if (ValidateDepositAmountBankAccount(amount) && ValidateCredit(creditExists) && ValidateMinAmount(creditExists, amount))
+                    try
                     {
-                        creditExists.Amount = creditExists.Amount - amount;
-                        Transaction transactions = new Transaction();
-                        transactions.SenderAccountInfo = credit.Iban;
-                        transactions.RecieverAccountInfo = reciever;
-                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
-                        await dbContext.SaveChangesAsync();
-                        responseMessage.Message = $"Succesfully withdrawed {amount} leva.";
-                        return StatusCode(200, responseMessage);
+                        if (ValidateDepositAmountBankAccount(amount) && ValidateCredit(creditExists) && ValidateMinAmount(creditExists, amount))
+                        {
+                            creditExists.Amount = creditExists.Amount - amount;
+                            Transaction transactions = new Transaction();
+                            transactions.SenderAccountInfo = credit.Iban;
+                            transactions.RecieverAccountInfo = reciever;
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
+                            await dbContext.SaveChangesAsync();
+                            responseMessage.Message = $"Succesfully withdrawed {amount} leva.";
+                            return StatusCode(200, responseMessage);
+                        }
+                        else if (ValidateDepositAmountBankAccount(amount) == false)
+                        {
+                            responseMessage.Message = "Invalid payment amount!";
+                            return StatusCode(400, responseMessage);
+                        }
+                        else if (ValidateCredit(creditExists) == false)
+                        {
+                            responseMessage.Message = "You don't have enough money in Credit Account!";
+                            return StatusCode(406, responseMessage);
+                        }
+                        else if (ValidateMinAmount(creditExists, amount) == false)
+                        {
+                            responseMessage.Message = "The amount is bigger than Credit Account's amount!";
+                            return StatusCode(406, responseMessage);
+                        }
                     }
-                    else if (ValidateDepositAmountBankAccount(amount) == false)
+                    catch (NullReferenceException)
                     {
-                        responseMessage.Message = "Invalid payment amount!";
-                        return StatusCode(400, responseMessage);
-                    }
-                    else if (ValidateCredit(creditExists) == false)
-                    {
-                        responseMessage.Message = "You don't have enough money in Credit Account!";
-                        return StatusCode(406, responseMessage);
-                    }
-                    else if (ValidateMinAmount(creditExists, amount) == false)
-                    {
-                        responseMessage.Message = "The amount is bigger than Credit Account's amount!";
-                        return StatusCode(406, responseMessage);
+                        responseMessage.Message = "Iban Invalid! Credit not found";
+                        return StatusCode(404, responseMessage);
+
                     }
 
                 }
