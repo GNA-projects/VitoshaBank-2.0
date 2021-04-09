@@ -40,7 +40,7 @@ namespace VitoshaBank.Services.DepositService
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
                 List<DepositResponseModel> userDeposits = new List<DepositResponseModel>();
-                
+
 
                 if (userAuthenticate == null)
                 {
@@ -91,7 +91,7 @@ namespace VitoshaBank.Services.DepositService
                 else
                 {
                     bool isChecked = false;
-                    foreach (var depositRef in dbContext.Deposits.Where(x => x.UserId ==  userAuthenticate.Id))
+                    foreach (var depositRef in dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id))
                     {
                         await dividentService.GetDividentPayment(depositRef);
                         isChecked = true;
@@ -171,53 +171,70 @@ namespace VitoshaBank.Services.DepositService
 
             if (role == "Admin")
             {
-                var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+                User userAuthenticate = null;
+                try
+                {
+                     userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+                }
+                catch (NullReferenceException)
+                {
+                    responseMessage.Message = "User not found";
+                    return StatusCode(404, responseMessage);
+                }
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id).Count() < 6)
+                    try
                     {
-                        if (ValidateUser(userAuthenticate) && ValidateDeposits(deposit))
+                        if (dbContext.Deposits.Where(x => x.UserId == userAuthenticate.Id).Count() < 6)
                         {
-   
-                            deposit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Deposit", dbContext);
-
-                            if (deposit.TermOfPayment == 3 || deposit.TermOfPayment == 6 || deposit.TermOfPayment == 12 || deposit.TermOfPayment == 1)
+                            if (ValidateUser(userAuthenticate) && ValidateDeposits(deposit))
                             {
-                                deposit.PaymentDate = DateTime.Now.AddMonths(deposit.TermOfPayment);
-                                deposit.Divident = CalculateDivident.GetDividentPercent(deposit.Amount, deposit.TermOfPayment);
-                                deposit.UserId = userAuthenticate.Id;
-                                await dbContext.AddAsync(deposit);
-                                await dbContext.SaveChangesAsync();
 
-                                SendEmail(userAuthenticate.Email);
-                                responseMessage.Message = "Deposit created succesfully";
-                                return StatusCode(200, responseMessage);
+                                deposit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Deposit", dbContext);
+
+                                if (deposit.TermOfPayment == 3 || deposit.TermOfPayment == 6 || deposit.TermOfPayment == 12 || deposit.TermOfPayment == 1)
+                                {
+                                    deposit.PaymentDate = DateTime.Now.AddMonths(deposit.TermOfPayment);
+                                    deposit.Divident = CalculateDivident.GetDividentPercent(deposit.Amount, deposit.TermOfPayment);
+                                    deposit.UserId = userAuthenticate.Id;
+                                    await dbContext.AddAsync(deposit);
+                                    await dbContext.SaveChangesAsync();
+
+                                    SendEmail(userAuthenticate.Email);
+                                    responseMessage.Message = "Deposit created succesfully";
+                                    return StatusCode(200, responseMessage);
+                                }
+                                else
+                                {
+                                    responseMessage.Message = "Deposit Term of paymet must be 1, 3, 6 or 12 months";
+                                    return StatusCode(400, responseMessage);
+                                }
+                            }
+                            else if (ValidateUser(userAuthenticate) == false)
+                            {
+                                responseMessage.Message = "User not found";
+                                return StatusCode(404, responseMessage);
+                            }
+                            else if (ValidateDeposits(deposit) == false)
+                            {
+                                responseMessage.Message = "Invalid payment amount!";
+                                return StatusCode(400, responseMessage);
                             }
                             else
                             {
-                                responseMessage.Message = "Deposit Term of paymet must be 1, 3, 6 or 12 months";
-                                return StatusCode(400, responseMessage);
+                                return null;
                             }
-                        }
-                        else if (ValidateUser(userAuthenticate) == false)
-                        {
-                            responseMessage.Message = "User not found";
-                            return StatusCode(404, responseMessage);
-                        }
-                        else if (ValidateDeposits(deposit) == false)
-                        {
-                            responseMessage.Message = "Invalid payment amount!";
-                            return StatusCode(400, responseMessage);
                         }
                         else
                         {
-                            return null;
+                            responseMessage.Message = "User already has the maximum of 5 Deposits!";
+                            return StatusCode(400, responseMessage);
                         }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
-                        responseMessage.Message = "User already has the maximum of 5 Deposits!";
+                        responseMessage.Message = "Invalid credentials";
                         return StatusCode(400, responseMessage);
                     }
 
@@ -236,60 +253,78 @@ namespace VitoshaBank.Services.DepositService
         }
         public async Task<ActionResult<MessageModel>> AddMoney(DepositRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
-            var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-            var amount = requestModel.Amount;
+            User userAuthenticate = null;
             Deposit deposit = requestModel.Deposit;
             Deposit depositExists = null;
             ChargeAccount chargeAccount = requestModel.ChargeAccount;
             ChargeAccount chargeAccountExists = null;
+            var amount = requestModel.Amount;
+
+            try
+            {
+                userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+            }
+            catch (NullReferenceException)
+            {
+                responseMessage.Message = "User not found";
+                return StatusCode(400, responseMessage);
+            }
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 if (userAuthenticate != null)
                 {
-                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
-                    if (depositExists != null)
+                    try
                     {
-                        chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
-                        if (amount < 0)
+                        depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                        if (depositExists != null)
                         {
-                            responseMessage.Message = "Invalid payment amount!";
-                            return StatusCode(400, responseMessage);
-                        }
-                        else if (amount == 0)
-                        {
-                            responseMessage.Message = "Put amount more than 0.00lv";
-                            return StatusCode(400, responseMessage);
+                            chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
+                            if (amount < 0)
+                            {
+                                responseMessage.Message = "Invalid payment amount!";
+                                return StatusCode(400, responseMessage);
+                            }
+                            else if (amount == 0)
+                            {
+                                responseMessage.Message = "Put amount more than 0.00lv";
+                                return StatusCode(400, responseMessage);
+                            }
+                            else
+                            {
+                                if (chargeAccountExists != null && chargeAccount.Amount > amount)
+                                {
+                                    deposit.Amount = deposit.Amount + amount;
+                                    deposit.PaymentDate = DateTime.Now.AddMonths(6);
+                                    chargeAccount.Amount = chargeAccount.Amount - amount;
+                                    Transaction transaction = new Transaction();
+                                    transaction.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                                    transaction.RecieverAccountInfo = depositExists.Iban;
+
+                                    await dbContext.SaveChangesAsync();
+                                    await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Added money - Bank Account - Deposit account");
+                                }
+                                else if (chargeAccountExists == null)
+                                {
+                                    responseMessage.Message = "You don't have a Bank Account";
+                                    return StatusCode(400, responseMessage);
+                                }
+                                else if (chargeAccountExists.Amount < amount)
+                                {
+                                    responseMessage.Message = "You don't have enough money in Bank Account!";
+                                    return StatusCode(406, responseMessage);
+                                }
+                            }
+                            responseMessage.Message = $"Succesfully deposited {amount} leva.";
+                            return StatusCode(200, responseMessage);
                         }
                         else
                         {
-                            if (chargeAccountExists != null && chargeAccount.Amount > amount)
-                            {
-                                deposit.Amount = deposit.Amount + amount;
-                                deposit.PaymentDate = DateTime.Now.AddMonths(6);
-                                chargeAccount.Amount = chargeAccount.Amount - amount;
-                                Transaction transaction = new Transaction();
-                                transaction.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                                transaction.RecieverAccountInfo = depositExists.Iban;
-                                
-                                await dbContext.SaveChangesAsync();
-                                await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, "Added money - Bank Account - Deposit account");
-                            }
-                            else if (chargeAccountExists == null)
-                            {
-                                responseMessage.Message = "You don't have a Bank Account";
-                                return StatusCode(400, responseMessage);
-                            }
-                            else if (chargeAccountExists.Amount < amount)
-                            {
-                                responseMessage.Message = "You don't have enough money in Bank Account!";
-                                return StatusCode(406, responseMessage);
-                            }
+                            responseMessage.Message = "Invalid Iban! Deposit not found";
+                            return StatusCode(404, responseMessage);
                         }
-                        responseMessage.Message = $"Succesfully deposited {amount} leva.";
-                        return StatusCode(200, responseMessage);
                     }
-                    else
+                    catch (NullReferenceException)
                     {
                         responseMessage.Message = "Invalid Iban! Deposit not found";
                         return StatusCode(404, responseMessage);
@@ -316,21 +351,29 @@ namespace VitoshaBank.Services.DepositService
             {
                 if (userAuthenticate != null)
                 {
-                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
-                    if (depositExists != null)
+                    try
                     {
-                        depositExists.Amount = depositExists.Amount - amount;
-                        depositExists.PaymentDate = DateTime.Now.AddMonths(depositExists.TermOfPayment);
-                        await dbContext.SaveChangesAsync();
+                        depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                        if (depositExists != null)
+                        {
+                            depositExists.Amount = depositExists.Amount - amount;
+                            depositExists.PaymentDate = DateTime.Now.AddMonths(depositExists.TermOfPayment);
+                            await dbContext.SaveChangesAsync();
 
-                        Transaction transaction = new Transaction();
-                        transaction.SenderAccountInfo = depositExists.Iban;
-                        transaction.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Withdrawing {amount}");
-                        responseMessage.Message = "Money withdrawed successfully!";
-                        return StatusCode(200, responseMessage);
+                            Transaction transaction = new Transaction();
+                            transaction.SenderAccountInfo = depositExists.Iban;
+                            transaction.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Withdrawing {amount}");
+                            responseMessage.Message = "Money withdrawed successfully!";
+                            return StatusCode(200, responseMessage);
+                        }
+                        else
+                        {
+                            responseMessage.Message = "Deposit not found! Iban invalid!";
+                            return StatusCode(404, responseMessage);
+                        }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
                         responseMessage.Message = "Deposit not found! Iban invalid!";
                         return StatusCode(404, responseMessage);
@@ -363,12 +406,20 @@ namespace VitoshaBank.Services.DepositService
 
             if (role == "Admin")
             {
+
                 var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                
 
                 if (user != null)
                 {
-                    depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    try
+                    {
+                        depositExists = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "User doesn't have a Deposit";
+                        return StatusCode(400, responseMessage);
+                    }
                 }
 
                 if (user == null)
@@ -382,7 +433,7 @@ namespace VitoshaBank.Services.DepositService
                     return StatusCode(400, responseMessage);
                 }
 
-                
+
                 dbContext.Deposits.Remove(depositExists);
                 await dbContext.SaveChangesAsync();
 

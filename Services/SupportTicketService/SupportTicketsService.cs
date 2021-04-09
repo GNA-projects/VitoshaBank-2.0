@@ -183,12 +183,19 @@ namespace VitoshaBank.Services.SupportTicketService
                 }
                 User userExists = await _context.Users.FirstOrDefaultAsync(x => x.Id == ticketExists.UserId);
 
-                ticketExists.HasResponce = true;
-                await _context.SaveChangesAsync();
-                SendEmail(userExists.Email, userExists.Username, _config);
-                responseMessage.Message = "Responded to ticket succesfully!";
-                return StatusCode(200, responseMessage);
-
+                if (ticketExists.HasResponce == false)
+                {
+                    ticketExists.HasResponce = true;
+                    await _context.SaveChangesAsync();
+                    SendEmail(userExists.Email, userExists.Username, _config);
+                    responseMessage.Message = "Responded to ticket succesfully!";
+                    return StatusCode(200, responseMessage);
+                }
+                else
+                {
+                    responseMessage.Message = "Ticket is already closed!";
+                    return StatusCode(400, responseMessage);
+                }
             }
             else
             {

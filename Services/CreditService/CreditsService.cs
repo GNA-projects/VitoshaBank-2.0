@@ -215,7 +215,15 @@ namespace VitoshaBank.Services.CreditService
             {
                 if (userAuthenticate != null)
                 {
-                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    try
+                    {
+                        creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "Credit not found";
+                        return StatusCode(404, responseMessage);
+                    }
                 }
                 else
                 {
@@ -225,32 +233,39 @@ namespace VitoshaBank.Services.CreditService
 
                 if (creditExists != null)
                 {
-                    if (ValidateCreditAmount(amount, creditExists) && ValidateCredit(creditExists))
+                    try
                     {
-                        creditExists.Amount = creditExists.Amount - amount;
-                        Transaction transaction = new Transaction();
-                        transaction.SenderAccountInfo = creditExists.Iban;
-                        transaction.RecieverAccountInfo = reciever;
-                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}");
-                        await dbContext.SaveChangesAsync();
-                        responseMessage.Message = $"Succesfully purhcased {product}.";
-                        return StatusCode(200, responseMessage);
+                        if (ValidateCreditAmount(amount, creditExists) && ValidateCredit(creditExists))
+                        {
+                            creditExists.Amount = creditExists.Amount - amount;
+                            Transaction transaction = new Transaction();
+                            transaction.SenderAccountInfo = creditExists.Iban;
+                            transaction.RecieverAccountInfo = reciever;
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product}");
+                            await dbContext.SaveChangesAsync();
+                            responseMessage.Message = $"Succesfully purhcased {product}.";
+                            return StatusCode(200, responseMessage);
+                        }
+                        else if (ValidateCreditAmount(amount, credit) == false)
+                        {
+                            responseMessage.Message = "Invalid payment amount!";
+                            return StatusCode(400, responseMessage);
+                        }
+                        else if (ValidateCredit(creditExists) == false)
+                        {
+                            responseMessage.Message = "You don't have enough money in Charge account!";
+                            return StatusCode(406, responseMessage);
+                        }
                     }
-                    else if (ValidateCreditAmount(amount, credit) == false)
+                    catch (NullReferenceException)
                     {
-                        responseMessage.Message = "Invalid payment amount!";
-                        return StatusCode(400, responseMessage);
+                        responseMessage.Message = "Iban Invalid! Credit not found";
+                        return StatusCode(404, responseMessage);
                     }
-                    else if (ValidateCredit(creditExists) == false)
-                    {
-                        responseMessage.Message = "You don't have enough money in Charge account!";
-                        return StatusCode(406, responseMessage);
-                    }
-
                 }
                 else
                 {
-                    responseMessage.Message = "Credit not found";
+                    responseMessage.Message = "Invalid Credit! Iban not found!";
                     return StatusCode(404, responseMessage);
                 }
             }
@@ -288,6 +303,7 @@ namespace VitoshaBank.Services.CreditService
                     responseMessage.Message = "User not found!";
                     return StatusCode(404, responseMessage);
                 }
+
                 if (creditsExists != null)
                 {
                     try
@@ -296,7 +312,7 @@ namespace VitoshaBank.Services.CreditService
                         return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccExists);
 
                     }
-                    catch (System.NullReferenceException)
+                    catch (NullReferenceException)
                     {
                         responseMessage.Message = "Invalid Charge Account! Iban not found!";
                         return StatusCode(404, responseMessage);
@@ -325,7 +341,16 @@ namespace VitoshaBank.Services.CreditService
             {
                 if (userAuthenticate != null)
                 {
-                    creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    try
+                    {
+                        creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "Credit not found";
+                        return StatusCode(404, responseMessage);
+                    }
+
                 }
                 else
                 {
@@ -399,7 +424,15 @@ namespace VitoshaBank.Services.CreditService
 
                 if (user != null)
                 {
-                    creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    try
+                    {
+                        creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "Credit not found";
+                        return StatusCode(404, responseMessage);
+                    }
                 }
 
                 if (user == null)

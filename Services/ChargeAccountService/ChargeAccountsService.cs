@@ -55,37 +55,49 @@ namespace VitoshaBank.Services.ChargeAccountService
                 {
                     if (dbContext.ChargeAccounts.Where(x => x.UserId == userAuthenticate.Id).Count() < 10)
                     {
-                        if (ValidateUser(userAuthenticate) && ValidateChargeAccount(chargeAcc))
+                        try
                         {
-                            chargeAcc.UserId = userAuthenticate.Id;
-                            chargeAcc.Iban = IBANGenerator.GenerateIBANInVitoshaBank("ChargeAccount", dbContext);
-                            await dbContext.AddAsync(chargeAcc);
-                            await dbContext.SaveChangesAsync();
+                            if (ValidateUser(userAuthenticate) && ValidateChargeAccount(chargeAcc))
+                            {
+                                chargeAcc.UserId = userAuthenticate.Id;
+                                chargeAcc.Iban = IBANGenerator.GenerateIBANInVitoshaBank("ChargeAccount", dbContext);
+                                await dbContext.AddAsync(chargeAcc);
+                                await dbContext.SaveChangesAsync();
 
 
-                            Card card = new Card();
-                            await _debitCardService.CreateDebitCard(currentUser, username, chargeAcc, card);
+                                Card card = new Card();
+                                await _debitCardService.CreateDebitCard(currentUser, username, chargeAcc, card);
 
-                            SendEmail(userAuthenticate.Email, _config);
-                            responseModel.Message = "Charge Account created succesfully";
-                            return StatusCode(201, responseModel);
+                                SendEmail(userAuthenticate.Email, _config);
+                                responseModel.Message = "Charge Account created succesfully";
+                                return StatusCode(201, responseModel);
+                            }
+                            else if (ValidateUser(userAuthenticate) == false)
+                            {
+                                responseModel.Message = "User not found!";
+                                return StatusCode(404, responseModel);
+                            }
+                            else if (ValidateChargeAccount(chargeAcc) == false)
+                            {
+                                responseModel.Message = "Invalid parameteres!";
+                                return StatusCode(400, responseModel);
+                            }
                         }
-                        else if (ValidateUser(userAuthenticate) == false)
-                        {
-                            responseModel.Message = "User not found!";
-                            return StatusCode(404, responseModel);
-                        }
-                        else if (ValidateChargeAccount(chargeAcc) == false)
+                        catch (NullReferenceException)
                         {
                             responseModel.Message = "Invalid parameteres!";
                             return StatusCode(400, responseModel);
                         }
                     }
 
+                    responseModel.Message = "User already has 10 Charge Accounts!";
+                    return StatusCode(400, responseModel);
                 }
-
-                responseModel.Message = "User already has a Charge Account!";
-                return StatusCode(400, responseModel);
+                else
+                {
+                    responseModel.Message = "User not found!";
+                    return StatusCode(404, responseModel);
+                }
             }
             else
             {
@@ -144,8 +156,17 @@ namespace VitoshaBank.Services.ChargeAccountService
             {
                 if (userAuthenticate != null)
                 {
-                    bankAccounts = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == bankAccount.Iban);
-                    depositsExist = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    try
+                    {
+                        bankAccounts = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == bankAccount.Iban);
+                        depositsExist = await dbContext.Deposits.FirstOrDefaultAsync(x => x.Iban == deposit.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseModel.Message = "Invalid Iban for Charge Account or Deposit! Please check Iban";
+                        return StatusCode(400, responseModel);
+                    }
+
                 }
                 else
                 {
@@ -155,24 +176,34 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                 if (bankAccounts != null && depositsExist != null)
                 {
-                    if (ValidateDepositAmountChargeAccount(amount))
+                    try
                     {
-                        bankAccounts.Amount = bankAccounts.Amount + amount;
-                        depositsExist.Amount = depositsExist.Amount - amount;
-                        await dbContext.SaveChangesAsync();
-                        Transaction transactions = new Transaction();
-                        transactions.RecieverAccountInfo = bankAccounts.Iban;
-                        transactions.SenderAccountInfo = depositsExist.Iban;
-                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account");
-                        responseModel.Message = "Money deposited succesfully!";
-                        return StatusCode(200, responseModel);
+                        if (ValidateDepositAmountChargeAccount(amount))
+                        {
+                            bankAccounts.Amount = bankAccounts.Amount + amount;
+                            depositsExist.Amount = depositsExist.Amount - amount;
+                            await dbContext.SaveChangesAsync();
+                            Transaction transactions = new Transaction();
+                            transactions.RecieverAccountInfo = bankAccounts.Iban;
+                            transactions.SenderAccountInfo = depositsExist.Iban;
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account");
+                            responseModel.Message = "Money deposited succesfully!";
+                            return StatusCode(200, responseModel);
+                        }
+
+                        responseModel.Message = "Invalid deposit amount!";
+                        return StatusCode(400, responseModel);
                     }
-                    responseModel.Message = "Invalid deposit amount!";
-                    return StatusCode(400, responseModel);
+                    catch (NullReferenceException)
+                    {
+                        responseModel.Message = "Charge Account or Deposit not found! Invalid Iban!";
+                        return StatusCode(404, responseModel);
+                    }
+
                 }
                 else
                 {
-                    responseModel.Message = "Charge Account not found! Iban Invalid!";
+                    responseModel.Message = "Charge Account or Deposit not found! Invalid Iban!";
                     return StatusCode(404, responseModel);
                 }
             }
@@ -187,40 +218,46 @@ namespace VitoshaBank.Services.ChargeAccountService
             var amount = requestModel.Amount;
             ChargeAccount chargeAcc = requestModel.ChargeAccount;
             ChargeAccount chargeAccExists = null;
-            ChargeAccountResponseModel chargeResponseModel = new ChargeAccountResponseModel();
-            BCryptPasswordHasher _BCrypt = new BCryptPasswordHasher();
 
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 if (userAuthenticate != null)
                 {
-                    chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
+                    try
+                    {
+                        chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
 
-                    if (chargeAccExists != null && ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAccExists, amount))
-                    {
-                        chargeAcc.Amount = chargeAcc.Amount - amount;
-                        Transaction transactions = new Transaction();
-                        transactions.SenderAccountInfo = chargeAccExists.Iban;
-                        transactions.RecieverAccountInfo = reciever;
-                        await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account");
-                        await dbContext.SaveChangesAsync();
-                        responseModel.Message = $"Succesfully purhcased {product}.";
-                        return StatusCode(200, responseModel);
+                        if (chargeAccExists != null && ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAccExists, amount))
+                        {
+                            chargeAcc.Amount = chargeAcc.Amount - amount;
+                            Transaction transactions = new Transaction();
+                            transactions.SenderAccountInfo = chargeAccExists.Iban;
+                            transactions.RecieverAccountInfo = reciever;
+                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account");
+                            await dbContext.SaveChangesAsync();
+                            responseModel.Message = $"Succesfully purhcased {product}.";
+                            return StatusCode(200, responseModel);
+                        }
+                        else if (chargeAccExists == null)
+                        {
+                            responseModel.Message = "Charge Account not found! Invalid Iban";
+                            return StatusCode(404, responseModel);
+                        }
+                        else if (ValidateDepositAmountChargeAccount(amount) == false)
+                        {
+                            responseModel.Message = "Invalid payment amount!";
+                            return StatusCode(400, responseModel);
+                        }
+                        else if (ValidateChargeAccount(chargeAccExists, amount) == false)
+                        {
+                            responseModel.Message = "You don't have enough money in Charge account!";
+                            return StatusCode(406, responseModel);
+                        }
                     }
-                    else if(chargeAccExists == null)
+                    catch (NullReferenceException)
                     {
-                        responseModel.Message = "Charge Account not found";
+                        responseModel.Message = "Charge Account not found! Invalid Iban";
                         return StatusCode(404, responseModel);
-                    }
-                    else if (ValidateDepositAmountChargeAccount(amount) == false)
-                    {
-                        responseModel.Message = "Invalid payment amount!";
-                        return StatusCode(400, responseModel);
-                    }
-                    else if (ValidateChargeAccount(chargeAccExists, amount) == false)
-                    {
-                        responseModel.Message = "You don't have enough money in Charge account!";
-                        return StatusCode(406, responseModel);
                     }
                 }
                 else
@@ -253,31 +290,38 @@ namespace VitoshaBank.Services.ChargeAccountService
             {
                 if (userAuthenticate != null)
                 {
-                    chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
-
-                    if (chargeAccExists != null)
+                    try
                     {
-                        if (ValidateDepositAmountChargeAccount(amount))
-                        {
-                            chargeAcc.Amount = chargeAcc.Amount + amount;
-                            await dbContext.SaveChangesAsync();
-                            Transaction transactions = new Transaction();
-                            transactions.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                            transactions.RecieverAccountInfo = chargeAcc.Iban;
-                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money in Charge Account");
-                            responseModel.Message = $"Succesfully deposited {amount} leva in Charge Account.";
-                            return StatusCode(200, responseModel);
-                        }
+                        chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
 
-                        responseModel.Message = "Invalid money amount!";
-                        return StatusCode(400, responseModel);
+                        if (chargeAccExists != null)
+                        {
+                            if (ValidateDepositAmountChargeAccount(amount))
+                            {
+                                chargeAcc.Amount = chargeAcc.Amount + amount;
+                                await dbContext.SaveChangesAsync();
+                                Transaction transactions = new Transaction();
+                                transactions.SenderAccountInfo = $"User {userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                                transactions.RecieverAccountInfo = chargeAcc.Iban;
+                                await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money in Charge Account");
+                                responseModel.Message = $"Succesfully deposited {amount} leva in Charge Account.";
+                                return StatusCode(200, responseModel);
+                            }
+
+                            responseModel.Message = "Invalid money amount!";
+                            return StatusCode(400, responseModel);
+                        }
+                        else
+                        {
+                            responseModel.Message = "Charge Account not found! Iban Invalid!";
+                            return StatusCode(404, responseModel);
+                        }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
                         responseModel.Message = "Charge Account not found! Iban Invalid!";
                         return StatusCode(404, responseModel);
                     }
-
                 }
                 else
                 {
@@ -303,39 +347,47 @@ namespace VitoshaBank.Services.ChargeAccountService
             {
                 if (userAuthenticate != null)
                 {
-                    chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
-
-                    if (chargeAccExists != null)
+                    try
                     {
-                        if (ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAcc, amount) && ValidateMinAmount(chargeAcc, amount))
-                        {
-                            chargeAcc.Amount = chargeAcc.Amount - amount;
-                            Transaction transactions = new Transaction();
-                            transactions.SenderAccountInfo = chargeAcc.Iban;
-                            transactions.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
-                            await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
-                            await dbContext.SaveChangesAsync();
-                            responseModel.Message = $"Succesfully withdrawed {amount} leva.";
-                            return StatusCode(200, responseModel);
-                        }
-                        else if (ValidateDepositAmountChargeAccount(amount) == false)
-                        {
-                            responseModel.Message = "Invalid payment amount!";
-                            return StatusCode(400, responseModel);
-                        }
-                        else if (ValidateChargeAccount(chargeAcc, amount) == false)
-                        {
-                            responseModel.Message = "You don't have enough money in Charge Account!";
-                            return StatusCode(406, responseModel);
-                        }
-                        else if (ValidateMinAmount(chargeAcc, amount) == false)
-                        {
-                            responseModel.Message = "Min amount is 10 leva!";
-                            return StatusCode(406, responseModel);
-                        }
+                        chargeAccExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAcc.Iban);
 
+                        if (chargeAccExists != null)
+                        {
+                            if (ValidateDepositAmountChargeAccount(amount) && ValidateChargeAccount(chargeAcc, amount) && ValidateMinAmount(chargeAcc, amount))
+                            {
+                                chargeAcc.Amount = chargeAcc.Amount - amount;
+                                Transaction transactions = new Transaction();
+                                transactions.SenderAccountInfo = chargeAcc.Iban;
+                                transactions.RecieverAccountInfo = $"{userAuthenticate.FirstName} {userAuthenticate.LastName}";
+                                await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Withdrawing {amount} leva");
+                                await dbContext.SaveChangesAsync();
+                                responseModel.Message = $"Succesfully withdrawed {amount} leva.";
+                                return StatusCode(200, responseModel);
+                            }
+                            else if (ValidateDepositAmountChargeAccount(amount) == false)
+                            {
+                                responseModel.Message = "Invalid payment amount!";
+                                return StatusCode(400, responseModel);
+                            }
+                            else if (ValidateChargeAccount(chargeAcc, amount) == false)
+                            {
+                                responseModel.Message = "You don't have enough money in Charge Account!";
+                                return StatusCode(406, responseModel);
+                            }
+                            else if (ValidateMinAmount(chargeAcc, amount) == false)
+                            {
+                                responseModel.Message = "Min amount is 10 leva!";
+                                return StatusCode(406, responseModel);
+                            }
+
+                        }
+                        else
+                        {
+                            responseModel.Message = "Charge Account not found! Iban Invalid!";
+                            return StatusCode(404, responseModel);
+                        }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
                         responseModel.Message = "Charge Account not found! Iban Invalid!";
                         return StatusCode(404, responseModel);
@@ -381,10 +433,10 @@ namespace VitoshaBank.Services.ChargeAccountService
                         creditExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.UserId == user.Id);
                         userChargeAcc = await dbContext.UserAccounts.FirstOrDefaultAsync(x => x.ChargeAccountId == chargeAccExists.Id);
                     }
-                    catch (Exception)
+                    catch (NullReferenceException)
                     {
-
-
+                        responseModel.Message = "Charge Account not found! Iban Invalid!";
+                        return StatusCode(404, responseModel);
                     }
 
                 }

@@ -103,39 +103,47 @@ namespace VitoshaBank.Services.WalletService
 
                 if (userAuthenticate != null)
                 {
-                    if (dbContext.Wallets.Where(x => x.UserId == userAuthenticate.Id).Count() < 7)
+                    try
                     {
-                        if (ValidateUser(userAuthenticate) && ValidateWallet(wallet))
+                        if (dbContext.Wallets.Where(x => x.UserId == userAuthenticate.Id).Count() < 7)
                         {
-                            wallet.UserId = userAuthenticate.Id;
-                            wallet.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Wallet", dbContext);
-                            wallet.CardNumber = GenerateCardInfo.GenerateNumber(11);
-                            var CVV = GenerateCardInfo.GenerateCVV(3);
-                            wallet.Cvv = (CVV);
-                            wallet.CardExpirationDate = DateTime.Now.AddMonths(60);
+                            if (ValidateUser(userAuthenticate) && ValidateWallet(wallet))
+                            {
+                                wallet.UserId = userAuthenticate.Id;
+                                wallet.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Wallet", dbContext);
+                                wallet.CardNumber = GenerateCardInfo.GenerateNumber(11);
+                                var CVV = GenerateCardInfo.GenerateCVV(3);
+                                wallet.Cvv = (CVV);
+                                wallet.CardExpirationDate = DateTime.Now.AddMonths(60);
 
-                            await dbContext.AddAsync(wallet);
-                            await dbContext.SaveChangesAsync();
+                                await dbContext.AddAsync(wallet);
+                                await dbContext.SaveChangesAsync();
 
-                            SendEmail(userAuthenticate.Email, _config);
-                            responseMessage.Message = "Wallet created succesfully!";
-                            return StatusCode(200, responseMessage);
+                                SendEmail(userAuthenticate.Email, _config);
+                                responseMessage.Message = "Wallet created succesfully!";
+                                return StatusCode(200, responseMessage);
+                            }
+                            else if (ValidateUser(userAuthenticate) == false)
+                            {
+                                responseMessage.Message = "User not found!";
+                                return StatusCode(404, responseMessage);
+                            }
+                            else if (ValidateWallet(wallet) == false)
+                            {
+                                responseMessage.Message = "Don't put negative value!";
+                                return StatusCode(400, responseMessage);
+                            }
                         }
-                        else if (ValidateUser(userAuthenticate) == false)
-                        {
-                            responseMessage.Message = "User not found!";
-                            return StatusCode(404, responseMessage);
-                        }
-                        else if (ValidateWallet(wallet) == false)
-                        {
-                            responseMessage.Message = "Don't put negative value!";
-                            return StatusCode(400, responseMessage);
-                        }
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "User not found!";
+                        return StatusCode(404, responseMessage);
                     }
 
                 }
 
-                responseMessage.Message = "User already has a wallet!";
+                responseMessage.Message = "User already has 7 wallets!";
                 return StatusCode(400, responseMessage);
             }
             else
@@ -157,26 +165,33 @@ namespace VitoshaBank.Services.WalletService
             {
                 if (userAuthenticate != null)
                 {
-                    walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-
-                    if (walletExists != null)
+                    try
                     {
-                        chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
+                        walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
 
-                        if (walletExists.CardExpirationDate > DateTime.Now)
+                        if (walletExists != null)
                         {
-                            responseMessage.Message = "Wallet Card is expired";
-                            return StatusCode(406, responseMessage);
-                        }
+                            chargeAccountExists = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.Iban == chargeAccount.Iban);
 
-                        return await ValidateDepositAmountAndBankAccount(userAuthenticate, currentUser, walletExists, amount, chargeAccountExists, _transactionsService);
+                            if (walletExists.CardExpirationDate > DateTime.Now)
+                            {
+                                responseMessage.Message = "Wallet Card is expired";
+                                return StatusCode(406, responseMessage);
+                            }
+
+                            return await ValidateDepositAmountAndBankAccount(userAuthenticate, currentUser, walletExists, amount, chargeAccountExists, _transactionsService);
+                        }
+                        else
+                        {
+                            responseMessage.Message = "Wallet not found! Invalid Iban!";
+                            return StatusCode(404, responseMessage);
+                        }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
-                        responseMessage.Message = "Wallet not found! Invalid Iban!";
+                        responseMessage.Message = "Wallet or Bank account not found! Check Iban!";
                         return StatusCode(404, responseMessage);
                     }
-
                 }
                 else
                 {
@@ -204,18 +219,26 @@ namespace VitoshaBank.Services.WalletService
             {
                 if (userAuthenticate != null)
                 {
-                    walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-                    if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && wallet.Cvv == walletExists.Cvv))
+                    try
                     {
-                        if (walletExists.CardExpirationDate > DateTime.Now)
+                        walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
+                        if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && wallet.Cvv == walletExists.Cvv))
                         {
-                            responseMessage.Message = "Wallet Card is expired";
-                            return StatusCode(406, responseMessage);
-                        }
+                            if (walletExists.CardExpirationDate > DateTime.Now)
+                            {
+                                responseMessage.Message = "Wallet Card is expired";
+                                return StatusCode(406, responseMessage);
+                            }
 
-                        return await ValidatePurchaseAmountAndBankAccount(userAuthenticate, currentUser, walletExists, product, reciever, amount, _transactionsService);
+                            return await ValidatePurchaseAmountAndBankAccount(userAuthenticate, currentUser, walletExists, product, reciever, amount, _transactionsService);
+                        }
+                        else
+                        {
+                            responseMessage.Message = "Wallet not found! Invalid Credentials!";
+                            return StatusCode(404, responseMessage);
+                        }
                     }
-                    else
+                    catch (NullReferenceException)
                     {
                         responseMessage.Message = "Wallet not found! Invalid Credentials!";
                         return StatusCode(404, responseMessage);
@@ -251,7 +274,15 @@ namespace VitoshaBank.Services.WalletService
 
                 if (user != null)
                 {
-                    walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
+                    try
+                    {
+                        walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "User doesn't have a Wallet";
+                        return StatusCode(400, responseMessage);
+                    }
                 }
 
                 if (user == null)
@@ -357,7 +388,7 @@ namespace VitoshaBank.Services.WalletService
                     walletExists.Amount = walletExists.Amount - amount;
                     transaction.SenderAccountInfo = walletExists.Iban;
                     transaction.RecieverAccountInfo = reciever;
-                   
+
                     await dbContext.SaveChangesAsync();
                     await _transation.CreateTransaction(userAuthenticate, currentUser, amount, transaction, $"Purchasing {product} with Wallet");
                 }
