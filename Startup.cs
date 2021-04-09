@@ -29,6 +29,9 @@ using VitoshaBank.Services.DebitCardService;
 using VitoshaBank.Services.TransactionService.Interfaces;
 using VitoshaBank.Services.TransactionService;
 using Microsoft.AspNetCore.HttpOverrides;
+using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.InterestService.Interfaces;
+
 
 namespace VitoshaBank
 {
@@ -54,6 +57,7 @@ namespace VitoshaBank
             services.AddScoped<IChargeAccountsService, ChargeAccountsService>();
             services.AddScoped<ICalculatorService, CalculatorService>();
             services.AddScoped<ITransactionsService, TransactionsService>();
+            services.AddScoped<ICreditPayOff, CreditPayOff>();
 
 
 

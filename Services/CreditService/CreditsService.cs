@@ -16,6 +16,7 @@ using VitoshaBank.Services.BcryptHasherService;
 using VitoshaBank.Services.CreditService.Interfaces;
 using VitoshaBank.Services.IbanGenereatorService;
 using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.InterestService.Interfaces;
 using VitoshaBank.Services.TransactionService.Interfaces;
 
 namespace VitoshaBank.Services.CreditService
@@ -25,17 +26,19 @@ namespace VitoshaBank.Services.CreditService
         private readonly BankSystemContext dbContext;
         private readonly IConfiguration config;
         private readonly ITransactionsService _transactionsService;
+        private readonly ICreditPayOff _creditPay;
         MessageModel responseMessage = new MessageModel();
-        public CreditsService(BankSystemContext context, IConfiguration _config, ITransactionsService transactionsService)
+        public CreditsService(BankSystemContext context, IConfiguration _config, ITransactionsService transactionsService, ICreditPayOff creditPay)
         {
             dbContext = context;
             config = _config;
             _transactionsService = transactionsService;
+            _creditPay = creditPay;
         }
 
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel)
         {
-           
+
             string role = "";
             string username = requestModel.Username;
             Credit credit = requestModel.Credit;
@@ -58,7 +61,7 @@ namespace VitoshaBank.Services.CreditService
                     {
                         if (ValidateUser(userAuthenticate) && ValidateCredit(credit))
                         {
-                            
+
                             credit.Iban = IBANGenerator.GenerateIBANInVitoshaBank("Credit", dbContext);
                             credit.Interest = 6.9m;
                             credit.CreditAmount = CalculateInterest.CalculateCreditAmount(credit.Amount, period, credit.Interest);
@@ -68,7 +71,7 @@ namespace VitoshaBank.Services.CreditService
                             credit.UserId = userAuthenticate.Id;
                             await dbContext.AddAsync(credit);
                             await dbContext.SaveChangesAsync();
-                            
+
 
                             SendEmail(userAuthenticate.Email);
                             responseMessage.Message = "Credit created succesfully!";
@@ -97,7 +100,7 @@ namespace VitoshaBank.Services.CreditService
                 return StatusCode(403, responseMessage);
             }
         }
-        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username )
+        public async Task<ActionResult<ICollection<CreditResponseModel>>> GetCreditInfo(ClaimsPrincipal currentUser, string username)
         {
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
@@ -113,11 +116,12 @@ namespace VitoshaBank.Services.CreditService
                 {
                     List<CreditResponseModel> responseModels = new List<CreditResponseModel>();
                     foreach (var creditRef in userCredits)
-                    { 
+                    {
                         CreditResponseModel creditResponseModel = new CreditResponseModel();
                         creditResponseModel.IBAN = creditRef.Iban;
                         creditResponseModel.Amount = Math.Round(creditRef.Amount, 2);
                         creditResponseModel.Instalment = creditRef.Instalment;
+                        creditResponseModel.CreditAmount = creditRef.CreditAmountLeft;
 
                         responseModels.Add(creditResponseModel);
                     }
@@ -148,34 +152,55 @@ namespace VitoshaBank.Services.CreditService
                 }
                 else
                 {
+                    ChargeAccount chargeAcc = await dbContext.ChargeAccounts.FirstOrDefaultAsync(x => x.UserId == userAuthenticate.Id);
+                    bool hasDeleted = false;
                     foreach (var creditRef in dbContext.Credits.Where(x => x.UserId == userAuthenticate.Id))
                     {
                         var credit = creditRef;
-                        CreditPayOff payOff = new CreditPayOff();
-                        await payOff.GetCreditPayOff(credit, username, dbContext);
+                        if (credit == null)
+                        {
+                            responseMessage.Message = "You don't have a Credit";
+                            return StatusCode(400, responseMessage);
+                        }
 
+
+                        await GetCreditPayOff(credit, username);
                         if (credit.CreditAmountLeft == 0 && credit.CreditAmount > 0)
                         {
                             CreditRequestModel requestModel = new CreditRequestModel();
                             requestModel.Credit = credit;
                             requestModel.Username = username;
                             responseMessage.Message = "You have payed your Credit!";
-                            await this.DeleteCredit(requestModel,currentUser);
+                            DeleteCreditFromPayOff(credit, currentUser,chargeAcc);
+                            hasDeleted = true;
                         }
-                        else
-                        {
-                            responseMessage.Message = "Successfully payed montly pay off!";
-                            return StatusCode(200, responseMessage);
-                        }
+
                     }
+                    await dbContext.SaveChangesAsync();
+                    if (hasDeleted)
+                    {
+                        responseMessage.Message = ($"Successfully payed montly pay off! Credit payed successfully! The left amount from the  credit is transfered to Bank Account with Iban: {chargeAcc.Iban}");
+                        return StatusCode(200, responseMessage);
+                    }
+                    responseMessage.Message = "Successfully payed montly pay off!";
+                    return StatusCode(200, responseMessage);
                 }
-                responseMessage.Message = "You don't have a Credit";
-                return StatusCode(400, responseMessage);
             }
 
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
+
+        private Task<ActionResult<MessageModel>> DeleteCreditFromPayOff(Credit credit, ClaimsPrincipal currentUser, ChargeAccount chargeAccount)
+        {
+            
+            chargeAccount.Amount += credit.Amount;
+            responseMessage.Message = ($"Credit payed successfully! The left amount from the  credit is transfered to Bank Account with Iban: {chargeAccount.Iban}");
+            dbContext.Remove(credit);
+            return StatusCode(200);
+        }
+      
+
         public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             //amount credit product reciever
@@ -247,7 +272,16 @@ namespace VitoshaBank.Services.CreditService
             {
                 if (userAuthenticate != null)
                 {
-                    creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x =>x.Iban == credit.Iban);
+                    try
+                    {
+                        creditsExists = await dbContext.Credits.FirstOrDefaultAsync(x => x.Iban == credit.Iban);
+
+                    }
+                    catch (NullReferenceException)
+                    {
+                        responseMessage.Message = "Credit not found";
+                        return StatusCode(404, responseMessage);
+                    }
                 }
                 else
                 {
@@ -259,6 +293,7 @@ namespace VitoshaBank.Services.CreditService
                     try
                     {
                         bankAccExists = dbContext.ChargeAccounts.FirstOrDefault(x => x.Iban == bankAccounts.Iban);
+                        return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccExists);
 
                     }
                     catch (System.NullReferenceException)
@@ -266,8 +301,7 @@ namespace VitoshaBank.Services.CreditService
                         responseMessage.Message = "Invalid Charge Account! Iban not found!";
                         return StatusCode(404, responseMessage);
                     }
-                    
-                    return await ValidateDepositAmountAndCredit(userAuthenticate, creditsExists, currentUser, amount, bankAccExists);
+
                 }
                 else
                 {
@@ -324,7 +358,7 @@ namespace VitoshaBank.Services.CreditService
                     }
                     else if (ValidateMinAmount(creditExists, amount) == false)
                     {
-                        responseMessage.Message = "Min amount is 10 lv!";
+                        responseMessage.Message = "The amount is bigger than Credit Account's amount!";
                         return StatusCode(406, responseMessage);
                     }
 
@@ -461,7 +495,50 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = $"Succesfully deposited {amount} leva.";
             return StatusCode(200, responseMessage);
         }
+        private async Task<ActionResult<MessageModel>> GetCreditPayOff(Credit credit, string username)
+        {
+            while (DateTime.Now >= credit.PaymentDate)
+            {
+                if (credit.Instalment <= credit.Amount)
+                {
 
+                    credit.Amount = credit.Amount - credit.Instalment;
+                    credit.CreditAmountLeft = credit.CreditAmountLeft - credit.Instalment;
+                    credit.PaymentDate = credit.PaymentDate.AddMonths(1);
+
+                    responseMessage.Message = "Credit instalment payed off successfully from Credit Account!";
+                    return StatusCode(200, responseMessage);
+                }
+                else
+                {
+                    int count = 1;
+                    var chargeAccountsCollection = dbContext.ChargeAccounts.Where(x => x.UserId == dbContext.Users.FirstOrDefault(z => z.Username == username).Id);
+                    foreach (var chargeAccountReff in chargeAccountsCollection)
+                    {
+                        ChargeAccount chargeAccount = chargeAccountReff;
+                        if (credit.Instalment <= chargeAccount.Amount)
+                        {
+                            chargeAccount.Amount = chargeAccount.Amount - credit.Instalment;
+                            credit.CreditAmountLeft = credit.CreditAmountLeft - credit.Instalment;
+                            credit.PaymentDate = credit.PaymentDate.AddMonths(1);
+                            await dbContext.SaveChangesAsync();
+                            responseMessage.Message = "Credit instalment payed off successfully from Charge Account!";
+                            return StatusCode(200, responseMessage);
+                        }
+                        else
+                        {
+                            if (count > chargeAccountsCollection.Count())
+                            {
+                                responseMessage.Message = "You don't have enough money to pay off Your instalment! Come to our office as soon as possible to discuss what happens from now on!";
+                                return StatusCode(406, responseMessage);
+                            }
+                            count++;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
         private void SendEmail(string email)
         {
             var fromMail = new MailAddress(config["Email:Email"], $"Credit account created");
