@@ -163,12 +163,18 @@ namespace VitoshaBank.Services.ChargeAccountService
                         Transaction transactions = new Transaction();
                         transactions.RecieverAccountInfo = bankAccounts.Iban;
                         transactions.SenderAccountInfo = depositsExist.Iban;
+
                         await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, "Depositing money Deposit Account -> Charge Account");
                         responseModel.Message = "Money deposited succesfully!";
                         return StatusCode(200, responseModel);
                     }
                     responseModel.Message = "Invalid deposit amount!";
                     return StatusCode(400, responseModel);
+                }
+                else if (depositsExist != null)
+                {
+                    responseModel.Message = "Deposit Account not found! Iban Invalid!";
+                    return StatusCode(404, responseModel);
                 }
                 else
                 {
@@ -202,12 +208,27 @@ namespace VitoshaBank.Services.ChargeAccountService
                         Transaction transactions = new Transaction();
                         transactions.SenderAccountInfo = chargeAccExists.Iban;
                         transactions.RecieverAccountInfo = reciever;
+                        if (reciever == null||reciever == "")
+                        {
+                            responseModel.Message = "Reciever cannot be null";
+                            return StatusCode(400, responseModel);
+                        }
+                        if (product == null || product=="")
+                        {
+                            responseModel.Message = "Product cannot be null";
+                            return StatusCode(400, responseModel);
+                        }
+                        if (amount == 0)
+                        {
+                            responseModel.Message = "Amount cannot be null";
+                            return StatusCode(400, responseModel);
+                        }
                         await _transactionsService.CreateTransaction(userAuthenticate, currentUser, amount, transactions, $"Purchasing {product} with Charge Account");
                         await dbContext.SaveChangesAsync();
                         responseModel.Message = $"Succesfully purhcased {product}.";
                         return StatusCode(200, responseModel);
                     }
-                    else if(chargeAccExists == null)
+                    else if (chargeAccExists == null)
                     {
                         responseModel.Message = "Charge Account not found";
                         return StatusCode(404, responseModel);
