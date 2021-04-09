@@ -35,7 +35,7 @@ namespace VitoshaBank.Controllers
         }
         [HttpGet("check")]
         [Authorize]
-        public async Task<ActionResult<CreditResponseModel>> GetPayOffInfo()
+        public async Task<ActionResult<MessageModel>> GetPayOffInfo()
         {
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
