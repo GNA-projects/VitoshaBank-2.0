@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createWalletReq } from "../../../../api/admin/admin";
+import { createWalletReq } from "../../../../api/admin/wallet";
 import {Form, FormBig} from "../../../../components/Form";
 import bg from "./bg.jpg"
 

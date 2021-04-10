@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createCreditReq } from "../../../../api/admin/admin";
+import { createCreditReq } from "../../../../api/admin/credit";
 import {Form, FormBig} from "../../../../components/Form";
 import bg from "./bg.jpg"
 

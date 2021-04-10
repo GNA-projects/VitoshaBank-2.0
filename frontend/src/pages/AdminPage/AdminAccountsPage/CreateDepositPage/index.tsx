@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createDepositReq } from "../../../../api/admin/admin";
+import { createDepositReq } from "../../../../api/admin/deposit";
 import {Form, FormBig} from "../../../../components/Form";
 import bg from "./bg.jpg"
 

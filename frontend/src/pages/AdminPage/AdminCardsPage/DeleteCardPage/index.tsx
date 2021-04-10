@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, FormBig } from "../../../../components/Form";
-import { deleteCardReq } from "../../../../api/cards/cards";
+import { deleteCardReq } from "../../../../api/admin/cards";
 import bg from "./bg.jpg";
 
 export default function DeleteCardPage() {

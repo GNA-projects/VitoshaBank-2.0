@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { createCreditReq } from "../../../../api/admin/admin";
-import { deleteChargeReq, deleteCreditReq, deleteDepositReq, deleteWalletReq } from "../../../../api/admin/delete";
-import { getChargesReq } from "../../../../api/bankAccount/charge";
-import { getCreditsReq } from "../../../../api/bankAccount/credit";
-import { getDepositsReq } from "../../../../api/bankAccount/deposit";
+import { deleteCreditReq } from "../../../../api/admin/credit";
+import { deleteChargeReq } from "../../../../api/admin/charge";
+import { deleteWalletReq } from "../../../../api/admin/wallet";
+import { deleteDepositReq } from "../../../../api/admin/deposit";
 import { Form, FormBig } from "../../../../components/Form";
 import bg from "./bg.jpg";
 

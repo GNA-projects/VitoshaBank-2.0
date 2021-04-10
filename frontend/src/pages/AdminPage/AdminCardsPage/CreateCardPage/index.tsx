@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, FormBig } from "../../../../components/Form";
-import { createCardReq } from "../../../../api/cards/cards";
+import { createCardReq } from "../../../../api/admin/cards";
 import bg from "./bg.jpg";
 
 export default function CreateCardPage() {

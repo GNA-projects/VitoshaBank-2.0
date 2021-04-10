@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { usersReq } from "../../../../api/admin/admin";
+import { getUsersReq } from "../../../../api/admin/user";
 import Review from "../../../../components/Review";
 
 export default function ReviewUsersPage() {
 	const [users, setUsers] = useState([]);
 
 	const getUsers = async () => {
-		let urs = await usersReq();
+		let urs = await getUsersReq();
 		setUsers(urs);
 		console.log(urs);
 	};

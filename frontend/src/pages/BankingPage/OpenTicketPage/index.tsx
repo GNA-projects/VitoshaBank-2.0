@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createTicketReq } from "../../../api/admin/tickets";
+import { createTicketReq } from "../../../api/banking/tickets";
 import {FormBig,Form} from '../../../components/Form/index'
 import bg from "./bg.jpg";
 

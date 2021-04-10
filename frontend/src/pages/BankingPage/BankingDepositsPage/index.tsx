@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getDepositsReq } from "../../../api/bankAccount/deposit";
+import { getDepositsReq } from "../../../api/banking/deposit";
 import BalanceWrap from "../../../components/Banking/BalanceWrap";
 
 export default function BankingDepositsPage() {

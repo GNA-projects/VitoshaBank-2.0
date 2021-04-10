@@ -12,7 +12,7 @@ export const createUserReq = async (
 	lname: string | undefined,
 	password: string | undefined,
 	mail: string | undefined,
-	isAdmin: boolean | undefined,
+	isAdmin: boolean | undefined
 ) => {
 	refreshToken();
 	return await axivit
@@ -31,5 +31,17 @@ export const createUserReq = async (
 		})
 		.catch((err) => {
 			return err.response.data.message;
+		});
+};
+
+export const getUsersReq = async () => {
+	refreshToken();
+	return await axivit
+		.get("/users/all")
+		.then((res) => {
+			return res.data;
+		})
+		.catch((err) => {
+			return err;
 		});
 };

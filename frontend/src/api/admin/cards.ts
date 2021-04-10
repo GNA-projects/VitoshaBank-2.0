@@ -48,15 +48,3 @@ export const deleteCardReq = async (
 		});
 };
 
-export const getCardsReq = async () => {
-	refreshToken();
-	return await axivit
-		.get("/debits")
-		.then((res) => {
-			return res.data;
-		})
-		.catch((err) => {
-			alert(err.response.data.message);
-			return [];
-		});
-};

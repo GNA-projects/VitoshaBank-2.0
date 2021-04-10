@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCardsReq } from "../../../api/cards/cards";
+import { getCardsReq } from "../../../api/banking/cards";
 import BalanceWrap from "../../../components/Banking/BalanceWrap";
 
 export default function BankingCardsPage() {
