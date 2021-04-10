@@ -9,6 +9,7 @@ export default function Accounts() {
 			<Options.Link to="/admin/accounts/deposit">Create Deposit</Options.Link>
 			<Options.Link to="/admin/accounts/charge">Create Charge</Options.Link>
 			<Options.Link to="/admin/accounts/credit">Create Credit</Options.Link>
+			<Options.Link to="/admin/accounts/wallet">Create Wallet</Options.Link>
 		</Options>
 	);
 }

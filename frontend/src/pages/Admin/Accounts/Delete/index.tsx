@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createCreditReq } from "../../../../api/admin/admin";
-import { deleteChargeReq, deleteCreditReq, deleteDepositReq } from "../../../../api/admin/delete";
+import { deleteChargeReq, deleteCreditReq, deleteDepositReq, deleteWalletReq } from "../../../../api/admin/delete";
 import { getChargesReq } from "../../../../api/bankAccount/charge";
 import { getCreditsReq } from "../../../../api/bankAccount/credit";
 import { getDepositsReq } from "../../../../api/bankAccount/deposit";
@@ -13,7 +13,7 @@ export default function DeleteAccount() {
 	const [type, setType] = useState("");
 
 	const deleteAccount = async () => {
-		let res = "No acc deleted";
+		let res = "No Such Type";
 		if (type == "Credit") {
 			res = await deleteCreditReq(username, iban);
 		}
@@ -22,6 +22,9 @@ export default function DeleteAccount() {
 		}
 		if (type == "Deposit") {
 			res = await deleteDepositReq(username, iban);
+		}
+		if (type == "Wallet") {
+			res = await deleteWalletReq(username, iban);
 		}
 		alert(res);
 	};

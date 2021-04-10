@@ -39,6 +39,8 @@ import CreateCharge from "../../pages/Admin/Accounts/Charge";
 import DeleteAccount from "../../pages/Admin/Accounts/Delete";
 import ReviewTickets from "../../pages/Admin/Review/Tickets";
 import OpenTicket from "../../pages/Banking/OpenTicket";
+import CreateWallet from "../../pages/Admin/Accounts/Wallet";
+import Wallets from "../../pages/Banking/Wallets";
 
 function Template() {
 	return (
@@ -57,6 +59,7 @@ function Template() {
 					<PrivateRoute exact path="/banking/deposit" component={Deposit} />
 					<PrivateRoute exact path="/banking/credit" component={Credit} />
 					<PrivateRoute exact path="/banking/charge" component={Charge} />
+					<PrivateRoute exact path="/banking/wallet" component={Wallets} />
 					<PrivateRoute exact path="/banking/cards" component={BankingCards} />
 					<PrivateRoute exact path="/banking/transactions" component={Transactions} />
 					<PrivateRoute exact path="/support" component={OpenTicket} />
@@ -69,6 +72,7 @@ function Template() {
 					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDeposit} />
 					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCredit} />
 					<PrivateRoute exact path="/admin/accounts/charge" component={CreateCharge} />
+					<PrivateRoute exact path="/admin/accounts/wallet" component={CreateWallet} />
 					<PrivateRoute exact path="/admin/accounts/delete" component={DeleteAccount} />
 					<PrivateRoute exact path="/admin/cards/create" component={CreateCard} />
 					<PrivateRoute exact path="/admin/cards/delete" component={DeleteCard} />

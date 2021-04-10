@@ -77,4 +77,20 @@ export const createChargeReq = async (username: any, amount: any) => {
 			return err.response.data.message;
 		});
 };
+export const createWalletReq = async (username: any, amount: any) => {
+	refreshToken();
+	return await axivit
+		.post("/admin/create/wallet", {
+			Wallet: {
+				Amount: amount,
+			},
+			Username: username,
+		})
+		.then((res) => {
+			return res.data.message;
+		})
+		.catch((err) => {
+			return err.response.data.message;
+		});
+};
 

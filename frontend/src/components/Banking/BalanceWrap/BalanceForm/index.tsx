@@ -87,8 +87,25 @@ export function TransactionForm({
 				<IBAN>Sender: {senderInfo}</IBAN>
 				<IBAN>Reciever: {recieverInfo}</IBAN>
 				<BALANCE>Amount: {amount}</BALANCE>
-				<IBAN>Dare: {toDate(date)}</IBAN>
+				<IBAN>Date: {toDate(date)}</IBAN>
 				<IBAN>Reason: {reason}</IBAN>
+			</FORM>
+		</div>
+	);
+}
+export function WalletForm({
+	iban,
+	amount,
+	cardNumber,
+	cardBrand,
+}: any) {
+	return (
+		<div>
+			<FORM>
+				<IBAN>Iban: {iban}</IBAN>
+				<IBAN>Card Number: {cardNumber}</IBAN>
+				<BALANCE>{amount} BGN</BALANCE>
+				<IBAN>Brand: {cardBrand}</IBAN>
 			</FORM>
 		</div>
 	);
