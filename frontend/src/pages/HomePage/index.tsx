@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import BackgroundBlock from "../../components/BackgroundBlock";
 import block1 from "./block1.jpg";
 import block2 from "./block2.jpg";

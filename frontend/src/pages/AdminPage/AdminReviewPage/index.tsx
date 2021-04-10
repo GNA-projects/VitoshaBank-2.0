@@ -1,5 +1,3 @@
-import React from "react";
-import { Link } from "react-router-dom";
 import Options from "../../../components/Options";
 
 export default function AdminReviewPage() {

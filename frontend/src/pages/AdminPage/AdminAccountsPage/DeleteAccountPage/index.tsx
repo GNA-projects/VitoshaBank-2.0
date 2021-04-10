@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { deleteCreditReq } from "../../../../api/admin/credit";
 import { deleteChargeReq } from "../../../../api/admin/charge";
 import { deleteWalletReq } from "../../../../api/admin/wallet";
@@ -13,16 +13,16 @@ export default function DeleteAccountPage() {
 
 	const deleteAccount = async () => {
 		let res = "No Such Type";
-		if (type == "Credit") {
+		if (type === "Credit") {
 			res = await deleteCreditReq(username, iban);
 		}
-		if (type == "Charge") {
+		if (type === "Charge") {
 			res = await deleteChargeReq(username, iban);
 		}
-		if (type == "Deposit") {
+		if (type === "Deposit") {
 			res = await deleteDepositReq(username, iban);
 		}
-		if (type == "Wallet") {
+		if (type === "Wallet") {
 			res = await deleteWalletReq(username, iban);
 		}
 		alert(res);

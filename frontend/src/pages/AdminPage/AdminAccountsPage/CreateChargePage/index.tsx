@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { createChargeReq } from "../../../../api/admin/charge";
 import { Form, FormBig } from "../../../../components/Form";
 import bg from "./bg.jpg";

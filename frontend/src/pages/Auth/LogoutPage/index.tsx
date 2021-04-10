@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useHistory } from "react-router";
 import {Form} from "../../../components/Form";
 import bg from "./bg.jpg";
@@ -7,7 +6,7 @@ import bg from "./bg.jpg";
 import LoginContext from "../../../context/LoginContext";
 
 export default function LogoutPage() {
-	const { loggedIn, setLoggedIn } = useContext(LoginContext);
+	const { setLoggedIn } = useContext(LoginContext);
 	const history = useHistory();
 
 	const logout = () => {

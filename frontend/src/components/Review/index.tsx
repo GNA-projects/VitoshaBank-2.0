@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { respondToTicketReq } from "../../api/admin/tickets";
 import bg from "./bg.jpg";

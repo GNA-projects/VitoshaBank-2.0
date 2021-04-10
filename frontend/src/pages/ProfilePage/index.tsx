@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { changePasswordReq } from "../../api/auth/auth";
 import BackgroundBlock from "../../components/BackgroundBlock";
 import { Form } from "../../components/Form";
@@ -12,7 +11,7 @@ export default function ProfilePage() {
 	const [confirmColor, setConfirmColor] = useState<string>("white");
 
 	const changePassword = async () => {
-		if (newpass != confirmPass) {
+		if (newpass !== confirmPass) {
 			alert("Passwords do not Match");
 		} else {
 			let message = await changePasswordReq(oldpass, newpass);
@@ -21,7 +20,7 @@ export default function ProfilePage() {
 	};
 
 	useEffect(() => {
-		if (newpass != confirmPass) {
+		if (newpass !== confirmPass) {
 			setConfirmColor("red");
 		} else {
 			setConfirmColor("green");

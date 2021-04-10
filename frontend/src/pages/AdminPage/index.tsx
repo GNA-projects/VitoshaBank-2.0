@@ -1,14 +1,13 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import BackgroundBlock from "../../components/BackgroundBlock";
 import AdminContext from "../../context/AdminContext";
 import block1 from "./block1.jpg";
 
-
 export default function AdminPage() {
-	const { admin, setAdmin } = useContext(AdminContext);
+	const { setAdmin } = useContext(AdminContext);
 
 	useEffect(() => {
-		setAdmin(true)
+		setAdmin(true);
 	});
 	return (
 		<div>

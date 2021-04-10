@@ -61,18 +61,18 @@ function Template() {
 			<MenuBar></MenuBar>
 			<Body>
 				<Switch>
-					//Test
+					{/* Test */}
 					<Route exact path="/test" component={TestPage} />
 
-					//Home
+					{/* Home */}
 					<Route exact path="/" component={HomePage} />
 					
-					//Profile & Auth
+					{/* Profile & Auth */}
 					<PrivateRoute exact path="/profile" component={ProfilePage} />
 					<Route exact path="/login" component={LoginPage} />
 					<PrivateRoute exact path="/logout" component={LogoutPage} />
 
-					//Banking
+					{/* Banking */}
 					<PrivateRoute exact path="/banking" component={BankingPage} />
 					<PrivateRoute exact path="/banking/deposits" component={BankingDepositsPage} />
 					<PrivateRoute exact path="/banking/credits" component={BankingCreditsPage} />
@@ -81,29 +81,29 @@ function Template() {
 					<PrivateRoute exact path="/banking/cards" component={BankingCardsPage} />
 					<PrivateRoute exact path="/banking/transactions" component={BankingTransactionsPage} />
 
-					//Support
+					{/* Support */}
 					<PrivateRoute exact path="/support" component={OpenTicketPage} />
 
-					//Calculator
+					{/* Calculator */}
 					<Route exact path="/calculator" component={CalculatorPage} />
 
-					//Admin
+					{/* Admin */}
 					<PrivateRoute exact path="/admin" component={AdminPage} />
-					//Admin User
+					{/* Admin User */}
 					<PrivateRoute exact path="/admin/user" component={AdminUserPage} />
 					<PrivateRoute exact path="/admin/user/create" component={CreateUserPage} />
-					//Admin Accounts
+					{/* Admin Accounts */}
 					<PrivateRoute exact path="/admin/accounts" component={AdminAccountsPage} />
 					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDepositPage} />
 					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCreditPage} />
 					<PrivateRoute exact path="/admin/accounts/charge" component={CreateChargePage} />
 					<PrivateRoute exact path="/admin/accounts/wallet" component={CreateWalletPage} />
 					<PrivateRoute exact path="/admin/accounts/delete" component={DeleteAccountPage} />
-					//Admin Cards
+					{/* Admin Cards */}
 					<PrivateRoute exact path="/admin/cards/create" component={CreateCardPage} />
 					<PrivateRoute exact path="/admin/cards/delete" component={DeleteCardPage} />
 					<PrivateRoute exact path="/admin/cards" component={AdminCardsPage} />
-					//Admin Review
+					{/* Admin Review */}
 					<PrivateRoute exact path="/admin/review" component={AdminReviewPage} />
 					<PrivateRoute exact path="/admin/review/users" component={ReviewUsersPage} />
 					<PrivateRoute exact path="/admin/review/tickets" component={ReviewTicketsPage} />

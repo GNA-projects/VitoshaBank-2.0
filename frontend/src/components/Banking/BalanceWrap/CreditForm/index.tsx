@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ChangeEventHandler } from "react";
 import {
 	withdrawFromCreditReq,
 	getCreditsPaymentCheckReq,
@@ -9,9 +8,6 @@ import {
 	IBAN,
 	INSTALMENT,
 	BALANCE,
-	INPUT_GROUP,
-	LABEL,
-	INPUT,
 	BalanceInput,
 	BalanceButton,
 } from "../BalanceForm";
