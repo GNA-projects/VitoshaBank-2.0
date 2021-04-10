@@ -1,28 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { usersReq } from "../../../../api/admin/admin";
+import { getTicketsReq } from "../../../../api/admin/tickets";
+import Review from "../../../../components/Review";
 
-export default function Users() {
-	const [users, setUsers] = useState([]);
+export default function ReviewTickets() {
+	const [tickets, setTickets] = useState([]);
+	const [reload, setReload] = useState<boolean>();
 
-	const getUsers = async () => {
-		let urs = await usersReq();
-		setUsers(urs);
-        console.log(urs)
+	const getTickets = async () => {
+		let res = await getTicketsReq();
+		setTickets(res);
+		console.log(res);
 	};
 
-    useEffect(()=>{
-        getUsers()
-    },[])
-    
+	useEffect(() => {
+		getTickets();
+	}, [reload]);
+
 	return (
 		<div>
-			{users.map(({username}) => {
-				return (
-					<div>
-						<h1>{username}</h1>
-					</div>
-				);
-			})}
+			{tickets.map(
+				({ id, message, title, username, ticketDate, hasResponse, }) => {
+					return (
+						<Review.Ticket
+							id={id}
+							message={message}
+							title={title}
+							username={username}
+							ticketDate={ticketDate}
+							hasResponse={hasResponse}
+							setReload={setReload}
+							reload={reload}
+						/>
+					);
+				}
+			)}
 		</div>
 	);
 }

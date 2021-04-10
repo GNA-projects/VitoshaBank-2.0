@@ -35,6 +35,16 @@ const INPUT = styled.input`
 	font-size: 18px;
 `;
 
+const BIG_INPUT = styled.textarea`
+	background-color: white;
+	color: teal;
+	outline: none;
+	border: 1px;
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 18px;
+`;
+
 const INPUT_GROUP = styled.div`
 	display: flex;
 	flex-direction: column;
@@ -102,6 +112,12 @@ Form.Input = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
 		<INPUT onChange={onChange} value={value}></INPUT>
+	</INPUT_GROUP>
+);
+Form.BigInput = ({ label, onChange, value }: InputProps) => (
+	<INPUT_GROUP>
+		<LABEL>{label}</LABEL>
+		<BIG_INPUT onChange={onChange} value={value}></BIG_INPUT>
 	</INPUT_GROUP>
 );
 Form.Password = ({ label, onChange, value }: InputProps) => (

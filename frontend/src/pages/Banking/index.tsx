@@ -34,6 +34,7 @@ export default function Banking() {
 				<Options.Link to="/banking/deposit">Deposit Accounts</Options.Link>
 				<Options.Link to="/banking/credit">Credit Accounts</Options.Link>
 				<Options.Link to="/banking/cards">Debit Cards</Options.Link>
+				<Options.Link to="/banking/transactions">My Transactions</Options.Link>
 				<Options.Link to="/support">Open a Ticket</Options.Link>
 			</Options>
 		</div>

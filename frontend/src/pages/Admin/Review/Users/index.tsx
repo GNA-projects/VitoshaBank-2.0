@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { usersReq } from "../../../../api/admin/admin";
-import UserReview from "../../../../components/UserReview";
+import Review from "../../../../components/Review";
 
 export default function Users() {
 	const [users, setUsers] = useState([]);
@@ -28,7 +28,7 @@ export default function Users() {
 					isConfirmed,
 					isAdmin,
 				}) => (
-					<UserReview
+					<Review.User
 						username={username}
 						firstName={firstName}
 						lastName={lastName}

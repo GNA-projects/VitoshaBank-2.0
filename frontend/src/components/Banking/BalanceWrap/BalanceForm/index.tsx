@@ -74,3 +74,22 @@ export function CardForm({ cardNumber, cardBrand }: any) {
 		</div>
 	);
 }
+export function TransactionForm({
+	senderInfo,
+	recieverInfo,
+	amount,
+	date,
+	reason,
+}: any) {
+	return (
+		<div>
+			<FORM>
+				<IBAN>Sender: {senderInfo}</IBAN>
+				<IBAN>Reciever: {recieverInfo}</IBAN>
+				<BALANCE>Amount: {amount}</BALANCE>
+				<IBAN>Dare: {toDate(date)}</IBAN>
+				<IBAN>Reason: {reason}</IBAN>
+			</FORM>
+		</div>
+	);
+}
