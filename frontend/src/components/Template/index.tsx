@@ -2,45 +2,58 @@ import React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import PrivateRoute from "../auth/PrivateRoute";
 
+//Essential
 import Body from "./Body";
-
 import MenuBar from "../MenuBar";
 
-import Test from "../../pages/Test";
+//Test Purposes Only
+import TestPage from "../../pages/TestPage";
 
-import Home from "../../pages/Home";
+//Home
+import HomePage from "../../pages/HomePage";
+import ProfilePage from "../../pages/ProfilePage";
 
-import Profile from "../../pages/Profile";
+//Auth
+import LoginPage from "../../pages/Auth/LoginPage";
+import LogoutPage from "../../pages/Auth/LogoutPage";
 
-import Logout from "../../pages/Auth/Logout";
-import Login from "../../pages/Auth/Login";
+//Banking
+import BankingPage from "../../pages/BankingPage";
+import BankingDepositsPage from "../../pages/BankingPage/BankingDepositsPage";
+import BankingChargesPage from "../../pages/BankingPage/BankingChargesPage";
+import BankingCreditsPage from "../../pages/BankingPage/BankingCreditsPage";
+import BankingWalletsPage from "../../pages/BankingPage/BankingWalletsPage";
+import BankingCardsPage from "../../pages/BankingPage/BankingCardsPage";
+import BankingTransactionsPage from "../../pages/BankingPage/BankingTransactionsPage";
 
-import Banking from "../../pages/Banking";
-import Deposit from "../../pages/Banking/Deposit";
-import Credit from "../../pages/Banking/Credit";
-import Charge from "../../pages/Banking/Charge";
+//Support
+import OpenTicketPage from "../../pages/BankingPage/OpenTicketPage";
+
+//Calculator
 import CalculatorPage from "../../pages/CalculatorPage";
 
+//Admin
+import AdminPage from "../../pages/AdminPage";
 
-import Admin from "../../pages/Admin";
-import Review from "../../pages/Admin/Review";
-import BankingCards from "../../pages/Banking/Cards";
-import AdminCards from "../../pages/Admin/Cards";
-import Transactions from "../../pages/Banking/Transactions";
-import Accounts from "../../pages/Admin/Accounts";
-import User from "../../pages/Admin/User";
-import CreateUser from "../../pages/Admin/User/Create";
-import Users from "../../pages/Admin/Review/Users";
-import CreateCard from "../../pages/Admin/Cards/Create";
-import DeleteCard from "../../pages/Admin/Cards/Delete";
-import CreateDeposit from "../../pages/Admin/Accounts/Deposit";
-import CreateCredit from "../../pages/Admin/Accounts/Credit";
-import CreateCharge from "../../pages/Admin/Accounts/Charge";
-import DeleteAccount from "../../pages/Admin/Accounts/Delete";
-import ReviewTickets from "../../pages/Admin/Review/Tickets";
-import OpenTicket from "../../pages/Banking/OpenTicket";
-import CreateWallet from "../../pages/Admin/Accounts/Wallet";
-import Wallets from "../../pages/Banking/Wallets";
+//Admin User
+import AdminUserPage from "../../pages/AdminPage/AdminUserPage";
+import CreateUserPage from "../../pages/AdminPage/AdminUserPage/CreateUserPage";
+//Admin Accounts
+import AdminAccountsPage from "../../pages/AdminPage/AdminAccountsPage";
+import CreateDepositPage from "../../pages/AdminPage/AdminAccountsPage/CreateDepositPage";
+import CreateCreditPage from "../../pages/AdminPage/AdminAccountsPage/CreateCreditPage";
+import CreateChargePage from "../../pages/AdminPage/AdminAccountsPage/CreateChargePage";
+import CreateWalletPage from "../../pages/AdminPage/AdminAccountsPage/CreateWalletPage";
+import DeleteAccountPage from "../../pages/AdminPage/AdminAccountsPage/DeleteAccountPage";
+//Admin Cards
+import CreateCardPage from "../../pages/AdminPage/AdminCardsPage/CreateCardPage";
+import DeleteCardPage from "../../pages/AdminPage/AdminCardsPage/DeleteCardPage";
+import AdminCardsPage from "../../pages/AdminPage/AdminCardsPage";
+//Admin Review
+import AdminReviewPage from "../../pages/AdminPage/AdminReviewPage";
+import ReviewUsersPage from "../../pages/AdminPage/AdminReviewPage/ReviewUsersPage";
+import ReviewTicketsPage from "../../pages/AdminPage/AdminReviewPage/ReviewTicketsPage";
+
 
 function Template() {
 	return (
@@ -48,38 +61,52 @@ function Template() {
 			<MenuBar></MenuBar>
 			<Body>
 				<Switch>
-					<Route exact path="/" component={Home} />
-					<Route exact path="/test" component={Test} />
+					//Test
+					<Route exact path="/test" component={TestPage} />
 
-					<PrivateRoute exact path="/profile" component={Profile} />
-					<Route exact path="/login" component={Login} />
-					<PrivateRoute exact path="/logout" component={Logout} />
+					//Home
+					<Route exact path="/" component={HomePage} />
+					
+					//Profile & Auth
+					<PrivateRoute exact path="/profile" component={ProfilePage} />
+					<Route exact path="/login" component={LoginPage} />
+					<PrivateRoute exact path="/logout" component={LogoutPage} />
 
-					<PrivateRoute exact path="/banking" component={Banking} />
-					<PrivateRoute exact path="/banking/deposit" component={Deposit} />
-					<PrivateRoute exact path="/banking/credit" component={Credit} />
-					<PrivateRoute exact path="/banking/charge" component={Charge} />
-					<PrivateRoute exact path="/banking/wallet" component={Wallets} />
-					<PrivateRoute exact path="/banking/cards" component={BankingCards} />
-					<PrivateRoute exact path="/banking/transactions" component={Transactions} />
-					<PrivateRoute exact path="/support" component={OpenTicket} />
+					//Banking
+					<PrivateRoute exact path="/banking" component={BankingPage} />
+					<PrivateRoute exact path="/banking/deposits" component={BankingDepositsPage} />
+					<PrivateRoute exact path="/banking/credits" component={BankingCreditsPage} />
+					<PrivateRoute exact path="/banking/charges" component={BankingChargesPage} />
+					<PrivateRoute exact path="/banking/wallets" component={BankingWalletsPage} />
+					<PrivateRoute exact path="/banking/cards" component={BankingCardsPage} />
+					<PrivateRoute exact path="/banking/transactions" component={BankingTransactionsPage} />
+
+					//Support
+					<PrivateRoute exact path="/support" component={OpenTicketPage} />
+
+					//Calculator
 					<Route exact path="/calculator" component={CalculatorPage} />
 
-					<PrivateRoute exact path="/admin" component={Admin} />
-					<PrivateRoute exact path="/admin/user" component={User} />
-					<PrivateRoute exact path="/admin/user/create" component={CreateUser} />
-					<PrivateRoute exact path="/admin/accounts" component={Accounts} />
-					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDeposit} />
-					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCredit} />
-					<PrivateRoute exact path="/admin/accounts/charge" component={CreateCharge} />
-					<PrivateRoute exact path="/admin/accounts/wallet" component={CreateWallet} />
-					<PrivateRoute exact path="/admin/accounts/delete" component={DeleteAccount} />
-					<PrivateRoute exact path="/admin/cards/create" component={CreateCard} />
-					<PrivateRoute exact path="/admin/cards/delete" component={DeleteCard} />
-					<PrivateRoute exact path="/admin/cards" component={AdminCards} />
-					<PrivateRoute exact path="/admin/review" component={Review} />
-					<PrivateRoute exact path="/admin/review/users" component={Users} />
-					<PrivateRoute exact path="/admin/review/tickets" component={ReviewTickets} />
+					//Admin
+					<PrivateRoute exact path="/admin" component={AdminPage} />
+					//Admin User
+					<PrivateRoute exact path="/admin/user" component={AdminUserPage} />
+					<PrivateRoute exact path="/admin/user/create" component={CreateUserPage} />
+					//Admin Accounts
+					<PrivateRoute exact path="/admin/accounts" component={AdminAccountsPage} />
+					<PrivateRoute exact path="/admin/accounts/deposit" component={CreateDepositPage} />
+					<PrivateRoute exact path="/admin/accounts/credit" component={CreateCreditPage} />
+					<PrivateRoute exact path="/admin/accounts/charge" component={CreateChargePage} />
+					<PrivateRoute exact path="/admin/accounts/wallet" component={CreateWalletPage} />
+					<PrivateRoute exact path="/admin/accounts/delete" component={DeleteAccountPage} />
+					//Admin Cards
+					<PrivateRoute exact path="/admin/cards/create" component={CreateCardPage} />
+					<PrivateRoute exact path="/admin/cards/delete" component={DeleteCardPage} />
+					<PrivateRoute exact path="/admin/cards" component={AdminCardsPage} />
+					//Admin Review
+					<PrivateRoute exact path="/admin/review" component={AdminReviewPage} />
+					<PrivateRoute exact path="/admin/review/users" component={ReviewUsersPage} />
+					<PrivateRoute exact path="/admin/review/tickets" component={ReviewTicketsPage} />
 				</Switch>
 			</Body>
 		</BrowserRouter>

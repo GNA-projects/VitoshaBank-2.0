@@ -1,6 +1,11 @@
 import React from "react";
 import styled from "styled-components";
-import { ChargeForm, CreditForm, DepositForm, CardForm, TransactionForm, WalletForm } from "./BalanceForm";
+import DepositForm from "./DepositForm";
+import CreditForm from "./CreditForm";
+import ChargeForm from "./ChargeForm";
+import WalletForm from "./WalletForm";
+import CardForm from "./CardForm";
+import TransactionForm from "./TransactionForm";
 
 const WRAP = styled.div`
 	display: flex;
