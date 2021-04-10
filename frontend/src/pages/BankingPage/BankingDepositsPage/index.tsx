@@ -4,6 +4,7 @@ import BalanceWrap from "../../../components/Banking/BalanceWrap";
 
 export default function BankingDepositsPage() {
 	const [deposits, setDeposits] = useState([]);
+	const [reload, setReload] = useState<boolean>();
 
 	const getDeposits = async () => {
 		let deposit = await getDepositsReq();
@@ -11,12 +12,18 @@ export default function BankingDepositsPage() {
 	};
 	useEffect(() => {
 		getDeposits();
-	}, []);
+	}, [reload]);
 	return (
 		<BalanceWrap>
 			<BalanceWrap.Heading>Deposit Accounts</BalanceWrap.Heading>
 			{deposits.map(({ iban, amount, paymentDate }) => (
-				<BalanceWrap.Deposit iban={iban} balance={amount} paymentDate={paymentDate}></BalanceWrap.Deposit>
+				<BalanceWrap.Deposit
+					iban={iban}
+					balance={amount}
+					paymentDate={paymentDate}
+					reload={reload}
+					setReload={setReload}
+				></BalanceWrap.Deposit>
 			))}
 		</BalanceWrap>
 	);

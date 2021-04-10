@@ -4,6 +4,7 @@ import BalanceWrap from "../../../components/Banking/BalanceWrap";
 
 export default function BankingCreditsPage() {
 	const [credits, setCredits] = useState([]);
+	const [reload, setReload] = useState<boolean>();
 
 	const getCredits = async () => {
 		let credit = await getCreditsReq();
@@ -11,7 +12,7 @@ export default function BankingCreditsPage() {
 	};
 	useEffect(() => {
 		getCredits();
-	}, []);
+	}, [reload]);
 	return (
 		<BalanceWrap>
 			<BalanceWrap.Heading>Credit Accounts</BalanceWrap.Heading>
@@ -20,6 +21,8 @@ export default function BankingCreditsPage() {
 					iban={iban}
 					balance={amount}
 					instalment={instalment}
+					reload={reload}
+					setReload={setReload}
 				></BalanceWrap.Credit>
 			))}
 		</BalanceWrap>

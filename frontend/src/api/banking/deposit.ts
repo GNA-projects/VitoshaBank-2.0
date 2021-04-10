@@ -19,3 +19,20 @@ export const getDepositsReq = async () => {
 			return [];
 		});
 };
+
+export const withdrawFromDepositReq = async (iban: string, amaunt: string) => {
+	refreshToken();
+	return await axivit
+		.put("/deposits/withdraw", {
+			Deposit: {
+				Iban: iban,
+			},
+			Amount: amaunt,
+		})
+		.then((res) => {
+			return res.data.message;
+		})
+		.catch((err) => {
+			return err.response.data.message;
+		});
+};
