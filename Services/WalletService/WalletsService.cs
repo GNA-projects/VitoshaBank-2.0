@@ -39,7 +39,6 @@ namespace VitoshaBank.Services.WalletService
             if (currentUser.HasClaim(c => c.Type == "Roles"))
             {
                 var userAuthenticate = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
-                WalletResponseModel walletResponseModel = new WalletResponseModel();
                 UserAccResponseModel userWallets = new UserAccResponseModel();
 
                 if (userAuthenticate == null)
@@ -51,6 +50,7 @@ namespace VitoshaBank.Services.WalletService
                 {
                     foreach (var walletRef in dbContext.Wallets.Where(x => x.UserId == userAuthenticate.Id))
                     {
+                        WalletResponseModel walletResponseModel = new WalletResponseModel();
                         var wallet = walletRef;
                         walletResponseModel.IBAN = wallet.Iban;
                         walletResponseModel.Amount = Math.Round(wallet.Amount, 2);
@@ -222,7 +222,7 @@ namespace VitoshaBank.Services.WalletService
                     try
                     {
                         walletExists = await dbContext.Wallets.FirstOrDefaultAsync(x => x.Iban == wallet.Iban);
-                        if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && _BCrypt.AuthenticateWalletCVV(wallet,walletExists)))
+                        if (walletExists != null && (wallet.CardNumber == walletExists.CardNumber && wallet.CardExpirationDate == walletExists.CardExpirationDate && _BCrypt.AuthenticateWalletCVV(wallet, walletExists)))
                         {
                             if (walletExists.CardExpirationDate < DateTime.Now)
                             {
