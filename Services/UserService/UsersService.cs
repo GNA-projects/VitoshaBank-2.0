@@ -89,6 +89,7 @@ namespace VitoshaBank.Services.UserService
                     var vanillaPassword = user.Password;
                     user.Password = _BCrypt.HashPassword(user.Password);
                     user.ActivationCode = Guid.NewGuid().ToString();
+                    user.RegisterDate = DateTime.Now;
                     await dbContext.AddAsync(user);
 
                     int i = await dbContext.SaveChangesAsync();
