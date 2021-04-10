@@ -26,7 +26,7 @@ const FORM = styled.div`
 `;
 
 const INPUT = styled.input`
-	background-color: white;
+	background-color: ${(props) => (props.theme ? props.theme : "white")};
 	color: teal;
 	outline: none;
 	border: 1px;
@@ -77,14 +77,14 @@ const BUTTON = styled.button`
 `;
 
 const BOOL = styled.button`
-	background-color: ${props => props.theme};
+	background-color: ${(props) => props.theme};
 	outline: none;
 	border: 1px;
 	border-radius: 6px;
 	padding: 5px 10px;
 	color: teal;
 	margin: 15px 0;
-	
+
 	font-size: 18px;
 `;
 
@@ -107,6 +107,7 @@ type InputProps = {
 	label: string;
 	onChange: ChangeEventHandler;
 	value: string | undefined;
+	color?: string;
 };
 Form.Input = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
@@ -120,9 +121,14 @@ Form.BigInput = ({ label, onChange, value }: InputProps) => (
 		<BIG_INPUT onChange={onChange} value={value}></BIG_INPUT>
 	</INPUT_GROUP>
 );
-Form.Password = ({ label, onChange, value }: InputProps) => (
+Form.Password = ({ label, onChange, value, color }: InputProps) => (
 	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
-		<INPUT type="password" onChange={onChange} value={value}></INPUT>
+		<INPUT
+			theme={color}
+			type="password"
+			onChange={onChange}
+			value={value}
+		></INPUT>
 	</INPUT_GROUP>
 );
