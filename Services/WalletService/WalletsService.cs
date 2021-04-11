@@ -70,7 +70,7 @@ namespace VitoshaBank.Services.WalletService
 
                     if (userWallets.UserWallets.Count > 0)
                     {
-                        return StatusCode(200, userWallets.UserWallets);
+                        return StatusCode(200, userWallets.UserWallets.OrderByDescending(x => x.IBAN));
                     }
 
                     responseMessage.Message = "You don't have a Wallet!";

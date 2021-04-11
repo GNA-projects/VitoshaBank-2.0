@@ -128,7 +128,7 @@ namespace VitoshaBank.Services.CreditService
 
                     if (responseModels.Count > 0)
                     {
-                        return StatusCode(200, responseModels);
+                        return StatusCode(200, responseModels.OrderByDescending(X => X.IBAN));
                     }
 
                     responseMessage.Message = "You don't have a Credit!";

@@ -339,7 +339,7 @@ namespace VitoshaBank.Services.UserService
         }
         private void SendVerificationLinkEmail(string email, string activationcode, string username, string password)
         {
-            var varifyUrl = "https" + "://" + "91.230.230.249" + "/api/users/activateaccount/" + activationcode;
+            var varifyUrl = "https" + "://" + "localhost" + "/api/users/activateaccount/" + activationcode;
             var fromMail = new MailAddress(_config["Email:Email"], $"Welcome to Vitosha Bank");
             var toMail = new MailAddress(email);
             var frontEmailPassowrd = _config["Pass:Pass"];
@@ -352,7 +352,7 @@ namespace VitoshaBank.Services.UserService
             {
                 Host = "smtp.gmail.com",
                 Port = 587,
-                EnableSsl = true,
+                EnableSsl = false,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(fromMail.Address, frontEmailPassowrd)
