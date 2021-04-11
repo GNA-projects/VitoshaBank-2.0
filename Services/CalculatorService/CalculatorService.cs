@@ -24,8 +24,25 @@ namespace VitoshaBank.Services.CalculatorService
         MessageModel responseMessage = new MessageModel();
         public async Task<ActionResult<MessageModel>> Calculate(string curr1, string curr2)
         {
-            responseMessage.Message = curr1 + curr2;
-            return responseMessage;
+            Dictionary<string, decimal> Currencies = new Dictionary<string, decimal>();
+
+            Currencies.Add("BGN", 1);
+            Currencies.Add("USD", 0.6024m);
+            Currencies.Add("EUR", 0.5114m);
+            Currencies.Add("JPY", 66.5623m); 
+            Currencies.Add("CHF", 0.5671m);
+            Currencies.Add("RUB", 45.8288m);
+            Currencies.Add("AUD", 0.7893m);
+            Currencies.Add("CNY", 3.9519m);
+            Currencies.Add("INR", 44.1257m);
+            Currencies.Add("TRY", 4.8854m);
+            Currencies.Add("GBP", 0.4349m);
+            Currencies.Add("RON", 2.5094m);
+            Currencies.Add("RSD", 60.0205m);
+            Currencies.Add("MKD", 31.4318m);
+
+            responseMessage.Message = "";
+            return StatusCode(200, responseMessage);
         }   
 
     }
