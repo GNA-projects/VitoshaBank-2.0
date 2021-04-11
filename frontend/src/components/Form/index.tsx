@@ -1,11 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-
 import {
 	menu_margin_max,
 	menu_margin_min,
 } from "../../components/Template/constants";
 import { ChangeEventHandler } from "react";
+import Dropdown from "./Dropdown/Accounts";
+import { getDepositsReq } from "../../api/banking/deposit";
+import { getCreditsReq } from "../../api/banking/credit";
+import { getChargesReq } from "../../api/banking/charge";
 
 const DIV = styled.div`
 	height: calc(${menu_margin_max} - ${menu_margin_min});
@@ -26,6 +29,16 @@ const FORM = styled.div`
 `;
 
 const INPUT = styled.input`
+	background-color: ${(props) => (props.theme ? props.theme : "white")};
+	color: teal;
+	outline: none;
+	border: 1px;
+	border-radius: 6px;
+	padding: 5px 12px;
+	font-size: 18px;
+`;
+
+const BIG_INPUT = styled.textarea`
 	background-color: white;
 	color: teal;
 	outline: none;
@@ -67,14 +80,14 @@ const BUTTON = styled.button`
 `;
 
 const BOOL = styled.button`
-	background-color: ${props => props.theme};
+	background-color: ${(props) => props.theme};
 	outline: none;
 	border: 1px;
 	border-radius: 6px;
 	padding: 5px 10px;
 	color: teal;
 	margin: 15px 0;
-	
+
 	font-size: 18px;
 `;
 
@@ -97,6 +110,7 @@ type InputProps = {
 	label: string;
 	onChange: ChangeEventHandler;
 	value: string | undefined;
+	color?: string;
 };
 Form.Input = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
@@ -104,9 +118,53 @@ Form.Input = ({ label, onChange, value }: InputProps) => (
 		<INPUT onChange={onChange} value={value}></INPUT>
 	</INPUT_GROUP>
 );
-Form.Password = ({ label, onChange, value }: InputProps) => (
+Form.InputNum = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
-		<INPUT type="password" onChange={onChange} value={value}></INPUT>
+		<INPUT type="number" onChange={onChange} value={value}></INPUT>
 	</INPUT_GROUP>
 );
+Form.BigInput = ({ label, onChange, value }: InputProps) => (
+	<INPUT_GROUP>
+		<LABEL>{label}</LABEL>
+		<BIG_INPUT onChange={onChange} value={value}></BIG_INPUT>
+	</INPUT_GROUP>
+);
+Form.Password = ({ label, onChange, value, color }: InputProps) => (
+	<INPUT_GROUP>
+		<LABEL>{label}</LABEL>
+		<INPUT
+			theme={color}
+			type="password"
+			onChange={onChange}
+			value={value}
+		></INPUT>
+	</INPUT_GROUP>
+);
+
+type DropdownStateProps = {
+	selected: string;
+	setSelected: React.Dispatch<React.SetStateAction<string>>;
+};
+
+Form.DepositDropdown = ({ selected, setSelected }: DropdownStateProps) => {
+	return (
+		<Dropdown
+			selected={selected}
+			setSelected={setSelected}
+			request={getDepositsReq}
+			type="Deposit"
+		></Dropdown>
+	);
+};
+
+Form.ChargeDropdown = ({ selected, setSelected }: DropdownStateProps) => {
+	return (
+		<Dropdown
+			selected={selected}
+			setSelected={setSelected}
+			request={getChargesReq}
+			type="Charge"
+		></Dropdown>
+	);
+};

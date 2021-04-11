@@ -45,7 +45,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
 
             if (BankAccountType == "ChargeAccount")
             {
-                var lastBankAccount = dbContext.ChargeAccounts.ToList();
+                var lastBankAccount = dbContext.ChargeAccounts.OrderBy(x=>x.Iban).ToList();
                 int serialNumber = 0;
                 if (lastBankAccount.Count() == 0)
                 {
@@ -86,7 +86,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
             }
             else if (BankAccountType == "Credit")
             {
-                var lastCredit = dbContext.Credits.ToList();
+                var lastCredit = dbContext.Credits.OrderBy(x=>x.Iban).ToList();
                 int serialNumber = 0;
                 if (lastCredit.Count() == 0)
                 {
@@ -127,7 +127,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
             }
             else if (BankAccountType == "Deposit")
             {
-                var lastDeposit = dbContext.Deposits.ToList();
+                var lastDeposit = dbContext.Deposits.OrderBy(x => x.Iban).ToList();
                 int serialNumber = 0;
                 if (lastDeposit.Count() == 0)
                 {
@@ -168,7 +168,7 @@ namespace VitoshaBank.Services.IbanGenereatorService
             }
             else if (BankAccountType == "Wallet")
             {
-                var lastWallet = dbContext.Wallets.ToList();
+                var lastWallet = dbContext.Wallets.OrderBy(x => x.Iban).ToList();
                 int serialNumber = 0;
                 if (lastWallet.Count() == 0)
                 {

@@ -1,10 +1,9 @@
-import axios from "axios";
-import React, { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { Redirect, Route } from "react-router-dom";
 import LoginContext from "../../context/LoginContext";
 
 const PrivateRoute = ({ component: Component, ...rest }: any) => {
-	const { loggedIn, setLoggedIn } = useContext(LoginContext);
+	const { loggedIn } = useContext(LoginContext);
 	let realLoggedIn = loggedIn;
 
 	const jwt = localStorage.getItem("jwt");

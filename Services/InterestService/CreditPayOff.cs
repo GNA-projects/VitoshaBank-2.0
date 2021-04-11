@@ -5,13 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using VitoshaBank.Data.DbModels;
 using VitoshaBank.Data.MessageModels;
+using VitoshaBank.Services.InterestService.Interfaces;
 
 namespace VitoshaBank.Services.InterestService
 {
-    public class CreditPayOff : ControllerBase
+    public class CreditPayOff : ControllerBase, ICreditPayOff
     {
+        private readonly BankSystemContext _context;
         MessageModel responseMessage = new MessageModel();
-        public async Task<ActionResult<MessageModel>> GetCreditPayOff(Credit credit, string username, BankSystemContext _context)
+        public CreditPayOff(BankSystemContext context)
+        {
+            _context = context;
+        }
+        public async Task<ActionResult<MessageModel>> GetCreditPayOff(Credit credit, string username)
         {
             while (DateTime.Now >= credit.PaymentDate)
             {
@@ -20,17 +26,17 @@ namespace VitoshaBank.Services.InterestService
                     credit.Amount = credit.Amount - credit.Instalment;
                     credit.CreditAmountLeft = credit.CreditAmountLeft - credit.Instalment;
                     credit.PaymentDate = credit.PaymentDate.AddMonths(1);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                     responseMessage.Message = "Credit instalment payed off successfully from Credit Account!";
                     return StatusCode(200, responseMessage);
                 }
                 else
                 {
                     int count = 1;
-                    var chargeAccountsCollection = _context.UserAccounts.Where(x => x.ChargeAccountId != null && x.UserUsername == username);
+                    var chargeAccountsCollection = _context.ChargeAccounts.Where(x => x.UserId == _context.Users.FirstOrDefault(z=>z.Username == username).Id);
                     foreach (var chargeAccountReff in chargeAccountsCollection)
                     {
-                        ChargeAccount chargeAccount = chargeAccountReff.ChargeAccount;
+                        ChargeAccount chargeAccount = chargeAccountReff;
                         if (credit.Instalment <= chargeAccount.Amount)
                         {
                             chargeAccount.Amount = chargeAccount.Amount - credit.Instalment;

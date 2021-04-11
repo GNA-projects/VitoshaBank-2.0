@@ -28,6 +28,10 @@ using VitoshaBank.Services.DebitCardService.Interfaces;
 using VitoshaBank.Services.DebitCardService;
 using VitoshaBank.Services.TransactionService.Interfaces;
 using VitoshaBank.Services.TransactionService;
+using Microsoft.AspNetCore.HttpOverrides;
+using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.InterestService.Interfaces;
+
 
 namespace VitoshaBank
 {
@@ -53,6 +57,7 @@ namespace VitoshaBank
             services.AddScoped<IChargeAccountsService, ChargeAccountsService>();
             services.AddScoped<ICalculatorService, CalculatorService>();
             services.AddScoped<ITransactionsService, TransactionsService>();
+            services.AddScoped<ICreditPayOff, CreditPayOff>();
 
 
 
@@ -82,6 +87,11 @@ namespace VitoshaBank
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -93,14 +103,13 @@ namespace VitoshaBank
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
 
             app.UseEndpoints(endpoints =>
             {
