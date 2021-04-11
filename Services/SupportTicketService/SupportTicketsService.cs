@@ -44,7 +44,7 @@ namespace VitoshaBank.Services.SupportTicketService
                         }
                         if (ticket.Title.Length > 2 && ticket.Message.Length > 2 && ticket.Title.Length < 60 && ticket.Message.Length < 200)
                         {
-
+                            ticket.Date = DateTime.Now;
                             ticket.UserId = userAuthenticate.Id;
                             ticket.Date = DateTime.Now;
                             ticket.HasResponce = false;
