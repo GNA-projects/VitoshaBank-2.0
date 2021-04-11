@@ -6,7 +6,7 @@ import bg from "./bg.jpg";
 const FORM = styled.div`
 	background-image: url(${bg});
 	background-position: center;
-	background-size: contain;
+	background-size: cover;
 	border: 1px;
 	border-radius: 8px;
 	width: 600px;
