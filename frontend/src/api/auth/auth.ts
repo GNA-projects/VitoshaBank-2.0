@@ -6,7 +6,10 @@ const refreshToken = () => {
 	] = `Bearer ${localStorage["jwt"]}`;
 };
 
-export const loginReq = async (username: string | undefined, password: string | undefined) => {
+export const loginReq = async (
+	username: string | undefined,
+	password: string | undefined
+) => {
 	refreshToken();
 	return await axivit
 		.post("/users/login", {
@@ -16,11 +19,11 @@ export const loginReq = async (username: string | undefined, password: string | 
 			},
 		})
 		.then((res) => {
-			localStorage.setItem("jwt", res.data.message);
-			return true;
+			localStorage.setItem('jwt', res.data.message)
+			return "Welcome";
 		})
 		.catch((err) => {
-			return false;
+			return err.response.data.message;
 		});
 };
 
