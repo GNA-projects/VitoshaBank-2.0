@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createUserReq } from "../../../../api/admin/user";
 import { Form, FormBig } from "../../../../components/Form";
+import AdminContext from "../../../../context/AdminContext";
 import bg from "./bg.jpg";
 
 export default function CreateUserPage() {
@@ -11,6 +12,11 @@ export default function CreateUserPage() {
 	const [mail, setMail] = useState<string>("");
 	const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
+	const { setAdmin } = useContext(AdminContext);
+
+	useEffect(() => {
+		setAdmin(true);
+	});
 	const createUser = async () => {
 		let res = await createUserReq(
 			username,

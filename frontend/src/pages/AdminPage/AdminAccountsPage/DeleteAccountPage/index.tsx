@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { deleteCreditReq } from "../../../../api/admin/credit";
 import { deleteChargeReq } from "../../../../api/admin/charge";
 import { deleteWalletReq } from "../../../../api/admin/wallet";
 import { deleteDepositReq } from "../../../../api/admin/deposit";
 import { Form, FormBig } from "../../../../components/Form";
 import bg from "./bg.jpg";
+import AdminContext from "../../../../context/AdminContext";
 
 export default function DeleteAccountPage() {
 	const [username, setUsername] = useState<string>("");
 	const [iban, setIban] = useState("");
 	const [type, setType] = useState("");
+	const { setAdmin } = useContext(AdminContext);
+
+	useEffect(() => {
+		setAdmin(true);
+	});
 
 	const deleteAccount = async () => {
 		let res = "No Such Type";

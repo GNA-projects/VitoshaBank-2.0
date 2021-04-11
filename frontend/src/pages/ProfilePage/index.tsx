@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { changePasswordReq } from "../../api/auth/auth";
 import BackgroundBlock from "../../components/BackgroundBlock";
 import { Form } from "../../components/Form";
-import bg from "./bg.jpg";
+import block3 from "./block3.jpg";
+import block1 from "./block1.jpg";
 
 export default function ProfilePage() {
 	const [oldpass, setOldPass] = useState<string>();
@@ -28,7 +29,7 @@ export default function ProfilePage() {
 	}, [oldpass, newpass, confirmPass]);
 	return (
 		<div>
-			<BackgroundBlock bg={bg}>
+			<BackgroundBlock bg={block1}>
 				<BackgroundBlock.HeadingLeft>Vitosha Bank</BackgroundBlock.HeadingLeft>
 				<BackgroundBlock.TextLeft>
 					The banking industry has been around for a long time – and so have
@@ -40,7 +41,7 @@ export default function ProfilePage() {
 			</BackgroundBlock>
 			<br></br>
 			<br></br>
-			<Form bg={bg}>
+			<Form bg={block3}>
 				<Form.Heading>Change Password</Form.Heading>
 				<Form.Password
 					label="Current Password"

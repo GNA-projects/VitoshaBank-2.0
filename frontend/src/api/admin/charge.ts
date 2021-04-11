@@ -6,7 +6,6 @@ export const refreshToken = () => {
 	] = `Bearer ${localStorage["jwt"]}`;
 };
 
-
 export const createChargeReq = async (username: any, amount: any) => {
 	refreshToken();
 	return await axivit
@@ -24,8 +23,6 @@ export const createChargeReq = async (username: any, amount: any) => {
 		});
 };
 
-
-
 export const deleteChargeReq = async (username: any, iban: any) => {
 	refreshToken();
 	return await axivit
@@ -36,6 +33,26 @@ export const deleteChargeReq = async (username: any, iban: any) => {
 					iban: iban,
 				},
 			},
+		})
+		.then((res) => {
+			return res.data.message;
+		})
+		.catch((err) => {
+			return err.response.data.message;
+		});
+};
+
+export const transferFromDepositReq = async (ibanFrom: string, ibanTo: string, amount: string) => {
+	refreshToken();
+	return await axivit
+		.put("/charges/fromdeposit", {
+			ChargeAccount: {
+				Iban: ibanTo,
+			},
+			Deposit: {
+				Iban: ibanFrom,
+			},
+			Amount: amount,
 		})
 		.then((res) => {
 			return res.data.message;

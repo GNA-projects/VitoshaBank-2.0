@@ -1,11 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-
 import {
 	menu_margin_max,
 	menu_margin_min,
 } from "../../components/Template/constants";
 import { ChangeEventHandler } from "react";
+import Dropdown from "./Dropdown/Accounts";
+import { getDepositsReq } from "../../api/banking/deposit";
+import { getCreditsReq } from "../../api/banking/credit";
+import { getChargesReq } from "../../api/banking/charge";
 
 const DIV = styled.div`
 	height: calc(${menu_margin_max} - ${menu_margin_min});
@@ -115,6 +118,12 @@ Form.Input = ({ label, onChange, value }: InputProps) => (
 		<INPUT onChange={onChange} value={value}></INPUT>
 	</INPUT_GROUP>
 );
+Form.InputNum = ({ label, onChange, value }: InputProps) => (
+	<INPUT_GROUP>
+		<LABEL>{label}</LABEL>
+		<INPUT type="number" onChange={onChange} value={value}></INPUT>
+	</INPUT_GROUP>
+);
 Form.BigInput = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
@@ -132,3 +141,30 @@ Form.Password = ({ label, onChange, value, color }: InputProps) => (
 		></INPUT>
 	</INPUT_GROUP>
 );
+
+type DropdownStateProps = {
+	selected: string;
+	setSelected: React.Dispatch<React.SetStateAction<string>>;
+};
+
+Form.DepositDropdown = ({ selected, setSelected }: DropdownStateProps) => {
+	return (
+		<Dropdown
+			selected={selected}
+			setSelected={setSelected}
+			request={getDepositsReq}
+			type="Deposit"
+		></Dropdown>
+	);
+};
+
+Form.ChargeDropdown = ({ selected, setSelected }: DropdownStateProps) => {
+	return (
+		<Dropdown
+			selected={selected}
+			setSelected={setSelected}
+			request={getChargesReq}
+			type="Charge"
+		></Dropdown>
+	);
+};

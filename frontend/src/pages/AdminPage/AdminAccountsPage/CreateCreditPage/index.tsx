@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createCreditReq } from "../../../../api/admin/credit";
 import {Form, FormBig} from "../../../../components/Form";
+import AdminContext from "../../../../context/AdminContext";
 import bg from "./bg.jpg"
 
 export default function CreateCreditPage() {
 	const [username, setUsername] = useState<string>("");
 	const [period, setPeriod] = useState<string>("");
 	const [amount, setAmount] = useState<string>("");
+	const { setAdmin } = useContext(AdminContext);
 
+	useEffect(() => {
+		setAdmin(true);
+	});
 	const createCredit = async() => {
 		let res = await createCreditReq(username, period, amount);
 		alert(res)

@@ -80,7 +80,7 @@ type InputProps = {
 export const BalanceInput = ({ label, onChange, value }: InputProps) => (
 	<INPUT_GROUP>
 		<LABEL>{label}</LABEL>
-		<INPUT onChange={onChange} value={value}></INPUT>
+		<INPUT type="number" onChange={onChange} value={value}></INPUT>
 	</INPUT_GROUP>
 );
 

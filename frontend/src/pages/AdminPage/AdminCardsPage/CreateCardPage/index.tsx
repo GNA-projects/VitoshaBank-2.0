@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, FormBig } from "../../../../components/Form";
 import { createCardReq } from "../../../../api/admin/cards";
 import bg from "./bg.jpg";
+import AdminContext from "../../../../context/AdminContext";
 
 export default function CreateCardPage() {
 	const [username, setUsername] = useState<string>("");
 	const [iban, setIban] = useState<string>("");
+	const { setAdmin } = useContext(AdminContext);
 
+	useEffect(() => {
+		setAdmin(true);
+	});
 	const createCard = async () => {
 		let res = await createCardReq(username, iban);
 		alert(res);

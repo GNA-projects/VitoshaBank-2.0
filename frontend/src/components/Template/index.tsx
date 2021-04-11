@@ -25,6 +25,10 @@ import BankingCreditsPage from "../../pages/BankingPage/BankingCreditsPage";
 import BankingWalletsPage from "../../pages/BankingPage/BankingWalletsPage";
 import BankingCardsPage from "../../pages/BankingPage/BankingCardsPage";
 import BankingTransactionsPage from "../../pages/BankingPage/BankingTransactionsPage";
+//Transfer
+import BankingTransferPage from "../../pages/BankingPage/BankingTransferPage";
+import BankingTransferChargePage from "../../pages/BankingPage/BankingTransferPage/BankingTransferChargePage";
+import BankingTransferDepositPage from "../../pages/BankingPage/BankingTransferPage/BankingTransferDepositPage";
 
 //Support
 import OpenTicketPage from "../../pages/BankingPage/OpenTicketPage";
@@ -80,6 +84,10 @@ function Template() {
 					<PrivateRoute exact path="/banking/wallets" component={BankingWalletsPage} />
 					<PrivateRoute exact path="/banking/cards" component={BankingCardsPage} />
 					<PrivateRoute exact path="/banking/transactions" component={BankingTransactionsPage} />
+					{/* Transfer */}
+					<PrivateRoute exact path="/banking/transfer" component={BankingTransferPage} />
+					<PrivateRoute exact path="/banking/transfer/charge/fromdeposit" component={BankingTransferChargePage} />
+					<PrivateRoute exact path="/banking/transfer/deposit/fromcharge" component={BankingTransferDepositPage} />
 
 					{/* Support */}
 					<PrivateRoute exact path="/support" component={OpenTicketPage} />

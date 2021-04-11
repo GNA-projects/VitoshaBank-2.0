@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { getTicketsReq } from "../../../../api/admin/tickets";
 import Review from "../../../../components/Review";
+import AdminContext from "../../../../context/AdminContext";
 
 export default function ReviewTicketsPage() {
 	const [tickets, setTickets] = useState([]);
 	const [reload, setReload] = useState<boolean>();
+
+	const { setAdmin } = useContext(AdminContext);
 
 	const getTickets = async () => {
 		let res = await getTicketsReq();
@@ -14,6 +17,7 @@ export default function ReviewTicketsPage() {
 
 	useEffect(() => {
 		getTickets();
+		setAdmin(true);
 	}, [reload]);
 
 	return (

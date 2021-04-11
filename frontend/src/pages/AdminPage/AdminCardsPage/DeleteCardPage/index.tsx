@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, FormBig } from "../../../../components/Form";
 import { deleteCardReq } from "../../../../api/admin/cards";
 import bg from "./bg.jpg";
+import AdminContext from "../../../../context/AdminContext";
 
 export default function DeleteCardPage() {
 	const [username, setUsername] = useState<string>("");
 	const [cardNum, setCardNum] = useState<string>("");
+
+	const { setAdmin } = useContext(AdminContext);
+
+	useEffect(() => {
+		setAdmin(true);
+	});
 
 	const deleteCard = async () => {
 		let res = await deleteCardReq(username, cardNum);

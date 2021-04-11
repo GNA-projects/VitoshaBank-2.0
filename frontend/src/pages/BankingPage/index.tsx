@@ -33,6 +33,7 @@ export default function BankingPage() {
 				<Options.Link to="/banking/credits">Credit Accounts</Options.Link>
 				<Options.Link to="/banking/wallets">Wallet Accounts</Options.Link>
 				<Options.Link to="/banking/cards">Debit Cards</Options.Link>
+				<Options.Link to="/banking/transfer">Transfer Money</Options.Link>
 				<Options.Link to="/banking/transactions">My Transactions</Options.Link>
 				<Options.Link to="/support">Open a Ticket</Options.Link>
 			</Options>

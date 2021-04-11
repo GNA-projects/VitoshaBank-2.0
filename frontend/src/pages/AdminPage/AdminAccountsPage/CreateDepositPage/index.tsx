@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { createDepositReq } from "../../../../api/admin/deposit";
 import {Form, FormBig} from "../../../../components/Form";
+import AdminContext from "../../../../context/AdminContext";
 import bg from "./bg.jpg"
 
 export default function CreateDepositPage() {
 	const [username, setUsername] = useState<string>("");
 	const [top, setTop] = useState<string>("");
 	const [amount, setAmount] = useState<string>("");
+	const { setAdmin } = useContext(AdminContext);
 
+	useEffect(() => {
+		setAdmin(true);
+	});
 	const createDeposit = async() => {
 		let res = await createDepositReq(username, top, amount);
 		alert(res)

@@ -47,3 +47,23 @@ export const deleteDepositReq = async (username: any, iban: any) => {
 			return err.response.data.message;
 		});
 };
+
+export const transferFromChargeReq = async (ibanFrom: string, ibanTo: string, amount: string) => {
+	refreshToken();
+	return await axivit
+		.put("/deposits/deposit", {
+			ChargeAccount: {
+				Iban: ibanFrom,
+			},
+			Deposit: {
+				Iban: ibanTo,
+			},
+			Amount: amount,
+		})
+		.then((res) => {
+			return res.data.message;
+		})
+		.catch((err) => {
+			return err.response.data.message;
+		});
+};
