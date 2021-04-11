@@ -132,7 +132,7 @@ namespace VitoshaBank.Services.ChargeAccountService
 
                     if (charges.Count > 0)
                     {
-                        return StatusCode(200, charges);
+                        return StatusCode(200, charges.OrderBy(x=>x.IBAN));
                     }
 
                     responseModel.Message = "You don't have a Charge Account!";

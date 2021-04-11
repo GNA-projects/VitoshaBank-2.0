@@ -61,7 +61,7 @@ namespace VitoshaBank.Services.DepositService
                     }
                     if (userDeposits.Count > 0)
                     {
-                        return StatusCode(200, userDeposits);
+                        return StatusCode(200, userDeposits.OrderBy(x=>x.IBAN));
                     }
                     responseMessage.Message = "You don't have a Deposit!";
                     return StatusCode(400, responseMessage);
