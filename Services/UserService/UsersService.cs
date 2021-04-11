@@ -111,13 +111,13 @@ namespace VitoshaBank.Services.UserService
                 }
                 else
                 {
-                    responseMessage.Message = "Registration failed";
+                    responseMessage.Message = "Username or email taken. Please, choose another one!";
                     return StatusCode(406, responseMessage);
                 }
             }
             else
             {
-                responseMessage.Message = "Username or Mail taken. Choose another one";
+                responseMessage.Message = "Username or email taken. Please, choose another one!";
                 return StatusCode(400, responseMessage);
             }
 
