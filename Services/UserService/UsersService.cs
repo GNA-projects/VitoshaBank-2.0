@@ -352,7 +352,7 @@ namespace VitoshaBank.Services.UserService
             {
                 Host = "smtp.gmail.com",
                 Port = 587,
-                EnableSsl = false,
+                EnableSsl = true,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(fromMail.Address, frontEmailPassowrd)
