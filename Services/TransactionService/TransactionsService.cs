@@ -277,7 +277,7 @@ namespace VitoshaBank.Services.TransactionService
                         responseModel.Date = transaction.Date;
 
                         allTransactions.Add(responseModel);
-                        allTransactions = allTransactions.OrderBy(x => x.Date).ToList();
+                        allTransactions = allTransactions.OrderByDescending(x => x.Date).ToList();
                     }
 
                 }

@@ -35,6 +35,7 @@ export default function Calculator() {
 		setFrom(e.target.value);
 		getCurrency();
 		setToInput(fromInput * currency);
+		
 	};
 	const handleToChange = (e: any) => {
 		setTo(e.target.value);
@@ -44,6 +45,7 @@ export default function Calculator() {
 
 	const handleFromChangeInput = (e: any) => {
 		setFromInput(parseInt(e.target.value));
+		console.log(fromInput * currency);
 		getCurrency();
 		setToInput(fromInput * currency);
 	};
@@ -51,6 +53,7 @@ export default function Calculator() {
 		setToInput(parseInt(e.target.value));
 		getCurrency();
 		setFromInput(toInput / currency);
+		
 	};
 
 	return (
@@ -75,6 +78,7 @@ export default function Calculator() {
 				<option value="BGN">Lev</option>
 				<option value="USD">Dollar</option>
 			</SELECT>
+			<p> NE RABOTI NE PIPAI</p>
 		</div>
 	);
 }

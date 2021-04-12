@@ -30,13 +30,10 @@ export default function ProfilePage() {
 	return (
 		<div>
 			<BackgroundBlock bg={block1}>
-				<BackgroundBlock.HeadingLeft>Vitosha Bank</BackgroundBlock.HeadingLeft>
+				<BackgroundBlock.HeadingLeft>My Account</BackgroundBlock.HeadingLeft>
 				<BackgroundBlock.TextLeft>
-					The banking industry has been around for a long time – and so have
-					their websites. Some banking websites have been stagnant for years,
-					while others are progressing ahead with new design websites with
-					superb functionality that engage users, increase brand awareness and
-					convert prospective clients.
+					This is your Account page where you can change your password for the
+					web banking.
 				</BackgroundBlock.TextLeft>
 			</BackgroundBlock>
 			<br></br>

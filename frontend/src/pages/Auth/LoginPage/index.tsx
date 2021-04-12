@@ -13,18 +13,17 @@ export default function LoginPage() {
 
 	const login = async () => {
 		setLoginLoad("Loading...");
-		(await loginReq(username, password))
-			? alert("Welcome")
-			: alert("Wrong Credentials");
+		let res = await loginReq(username, password);
+		alert(res);
 		setLoginLoad("Log In");
 		history.push("/");
 	};
 
 	const handleUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.currentTarget.value);
-		/* username == "admin"
-			? window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-			: console.log(); */
+		username == "admin"
+			? (window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+			: console.log();
 	};
 	const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setPassword(e.currentTarget.value);

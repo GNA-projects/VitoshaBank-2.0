@@ -4,7 +4,6 @@ import BackgroundBlock from "../../components/BackgroundBlock";
 import Options from "../../components/Options";
 import block1 from "./block1.jpg";
 
-
 export default function BankingPage() {
 	const [username, setUsername] = useState();
 
@@ -18,13 +17,13 @@ export default function BankingPage() {
 	return (
 		<div>
 			<BackgroundBlock bg={block1}>
-				<BackgroundBlock.HeadingLeft>Hello, {username}</BackgroundBlock.HeadingLeft>
+				<BackgroundBlock.HeadingLeft>
+					Hello, {username}
+				</BackgroundBlock.HeadingLeft>
 				<BackgroundBlock.TextLeft>
-					The banking industry has been around for a long time – and so have
-					their websites. Some banking websites have been stagnant for years,
-					while others are progressing ahead with new design websites with
-					superb functionality that engage users, increase brand awareness and
-					convert prospective clients.
+					Manage your finances in the best possible way with the Bank accounts
+					of Vitosha. You can perform any banking operation from any branch of
+					the bank or remotely.
 				</BackgroundBlock.TextLeft>
 			</BackgroundBlock>
 			<Options>

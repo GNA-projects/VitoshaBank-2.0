@@ -35,7 +35,6 @@ namespace VitoshaBank.Services.CreditService
             _transactionsService = transactionsService;
             _creditPay = creditPay;
         }
-
         public async Task<ActionResult<MessageModel>> CreateCredit(ClaimsPrincipal currentUser, CreditRequestModel requestModel)
         {
 
@@ -128,7 +127,7 @@ namespace VitoshaBank.Services.CreditService
 
                     if (responseModels.Count > 0)
                     {
-                        return StatusCode(200, responseModels);
+                        return StatusCode(200, responseModels.OrderBy(x=>x.IBAN));
                     }
 
                     responseMessage.Message = "You don't have a Credit!";
@@ -190,7 +189,6 @@ namespace VitoshaBank.Services.CreditService
             responseMessage.Message = "You are not autorized to do such actions!";
             return StatusCode(403, responseMessage);
         }
-
         private async Task<ActionResult<MessageModel>> DeleteCreditFromPayOff(Credit credit, ChargeAccount chargeAccount)
         {
 
@@ -199,8 +197,6 @@ namespace VitoshaBank.Services.CreditService
             dbContext.Remove(credit);
             return StatusCode(200, responseMessage);
         }
-
-
         public async Task<ActionResult<MessageModel>> SimulatePurchase(CreditRequestModel requestModel, ClaimsPrincipal currentUser, string username)
         {
             //amount credit product reciever

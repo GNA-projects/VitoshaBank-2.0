@@ -2,7 +2,8 @@ import axios from "axios";
 
 const axivit = axios.create();
 
-axivit.defaults.baseURL = "https://localhost:44342/api";
+axivit.defaults.baseURL = "http://91.230.230.249/api";
+//axivit.defaults.baseURL = "http://localhost:5000/api";
 axivit.defaults.headers.common['Authorization'] = `Bearer ${localStorage['jwt']}`;
 
 

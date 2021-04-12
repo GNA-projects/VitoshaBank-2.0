@@ -7,37 +7,31 @@ export default function HomePage() {
 	return (
 		<div>
 			<BackgroundBlock bg={block1}>
-				<BackgroundBlock.HeadingLeft>Vitosha Bank</BackgroundBlock.HeadingLeft>
+				<BackgroundBlock.HeadingLeft>Vitosha Bank Web Banking</BackgroundBlock.HeadingLeft>
 				<BackgroundBlock.TextLeft>
-					Because banks play an important role in financial stability and the
-					economy of a country, most jurisdictions exercise a high degree of
-					regulation over banks. Most countries have institutionalized a system
-					known as fractional reserve banking, under which banks hold liquid
-					assets equal to only a portion of their current liabilities.
+					Track every movement on your accounts - wherever you want and however
+					you want
 				</BackgroundBlock.TextLeft>
 			</BackgroundBlock>
 			<BackgroundBlock bg={block2}>
 				<BackgroundBlock.HeadingRight>
-					Vitosha Bank
+					Operate with your funds 24/7 anywhere in the World just from our web
+					banking
 				</BackgroundBlock.HeadingRight>
 				<BackgroundBlock.TextRight>
-					The banking industry has been around for a long time – and so have
-					their websites. Some banking websites have been stagnant for years,
-					while others are progressing ahead with new design websites with
-					superb functionality that engage users, increase brand awareness and
-					convert prospective clients.
+					Operate with your funds 24/7 anywhere in the World just from our web
+					banking
 				</BackgroundBlock.TextRight>
 			</BackgroundBlock>
 			<BackgroundBlock bg={block3}>
-				<BackgroundBlock.HeadingLeft>Vitosha Bank</BackgroundBlock.HeadingLeft>
+				<BackgroundBlock.HeadingLeft>
+					Time and money saving
+				</BackgroundBlock.HeadingLeft>
 				<BackgroundBlock.TextLeft>
-					Banking in its modern sense evolved in the fourteenth century in the
-					prosperous cities of Renaissance Italy but in many ways functioned as
-					a continuation of ideas and concepts of credit and lending that had
-					their roots in the ancient world. In the history of banking, a number
-					of banking dynasties — notably, the Medicis, the Fuggers, 
-					the Berenbergs, and the Rothschilds — have played a central role over
-					many centuries.
+					The mobile banking is fast and convenient. You no longer have to
+					visit a branch and consider the working hours. In addition, the price
+					of a transaction via mobile banking is three times lower than that of
+					the same transfer performed at a branch of the bank. centuries.
 				</BackgroundBlock.TextLeft>
 			</BackgroundBlock>
 		</div>
