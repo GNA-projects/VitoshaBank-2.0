@@ -56,7 +56,7 @@ namespace VitoshaBank.Controllers
         [Authorize]
         public async Task<ActionResult<MessageModel>> Deposit(CreditRequestModel requestModel)
         {
-            
+
             var currentUser = HttpContext.User;
             string username = currentUser.Claims.FirstOrDefault(currentUser => currentUser.Type == "Username").Value;
             return await _creditService.AddMoney(requestModel, currentUser, username);
