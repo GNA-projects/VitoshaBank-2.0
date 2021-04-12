@@ -1,10 +1,37 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using VitoshaBank.Data.DbModels;
+using VitoshaBank.Services.ChargeAccountService;
+using VitoshaBank.Services.ChargeAccountService.Interfaces;
+using VitoshaBank.Services.CreditService;
+using VitoshaBank.Services.CreditService.Interfaces;
+using VitoshaBank.Services.DepositService;
+using VitoshaBank.Services.DepositService.Interfaces;
+using VitoshaBank.Services.SupportTicketService;
+using VitoshaBank.Services.SupportTicketService.Interfaces;
+using VitoshaBank.Services.UserService;
+using VitoshaBank.Services.UserService.Interfaces;
+using VitoshaBank.Services.WalletService;
+using VitoshaBank.Services.WalletService.Interfaces;
+using VitoshaBank.Services.CalculatorService;
+using VitoshaBank.Services.CalculatorService.Interfaces;
+using VitoshaBank.Services.DebitCardService.Interfaces;
+using VitoshaBank.Services.DebitCardService;
+using VitoshaBank.Services.TransactionService.Interfaces;
+using VitoshaBank.Services.TransactionService;
+using Microsoft.AspNetCore.HttpOverrides;
+using VitoshaBank.Services.InterestService;
+using VitoshaBank.Services.InterestService.Interfaces;
+
 
 namespace VitoshaBank
 {
@@ -21,8 +48,35 @@ namespace VitoshaBank
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IDepositsService, DepositsService>();
+            services.AddScoped<ICreditsService, CreditsService>();
+            services.AddScoped<IWalletsService, WalletsService>();
+            services.AddScoped<IDebitCardsService, DebitCardsService>();
+            services.AddScoped<ISupportTicketsService, SupportTicketsService>();
+            services.AddScoped<IChargeAccountsService, ChargeAccountsService>();
+            services.AddScoped<ICalculatorService, CalculatorService>();
+            services.AddScoped<ITransactionsService, TransactionsService>();
+            services.AddScoped<ICreditPayOff, CreditPayOff>();
+
+
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = false,
+                        ValidateIssuerSigningKey = false,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    };
+                });
+
             services.AddControllersWithViews();
 
+            services.AddDbContext<BankSystemContext>(options => options.UseNpgsql(Configuration.GetConnectionString("BankConnection")));
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -33,6 +87,11 @@ namespace VitoshaBank
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -44,11 +103,13 @@ namespace VitoshaBank
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
-
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {
